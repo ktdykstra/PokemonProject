@@ -1,7 +1,7 @@
 # PokemonProject
 Outputs from data analysis:
 1. Total Games [Win + Loss]
-2. Winrate - [Win / Total Games]
+2. Win Rate - [Win / Total Games]
 3. Win Rate with individual lead - [#Hero_Lead_1∩Win / Total Games]
 3. Win Rate with combined lead - [#Hero_Lead_Pair∩Win / Total Games]
 4. Lose Rate against opposing individual lead - [#Villian_Lead_1∩Loss / Total Games]
