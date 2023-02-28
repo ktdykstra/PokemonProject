@@ -22,8 +22,10 @@ def predict():
         #access the data from form
         ## Username
         user = int(request.form["username"])
+        gametype = int(request.form["gametype"])
         #get stats
         #stats = model.predict(input_cols)
+        #run_all_steps_metrics(user, gametype)!!!!!!!!
         output = round(prediction[0], 2)
         return render_template("home.html", prediction_text='Your predicted annual Healthcare Expense is $ {}'.format(output))
 
