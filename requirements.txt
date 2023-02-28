@@ -1,5 +1,6 @@
 Flask
 Flask-RESTful
+Flask-Bootstrap
 
 Jinja2
 Werkzeug

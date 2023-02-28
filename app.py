@@ -1,33 +1,35 @@
 from flask import Flask, render_template
 from flask import jsonify
+from flask_bootstrap import Bootstrap
+import pandas as pd
 import socket 
 import pickle
 
+#matchdata = pd.read_csv('')
 app = Flask(__name__)
 
 # two decorators, same function
 @app.route('/')
-@app.route('/home.html')
-def home():
-    return render_template('home.html', the_title='Home Page')
 
-@app.route("/predict", methods=['GET','POST'])
+@app.route('/index.html')
+def index():
+    return render_template('index.html', the_title='Home Page')
+
+@app.route("/username", methods=['GET','POST'])
 def predict():
-    return render_template("home.html")
+    return render_template('index.html', the_title='Home Page')
     if request.method == 'POST':
         #access the data from form
-        ## Age
-        age = int(request.form["age"])
-        bmi = int(request.form["bmi"])
-        children = int(request.form["children"])
-        Sex = int(request.form["Sex"])
-        Smoker = int(request.form["Smoker"])
-        Region = int(request.form["Region"])
-        #get prediction
-        input_cols = [[age, bmi, children, Sex, Smoker, Region]]
-        prediction = model.predict(input_cols)
+        ## Username
+        user = int(request.form["username"])
+        #get stats
+        #stats = model.predict(input_cols)
         output = round(prediction[0], 2)
         return render_template("home.html", prediction_text='Your predicted annual Healthcare Expense is $ {}'.format(output))
+
+@app.route('/data', methods=['GET'])
+def get_data():
+    return jsonify(matchdata.to_dict(orient='records'))
 
 @app.route('/ip')
 def ip():
