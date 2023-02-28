@@ -8,8 +8,3 @@ Outputs from data analysis:
 5. Lose Rate against opposing combined lead - [#Villian_Lead_Pair∩Loss / Total Games]
 6. Lose Rate against full team selection - [#Villian_Comp_Six∩Loss / Total Games]
 
-Originally Planned for but Do Not Have:
-1. Winrate by item activation - [Item_Activation∩Win / Total Games]
-2. Winrate by battle turns - [Battle_Turn_#∩Win / Total Games]
-3. Winrate with battle team selection - [#Hero_Comp_Four∩Win / Total Games]
-4. Loserate against battle team selection - [#Villian_Comp_Four∩Loss / Total Games]
