@@ -10,18 +10,12 @@ import requests
 import numpy as np
 import pandas as pd
 # !pip install beautifulsoup4
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 # !pip install selenium
-import selenium
-from selenium import webdriver
-from selenium.webdriver.common.by import By
+
 import json
 import re
-import warnings
 
-## Logistics
-
-warnings.filterwarnings('ignore')
 
 
 # ### Hours logged

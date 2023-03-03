@@ -55,7 +55,7 @@ https://templatemo.com/tm-535-softy-pinko
                         <!-- ***** Menu Start ***** -->
                         <ul class="nav">
                             <li><a href="#welcome" class="active">Home</a></li>
-                            <li><a href="#username-submit">Enter Username</a></li>
+                            <li><a href="#data">Analytics</a></li>
                             <li><a href="#work-process">Work Process</a></li>
                             <li><a href="#testimonials">Testimonials</a></li>
                             <li><a href="#pricing-plans">Pricing Tables</a></li>
@@ -92,7 +92,7 @@ https://templatemo.com/tm-535-softy-pinko
     <!-- ***** Welcome Area End ***** -->
 
     <!-- ***** Username Start ***** -->
-    <section class="section colored" id="username-submit">
+    <section class="section colored" id="data">
         <div class="container">
             <!-- ***** Section Title Start ***** -->
             <div class="row">
@@ -109,12 +109,18 @@ https://templatemo.com/tm-535-softy-pinko
                 <!-- ***** Username Form Start ***** -->
                 <div class="offset-md-2 col-lg-8 col-md-6 col-sm-12">
                     <div class="contact-form">
-                        <form id="username" action="" method="get">
+                        <form id="username" action="/get_data" method="POST" name="inputUser">
                             <div class="row">
                                 <div class="col-lg-6 col-md-12 col-sm-12">
                                     <fieldset>
                                         <input name="username" type="text" class="form-control" id="username"
                                             placeholder="Username" required="">
+                                    </fieldset>
+                                </div>
+                                <div class="col-lg-6 col-md-12 col-sm-12">
+                                    <fieldset>
+                                        <input name="gametype" type="text" class="form-control" id="gametype"
+                                            placeholder="Game Type" required="">
                                     </fieldset>
                                 </div>
                                 <div class="col-lg-12">
@@ -125,6 +131,9 @@ https://templatemo.com/tm-535-softy-pinko
                                 </div>
                             </div>
                         </form>
+                        {% if result %}
+                            <p> {{ result }}</p>
+                        {% endif %}
                     </div>
                 </div>
                 <!-- ***** Username Form End ***** -->
@@ -132,6 +141,7 @@ https://templatemo.com/tm-535-softy-pinko
         </div>
     </section>
     <!-- ***** Username End ***** -->
+    {{prediction_text}}
 
     <!-- ***** Home Parallax Start ***** -->
     <section class="mini" id="work-process">
@@ -425,75 +435,7 @@ https://templatemo.com/tm-535-softy-pinko
     </section>
     <!-- ***** Counter Parallax End ***** -->
 
-
-    <!-- ***** Contact Us Start ***** -->
-    <section class="section colored" id="contact-us">
-        <div class="container">
-            <!-- ***** Section Title Start ***** -->
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="center-heading">
-                        <h2 class="section-title">Talk To Us</h2>
-                    </div>
-                </div>
-                <div class="offset-lg-3 col-lg-6">
-                    <div class="center-text">
-                        <p>Do you have ideas for improving our site? Are there other analytics you would find useful? We
-                            would love to hear from you below!</p>
-                    </div>
-                </div>
-            </div>
-            <!-- ***** Section Title End ***** -->
-
-            <div class="row">
-                <!-- ***** Contact Text Start ***** -->
-                <!--<div class="col-lg-4 col-md-6 col-sm-12">
-                    <h5 class="margin-bottom-30">Keep in touch</h5>
-                    <div class="contact-text">
-                        <p>110-220 Quisque diam odio, maximus ac consectetur eu, 10260
-                        <br>auctor non lorem</p>
-                        <p>Thank you.</p>
-                    </div>
-                </div>-->
-                <!-- ***** Contact Text End ***** -->
-
-                <!-- ***** Contact Form Start ***** -->
-                <div class="offset-md-2 col-lg-8 col-md-6 col-sm-12">
-                    <div class="contact-form">
-                        <form id="contact" action="" method="get">
-                            <div class="row">
-                                <div class="col-lg-6 col-md-12 col-sm-12">
-                                    <fieldset>
-                                        <input name="name" type="text" class="form-control" id="name"
-                                            placeholder="Full Name" required="">
-                                    </fieldset>
-                                </div>
-                                <div class="col-lg-6 col-md-12 col-sm-12">
-                                    <fieldset>
-                                        <input name="email" type="email" class="form-control" id="email"
-                                            placeholder="E-Mail Address" required="">
-                                    </fieldset>
-                                </div>
-                                <div class="col-lg-12">
-                                    <fieldset>
-                                        <textarea name="message" rows="6" class="form-control" id="message"
-                                            placeholder="Your Message" required=""></textarea>
-                                    </fieldset>
-                                </div>
-                                <div class="col-lg-12">
-                                    <fieldset>
-                                        <button type="submit" id="form-submit" class="main-button">Send Message</button>
-                                    </fieldset>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <!-- ***** Contact Form End ***** -->
-            </div>
-        </div>
-    </section>
-    <!-- ***** Contact Us End ***** -->
+    
 
     <!-- ***** Footer Start ***** -->
     <footer>

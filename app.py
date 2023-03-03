@@ -1,37 +1,48 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask import jsonify
 from flask_bootstrap import Bootstrap
 import pandas as pd
+import showdown_data_gathering as sdg
 import socket 
 import pickle
 
-#matchdata = pd.read_csv('')
 app = Flask(__name__)
 
 # two decorators, same function
 @app.route('/')
 
-@app.route('/index.html')
+@app.route('/index.html', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html', the_title='Home Page')
-
-@app.route("/username", methods=['GET','POST'])
-def predict():
-    return render_template('index.html', the_title='Home Page')
     if request.method == 'POST':
-        #access the data from form
-        ## Username
-        user = int(request.form["username"])
-        gametype = int(request.form["gametype"])
-        #get stats
-        #stats = model.predict(input_cols)
-        #run_all_steps_metrics(user, gametype)!!!!!!!!
-        output = round(prediction[0], 2)
-        return render_template("home.html", prediction_text='Your predicted annual Healthcare Expense is $ {}'.format(output))
+            #access the data from form
+            ## Username
+            username = request.form["username"]
+            gametype = request.form["gametype"]
+            print(username)
+            print(gametype)
+            output = sdg.run_all_steps_metrics(username, gametype)
+            print(output)
+            return render_template("index.html", result=output)
+    else:
+        return render_template('index.html', the_title='Home Page')
 
-@app.route('/data', methods=['GET'])
+#sample_username="Broskander" 
+#sample_game_type="gen9vgc2023series1"
+@app.route("/get_data", methods=['GET','POST'])
 def get_data():
-    return jsonify(matchdata.to_dict(orient='records'))
+        if request.method == 'POST':
+            #access the data from form
+            ## Username
+            username = request.form["username"]
+            gametype = request.form["gametype"]
+            print(username)
+            print(gametype)
+            output = sdg.run_all_steps_metrics(username, gametype)
+            print(output)
+            return render_template("index.html", result=output)
+        else:
+            print("did not retrieve input")
+            return render_template('index.html')
 
 @app.route('/ip')
 def ip():
