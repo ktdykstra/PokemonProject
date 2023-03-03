@@ -115,6 +115,10 @@ def gather_matches(username, game_type):
 
 def get_logs(df):
     
+    ## Set base url
+    
+    base_url="https://replay.pokemonshowdown.com"
+    
     ## Storage lists
 
     body_logs=[]
