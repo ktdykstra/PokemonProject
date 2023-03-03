@@ -12,6 +12,10 @@ body {
     margin: 0;
 }
 
+table{
+    border: none;
+}
+
 #container {
     margin: 2em auto;
     width: 740px;

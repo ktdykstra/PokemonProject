@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from flask import jsonify
 from flask_bootstrap import Bootstrap
+from markupsafe import Markup
 import pandas as pd
 import showdown_data_gathering as sdg
 import socket 
@@ -37,9 +38,18 @@ def get_data():
             gametype = request.form["gametype"]
             #print(username)
             #print(gametype)
-            output = sdg.run_all_steps_metrics(username, gametype)
-            print(output)
-            return render_template("index.html", result=output)
+            df1, df2, df3, df4, df5, df6 = sdg.run_all_steps_metrics(username, gametype)
+            #print(output)
+            # op1 = df1.to_html(index=False)
+            op2 = df2.to_html(index=False, classes='table table-responsive table-hover')
+            op3 = df3.to_html(index=False, classes='table table-responsive table-hover')
+            op4 = df4.to_html(index=False, classes='table table-responsive table-hover')
+            op5 = df5.to_html(index=False, classes='table table-responsive table-hover')
+            op6 = df6.to_html(index=False, classes='table table-responsive table-hover')
+
+            output_html = Markup(op2+ "<br><br>" +op3+ "<br><br>" +op4+ "<br><br>" +op5+ "<br><br>" +op6)
+
+            return render_template("index.html", result = output_html)
         else:
             print("did not retrieve input")
             return render_template('index.html')
