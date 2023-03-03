@@ -35,8 +35,8 @@ def get_data():
             ## Username
             username = request.form["username"]
             gametype = request.form["gametype"]
-            print(username)
-            print(gametype)
+            #print(username)
+            #print(gametype)
             output = sdg.run_all_steps_metrics(username, gametype)
             print(output)
             return render_template("index.html", result=output)

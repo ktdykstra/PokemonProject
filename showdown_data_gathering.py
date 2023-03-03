@@ -443,29 +443,29 @@ def scorecards(db):
         old_turn=generate_turn_df(target_match)
         turn_number=1
         new_turn=populate_fresh_scorecard(target_match, old_turn, turn_number)
-        display(new_turn)
+        #display(new_turn)
         
         match_scorecards=[]
         
         for i in range(target_match.turn_count):
             
             sample_turn=target_turns.iloc[i].line_str
-            print(sample_turn)
-            display(new_turn)
+            #print(sample_turn)
+            #display(new_turn)
             new_turn=check_changes(sample_turn, new_turn, target_match, turn_number)
             
             new_turn.loc[new_turn["current_field"]==1,"ends_field"]=1
             new_turn.loc[(new_turn["begins_field"]==1) & (new_turn["ends_field"]==1),"full_turn"]=1
             
             old_turn=new_turn
-            display(new_turn)
+            #display(new_turn)
             match_scorecards.append(new_turn)
             turn_number=turn_number+1
             new_turn=populate_fresh_scorecard(target_match, old_turn, turn_number)
         
         combined_turns_scorecard=pd.concat(match_scorecards)
         product=create_match_scorecard(combined_turns_scorecard)
-        display(product)
+        #display(product)
         aggregate_scorecards.append(product)
 
     return aggregate_scorecards
@@ -509,9 +509,9 @@ def check_changes(sample_turn, new_turn, target_match, turn_number):
         else:
             pokemon_name=result.group(4)
             move_name=result.group(6)
-            print(move_name)
+            #print(move_name)
             player_number=result.group(2)
-            print(player_number)
+            #print(player_number)
             if "p1" in player_number and target_match.hero=="p1":
                 new_turn.loc[(new_turn["pokemon"]==pokemon_name) & (new_turn["label"]=="hero_pokemon"),"move_used"]=move_name
             else:
@@ -588,8 +588,8 @@ def check_changes(sample_turn, new_turn, target_match, turn_number):
     if turn_number==1:
         target_turn=target_match.turn_logs.turn_df.iloc[0]
         target_turn=pd.concat([target_match.head_logs,target_turn])
-        print("ability turn")
-        display(target_turn)
+        #print("ability turn")
+        #display(target_turn)
         for x in target_turn.line_str:
             #pat=re.compile(r"(p[1-2][a-b])(\:\s+)(.+?)(?=\|)(.+?)(?=item\:\s+)(.+)") #.+?)(?=\|)
             pat=re.compile(r"(ability\:\s+)(.+?)(?=\|)(.+)(p[1-2][a-b])(\:\s+)(.+)")
