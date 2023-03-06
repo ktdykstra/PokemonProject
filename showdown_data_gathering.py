@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[102]:
 
 
 ## Import libraries
@@ -10,12 +10,18 @@ import requests
 import numpy as np
 import pandas as pd
 # !pip install beautifulsoup4
-#from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 # !pip install selenium
-
+import selenium
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 import json
 import re
+import warnings
 
+## Logistics
+
+warnings.filterwarnings('ignore')
 
 
 # ### Hours logged
@@ -39,7 +45,9 @@ import re
 # 
 # Meetings: 2:00
 # 
+# 28FEB: 2:57
 # 
+# 6MAR: 1:15
 # 
 # 
 
@@ -59,7 +67,7 @@ import re
 
 # ## Wrapped code
 
-# In[2]:
+# In[103]:
 
 
 ## Gather matches via the API
@@ -110,14 +118,10 @@ def gather_matches(username, game_type):
     return base_db
 
 
-# In[3]:
+# In[104]:
 
 
 def get_logs(df):
-    
-    ## Set base url
-    
-    base_url="https://replay.pokemonshowdown.com"
     
     ## Storage lists
 
@@ -128,6 +132,8 @@ def get_logs(df):
     turn_count=[]
 
     ## Access single game log
+    
+    base_url="https://replay.pokemonshowdown.com"
     
     print("Chunking match log...")
 
@@ -202,7 +208,7 @@ def get_logs(df):
     return body_logs, head_logs, tail_logs, turns, turn_count
 
 
-# In[4]:
+# In[105]:
 
 
 ## Finding p1 and p2 pokemon. Searchs through "head log"
@@ -272,7 +278,7 @@ def find_pokemons_and_leads(target):
     return p1_pokemons, p2_pokemons, lead_1a, lead_1b, lead_2a, lead_2b
 
 
-# In[5]:
+# In[106]:
 
 
 ## Find winner. Searches through "tail log"
@@ -288,7 +294,7 @@ def find_winner(target):
             return(result_win.group(2))
 
 
-# In[6]:
+# In[107]:
 
 
 ## Get rid of annoying male female tag
@@ -300,13 +306,14 @@ def clip_pokemon(poke):
 clip_pokemon("Indeedee-F")
 
 
-# In[7]:
+# In[108]:
 
 
 ## Run head log functions
 
 def get_head_tail_data(db):
     
+    print("Finding meta data...")
     ## Get list of pokemons brought, leads, and wins/losses
 
     hero_comp_six=[]
@@ -316,6 +323,8 @@ def get_head_tail_data(db):
     hero_lead_two=[]
     villain_lead_one=[]
     villain_lead_two=[]
+    hero_pair_list=[]
+    villain_pair_list=[]
 
     for i, x in enumerate(db.head_logs):
 
@@ -341,19 +350,39 @@ def get_head_tail_data(db):
         else:
             win.append(0)
 
-        ## Mark the leads
+        ## Mark the leads and add sorted list for katie
+        
+        temp_hero=[]
+        temp_villain=[]
 
         if db.iloc[i].hero=="p1":
             hero_lead_one.append(lead_1a)
             hero_lead_two.append(lead_1b)
             villain_lead_one.append(lead_2a)
             villain_lead_two.append(lead_2b)
+            temp_hero.append(lead_1a)
+            temp_hero.append(lead_1b)
+            temp_hero.sort()
+            temp_villain.append(lead_2a)
+            temp_villain.append(lead_2b)
+            temp_villain.sort()
+            hero_pair_list.append(temp_hero)
+            villain_pair_list.append(temp_villain)
+            
         else:
             hero_lead_one.append(lead_2a)
             hero_lead_two.append(lead_2b)
             villain_lead_one.append(lead_1a)
             villain_lead_two.append(lead_1b)
-
+            temp_hero.append(lead_2a)
+            temp_hero.append(lead_2b)
+            temp_hero.sort()
+            temp_villain.append(lead_1a)
+            temp_villain.append(lead_1b)
+            temp_villain.sort()
+            hero_pair_list.append(temp_hero)
+            villain_pair_list.append(temp_villain)
+ 
     db["win"]=win
     db['hero_comp_six']=hero_comp_six
     db['villain_comp_six']=villain_comp_six
@@ -361,12 +390,16 @@ def get_head_tail_data(db):
     db["hero_lead_two"]=hero_lead_two
     db["villain_lead_one"]=villain_lead_one
     db["villain_lead_two"]=villain_lead_two
+    db["sorted_hero_pair"]=hero_pair_list
+    db["sorted_villain_pair"]=villain_pair_list
+    
     # MATCH_DB['hero_comp_six'] = MATCH_DB['hero_comp_six'].apply(lambda x: 'p1' if x==username else 'p2')
     
+    print("Meta data found.")
     return db
 
 
-# In[8]:
+# In[109]:
 
 
 ## Get hero and villain leads
@@ -380,7 +413,7 @@ def get_hero_leads(df_row):
     return hero_lead_one, hero_lead_two,villain_lead_one,villain_lead_two
 
 
-# In[9]:
+# In[110]:
 
 
 ## Create a turn data structure
@@ -400,7 +433,7 @@ def generate_turn_df(db_row):
     return turn_df
 
 
-# In[10]:
+# In[111]:
 
 
 def populate_fresh_scorecard(db_row, old_turn, turn_number):
@@ -428,11 +461,12 @@ def populate_fresh_scorecard(db_row, old_turn, turn_number):
     return new_turn
 
 
-# In[11]:
+# In[112]:
 
 
 def scorecards(db):
     
+    print("Generating scorecards...")
     aggregate_scorecards=[]
     
     for x in range(db.shape[0]):
@@ -443,35 +477,36 @@ def scorecards(db):
         old_turn=generate_turn_df(target_match)
         turn_number=1
         new_turn=populate_fresh_scorecard(target_match, old_turn, turn_number)
-        #display(new_turn)
+#         display(new_turn)
         
         match_scorecards=[]
         
         for i in range(target_match.turn_count):
             
             sample_turn=target_turns.iloc[i].line_str
-            #print(sample_turn)
-            #display(new_turn)
+#             print(sample_turn)
+#             display(new_turn)
             new_turn=check_changes(sample_turn, new_turn, target_match, turn_number)
             
             new_turn.loc[new_turn["current_field"]==1,"ends_field"]=1
             new_turn.loc[(new_turn["begins_field"]==1) & (new_turn["ends_field"]==1),"full_turn"]=1
             
             old_turn=new_turn
-            #display(new_turn)
+#             display(new_turn)
             match_scorecards.append(new_turn)
             turn_number=turn_number+1
             new_turn=populate_fresh_scorecard(target_match, old_turn, turn_number)
         
         combined_turns_scorecard=pd.concat(match_scorecards)
         product=create_match_scorecard(combined_turns_scorecard)
-        #display(product)
+#         display(product)
         aggregate_scorecards.append(product)
-
+    
+    print("Scorecards generated.")
     return aggregate_scorecards
 
 
-# In[12]:
+# In[113]:
 
 
 ## Create match aggregate scorecard
@@ -486,7 +521,7 @@ def create_match_scorecard(combined_turns_scorecard):
 #temp.groupby(["label","pokemon"])
 
 
-# In[13]:
+# In[114]:
 
 
 def check_changes(sample_turn, new_turn, target_match, turn_number):
@@ -509,9 +544,9 @@ def check_changes(sample_turn, new_turn, target_match, turn_number):
         else:
             pokemon_name=result.group(4)
             move_name=result.group(6)
-            #print(move_name)
+#             print(move_name)
             player_number=result.group(2)
-            #print(player_number)
+#             print(player_number)
             if "p1" in player_number and target_match.hero=="p1":
                 new_turn.loc[(new_turn["pokemon"]==pokemon_name) & (new_turn["label"]=="hero_pokemon"),"move_used"]=move_name
             else:
@@ -588,8 +623,8 @@ def check_changes(sample_turn, new_turn, target_match, turn_number):
     if turn_number==1:
         target_turn=target_match.turn_logs.turn_df.iloc[0]
         target_turn=pd.concat([target_match.head_logs,target_turn])
-        #print("ability turn")
-        #display(target_turn)
+#         print("ability turn")
+#         display(target_turn)
         for x in target_turn.line_str:
             #pat=re.compile(r"(p[1-2][a-b])(\:\s+)(.+?)(?=\|)(.+?)(?=item\:\s+)(.+)") #.+?)(?=\|)
             pat=re.compile(r"(ability\:\s+)(.+?)(?=\|)(.+)(p[1-2][a-b])(\:\s+)(.+)")
@@ -609,7 +644,7 @@ def check_changes(sample_turn, new_turn, target_match, turn_number):
     return new_turn
 
 
-# In[14]:
+# In[115]:
 
 
 ## Publish lead pairs
@@ -636,7 +671,7 @@ def publish_lead_pairs(MATCH_DB):
     return MATCH_DB
 
 
-# In[15]:
+# In[116]:
 
 
 ## Publish comps
@@ -658,7 +693,7 @@ def publish_comps(MATCH_DB):
     return MATCH_DB
 
 
-# In[16]:
+# In[117]:
 
 
 ## publish losses
@@ -669,7 +704,7 @@ def publish_losses(MATCH_DB):
     return MATCH_DB
 
 
-# In[17]:
+# In[118]:
 
 
 ## Convert to formatted string
@@ -681,7 +716,7 @@ def format_percent(line):
     return line
 
 
-# In[18]:
+# In[119]:
 
 
 ## Create pair hero metrics
@@ -689,43 +724,57 @@ def format_percent(line):
 def get_pair_metrics(MATCH_DB):
 
 
-    pairs_db=MATCH_DB.groupby(["hero_pair"]).agg({"win":"sum","match_id":"count"}).reset_index()
+    pairs_db=MATCH_DB.groupby(["hero_pair"]).agg({"sorted_hero_pair":"first","win":"sum","match_id":"count"}).reset_index()
     pairs_db["pairs_winrate"]= pairs_db.win/pairs_db.match_id*100
     pairs_db.rename(columns={"match_id":"num_games","win":"num_wins"},inplace=True)
     pairs_db["pairs_winrate"]=pairs_db.apply(lambda row: format_percent(row["pairs_winrate"]),axis=1)
+    pairs_db["hero_one"]=pairs_db.sorted_hero_pair.apply(lambda x: x[0])
+    pairs_db["hero_two"]=pairs_db.sorted_hero_pair.apply(lambda x: x[1])
     hero_pairs_db=pairs_db
     
-    villains_pairs_db=MATCH_DB.groupby(["villain_pair"]).agg({"loss":"sum","match_id":"count"}).reset_index()
+    villains_pairs_db=MATCH_DB.groupby(["villain_pair"]).agg({"sorted_villain_pair":"first","loss":"sum","match_id":"count"}).reset_index()
     villains_pairs_db["pairs_loserate"]=villains_pairs_db.loss/villains_pairs_db.match_id*100
     villains_pairs_db.rename(columns={"match_id":"num_games","loss":"num_losses"},inplace=True)
     villains_pairs_db["pairs_loserate"]=villains_pairs_db.apply(lambda row: format_percent(row["pairs_loserate"]),axis=1)
-    villains_pairs_db
+    villains_pairs_db["villain_one"]=villains_pairs_db.sorted_villain_pair.apply(lambda x: x[0])
+    villains_pairs_db["villain_two"]=villains_pairs_db.sorted_villain_pair.apply(lambda x: x[1])
     
     return hero_pairs_db, villains_pairs_db
 
 
-# In[19]:
+# In[120]:
 
 
 ## Comps metrics
 
 def get_comps_metrics(MATCH_DB):
 
-    hero_comps_db=MATCH_DB.groupby(["hero_comp_fused"]).agg({"win":"sum","match_id":"count"}).reset_index()
+    hero_comps_db=MATCH_DB.groupby(["hero_comp_fused"]).agg({"hero_comp_six":"first","win":"sum","match_id":"count"}).reset_index()
     hero_comps_db["comps_winrate"]=hero_comps_db.win/hero_comps_db.match_id*100
     hero_comps_db.rename(columns={"match_id":"num_games","win":"num_wins"},inplace=True)
     hero_comps_db["comps_winrate"]=hero_comps_db.comps_winrate.apply(format_percent)
+    hero_comps_db["hero_one"]=hero_comps_db.hero_comp_six.apply(lambda x: x[0])
+    hero_comps_db["hero_two"]=hero_comps_db.hero_comp_six.apply(lambda x: x[1])
+    hero_comps_db["hero_three"]=hero_comps_db.hero_comp_six.apply(lambda x: x[2])
+    hero_comps_db["hero_four"]=hero_comps_db.hero_comp_six.apply(lambda x: x[3])
+    hero_comps_db["hero_five"]=hero_comps_db.hero_comp_six.apply(lambda x: x[4])
+    hero_comps_db["hero_six"]=hero_comps_db.hero_comp_six.apply(lambda x: x[5])
 
-    villain_comps_db=MATCH_DB.groupby(["villain_comp_fused"]).agg({"loss":"sum","match_id":"count"}).reset_index()
+    villain_comps_db=MATCH_DB.groupby(["villain_comp_fused"]).agg({"villain_comp_six":"first","loss":"sum","match_id":"count"}).reset_index()
     villain_comps_db["comps_lossrate"]=villain_comps_db.loss/villain_comps_db.match_id*100
     villain_comps_db.rename(columns={"match_id":"num_games","loss":"num_losses"},inplace=True)
     villain_comps_db["comps_lossrate"]=villain_comps_db.comps_lossrate.apply(format_percent)
-    villain_comps_db
+    villain_comps_db["villain_one"]=villain_comps_db.villain_comp_six.apply(lambda x: x[0])
+    villain_comps_db["villain_two"]=villain_comps_db.villain_comp_six.apply(lambda x: x[1])
+    villain_comps_db["villain_three"]=villain_comps_db.villain_comp_six.apply(lambda x: x[2])
+    villain_comps_db["villain_four"]=villain_comps_db.villain_comp_six.apply(lambda x: x[3])
+    villain_comps_db["villain_five"]=villain_comps_db.villain_comp_six.apply(lambda x: x[4])
+    villain_comps_db["villain_six"]=villain_comps_db.villain_comp_six.apply(lambda x: x[5])
     
     return hero_comps_db, villain_comps_db
 
 
-# In[20]:
+# In[121]:
 
 
 ## Get metametrics
@@ -740,7 +789,7 @@ def get_metametrics(MATCH_DB):
     return meta_df
 
 
-# In[21]:
+# In[122]:
 
 
 ## Creates the full MATCH_DB with all relevant data
@@ -754,6 +803,7 @@ def get_all_data(MATCH_DB):
     ## Aggregate scorecards
 
     MATCH_DB["match_scorecards"]=scorecards(MATCH_DB)
+    
     
     ## Get lead pairs fused
     
@@ -770,7 +820,7 @@ def get_all_data(MATCH_DB):
     return MATCH_DB
 
 
-# In[22]:
+# In[123]:
 
 
 ## Run all steps (for front end)
@@ -787,13 +837,16 @@ def run_all_steps_metrics(sample_username, sample_game_type):
     
     ## Generate match library, metametrics df, pair metric df, comp metric df
     
+    print("Generating metrics...")
+    
     hero_comps_db, villain_comps_db = get_comps_metrics(MATCH_DB)
     hero_pairs_db, villain_pairs_db = get_pair_metrics(MATCH_DB)
     
+    print("Metrics generated.")
     return MATCH_DB, get_metametrics(MATCH_DB), hero_pairs_db, villain_pairs_db, hero_comps_db, villain_comps_db
 
 
-# In[25]:
+# In[127]:
 
 
 # ## Samples for testing
@@ -813,10 +866,4 @@ def run_all_steps_metrics(sample_username, sample_game_type):
 
 # display(library, meta, pairs, comps)
 # display(library, meta, hero_pairs_db, villain_pairs_db, hero_comps_db, villain_comps_db)
-
-
-# In[ ]:
-
-
-
 
