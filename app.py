@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, url_for
 from flask import jsonify
 from flask_bootstrap import Bootstrap
 from markupsafe import Markup
@@ -9,23 +9,11 @@ import pickle
 
 app = Flask(__name__)
 
-# two decorators, same function
-@app.route('/')
 
-@app.route('/index.html', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    if request.method == 'POST':
-            #access the data from form
-            ## Username
-            username = request.form["username"]
-            gametype = request.form["gametype"]
-            print(username)
-            print(gametype)
-            output = sdg.run_all_steps_metrics(username, gametype)
-            print(output)
-            return render_template("index.html", result=output)
-    else:
-        return render_template('index.html', the_title='Home Page')
+    #submitted = request.args.get('submitted')
+    return render_template('index.html')
 
 #sample_username="Broskander" 
 #sample_game_type="gen9vgc2023series1"
@@ -40,16 +28,82 @@ def get_data():
             #print(gametype)
             df1, df2, df3, df4, df5, df6 = sdg.run_all_steps_metrics(username, gametype)
             #print(output)
-            # op1 = df1.to_html(index=False)
-            op2 = df2.to_html(index=False, classes='table table-responsive table-hover')
-            op3 = df3.to_html(index=False, classes='table table-responsive table-hover')
-            op4 = df4.to_html(index=False, classes='table table-responsive table-hover')
-            op5 = df5.to_html(index=False, classes='table table-responsive table-hover')
-            op6 = df6.to_html(index=False, classes='table table-responsive table-hover')
+            
+            #df with num_wins, num_games, win_rate
+            overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
+            num_games = str(df2.loc[0, 'num_games'])
+            num_wins = str(df2.loc[0, 'num_wins'])
+            win_rate = str(df2.loc[0, 'win_rate'])
 
-            output_html = Markup(op2+ "<br><br>" +op3+ "<br><br>" +op4+ "<br><br>" +op5+ "<br><br>" +op6)
+            #dfs with hero pairs, games and win rates breakdown 
+            df3 = df3.iloc[:, -5:]
+            cols = df3.columns.tolist()
+            cols = cols[-2:] + cols[:-2]
+            df3 = df3[cols]
+            df3.columns = ['Hero #1', 'Hero #2', "Wins", "Games", "Pair Win Rate"]
+            heroStats = df3.to_html(index=False)
+            
+            df4 = df4.iloc[:, -5:]
+            cols = df4.columns.tolist()
+            cols = cols[-2:] + cols[:-2]
+            df4 = df4[cols]
+            df4.columns = ['Villain #1', 'Villain #2', "Losses", "Games", "Pair Loss Rate"]
+            villainStats = df4.to_html(index=False)
+            
+            
+            df5 = df5.iloc[:, 1:5]
+            df5.columns = ['Ordered Hero Team', 'Wins', "Games", "Win Rate"]
+            sixTeamHeroStats = df5.to_html(index=False)
+            
 
-            return render_template("index.html", result = output_html)
+            df6 = df6.iloc[:, 1:5]
+            df6.columns = ['Ordered Villain Team', 'Losses', "Games", "Loss Rate"]
+            sixTeamVillainStats = df6.to_html(index=False)
+
+            # Define the CSS style for the table
+            table_style = """
+            <style>
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    max-width: 800px;
+                    margin: auto;
+                    margin-bottom: 1em;
+                }
+                
+                th {
+                    font-weight: bold;
+                    text-align: left;
+                    color: white;
+                    background-color: #9d5bd9;
+                    padding: 0.5em;
+                }
+                
+                tr:hover {
+                    background-color: #a759d13f;
+                }
+                
+                td, th {
+                    border: 1px solid #ddd;
+                    padding: 0.5em;
+                    text-align: left;
+                }
+                
+                @media (max-width: 768px) {
+                    table {
+                        font-size: 0.8em;
+                    }
+                    
+                    th, td {
+                        padding: 0.25em;
+                    }
+                }
+            </style>
+            """
+
+            output_html = Markup(table_style + heroStats+ "<br><br>" +villainStats+ "<br><br>" +sixTeamHeroStats+ "<br><br>" +sixTeamVillainStats)
+
+            return render_template('results.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
         else:
             print("did not retrieve input")
             return render_template('index.html')

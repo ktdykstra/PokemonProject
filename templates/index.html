@@ -105,7 +105,7 @@ https://templatemo.com/tm-535-softy-pinko
                 <!-- ***** Username Form Start ***** -->
                 <div class="offset-md-2 col-lg-8 col-md-6 col-sm-12">
                     <div class="contact-form">
-                        <form id="username" action="/get_data" method="POST" name="inputUser">
+                        <form id="username" action="/get_data" method="POST" name="inputUser" target="_blank">
                             <div class="row">
                                 <div class="col-lg-6 col-md-12 col-sm-12">
                                     <fieldset>
@@ -124,13 +124,10 @@ https://templatemo.com/tm-535-softy-pinko
                                         <button type="submit" id="username-submit" class="main-button">Display Match
                                             Analytics</button>
                                     </fieldset>
+                                    <p>Clicking will open a new tab. Please ensure pop-up blockers are disabled.</p>
                                 </div>
                             </div>
                         </form>
-                        {% if result %}
-                            <br><br>
-                            <p>{{result|safe}}</p>
-                        {% endif %}
                     </div>
                 </div>
                 <!-- ***** Username Form End ***** -->
@@ -139,44 +136,35 @@ https://templatemo.com/tm-535-softy-pinko
     </section>
     <!-- ***** Username End ***** -->
 
-
-
-    <!-- ***** Counter Parallax Start ***** -->
-    <section class="counter">
+    <!-- Display Overall Stats-->
+    <section id="overallStats" style="display: none;" class="counter">
         <div class="content">
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="col-lg-4 col-md-6 col-sm-12">
                         <div class="count-item decoration-bottom">
                             <strong>126</strong>
-                            <span>Projects</span>
+                            <span>Games</span>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="col-lg-4 col-md-6 col-sm-12">
                         <div class="count-item decoration-top">
                             <strong>63</strong>
-                            <span>Happy Clients</span>
+                            <span>Wins</span>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6 col-sm-12">
-                        <div class="count-item decoration-bottom">
-                            <strong>18</strong>
-                            <span>Awards Wins</span>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="col-lg-4 col-md-6 col-sm-12">
                         <div class="count-item">
-                            <strong>27</strong>
-                            <span>Countries</span>
+                            <strong>18</strong>
+                            <span>Win Rate</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <!-- ***** Counter Parallax End ***** -->
-
-    
+    <!-- ***** Overarching Stats End ***** -->
+  
 
     <!-- ***** Footer Start ***** -->
     <footer>
@@ -200,6 +188,20 @@ https://templatemo.com/tm-535-softy-pinko
             </div>
         </div>
     </footer>
+
+    <!--***JS for displaying overall stats***-->
+    <!--<script>
+        var submitBtn = document.getElementById("username-submit");
+        var newSection = document.getElementById("overallStats");
+        var submitted = true; 
+        submitBtn.addEventListener("click", function() {
+            event.preventDefault(); // prevent the default form submission behavior
+            //newSection.style.display = "block";
+            newSection.style.display = '{display}'.format(display='none' if not submitted else 'block', submitted=submitted);
+        });
+
+    </script> -->
+    <!--JS END-->
 
     <!-- jQuery -->
     <script src="/static/assets/js/jquery-2.1.0.min.js"></script>

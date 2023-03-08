@@ -10,12 +10,12 @@ import requests
 import numpy as np
 import pandas as pd
 # !pip install beautifulsoup4
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 # !pip install selenium
-import selenium
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-import json
+#import selenium
+#from selenium import webdriver
+#from selenium.webdriver.common.by import By
+#import json
 import re
 import warnings
 
@@ -477,7 +477,7 @@ def scorecards(db):
         old_turn=generate_turn_df(target_match)
         turn_number=1
         new_turn=populate_fresh_scorecard(target_match, old_turn, turn_number)
-#         display(new_turn)
+#         #display(new_turn)
         
         match_scorecards=[]
         
@@ -485,7 +485,7 @@ def scorecards(db):
             
             sample_turn=target_turns.iloc[i].line_str
 #             print(sample_turn)
-#             display(new_turn)
+#             #display(new_turn)
             new_turn=check_changes(sample_turn, new_turn, target_match, turn_number)
             
             new_turn.loc[new_turn["current_field"]==1,"ends_field"]=1
