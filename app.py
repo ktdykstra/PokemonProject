@@ -3,7 +3,7 @@ from flask import jsonify
 from flask_bootstrap import Bootstrap
 from markupsafe import Markup
 import pandas as pd
-import showdown_data_gathering as sdg
+import poke_backend_v2 as sdg
 import socket 
 import pickle
 
@@ -26,7 +26,7 @@ def get_data():
             gametype = request.form["gametype"]
             #print(username)
             #print(gametype)
-            df1, df2, df3, df4, df5, df6 = sdg.run_all_steps_metrics(username, gametype)
+            df1, df2, df_individual, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)
             #print(output)
             
             #df with num_wins, num_games, win_rate
