@@ -37,9 +37,8 @@ def get_data():
 
             #dfs with individual pokemon winrates and elo scores
             df_individual = df_individual.reset_index()
-            cols = df_individual.columns.tolist()
-            df_individual = df3[cols]
-            df_individual.columns = ['Hero Pokemon Used', 'Total Games Used', "Games Won", "Raw Win Rate", "ELO Win Rate"]
+            df_individual.rename(columns={"hero_pokemon":'Hero Pokemon Used', "total_games":'Total Games Used',
+                                          "win":"Games Won", "win_rate":"Raw Win Rate","elo_score":"ELO Win Rate"},inplace=True)
             individualStats = df_individual.to_html(index=False)
 
             #dfs with hero pairs, games and win rates breakdown 
