@@ -1,6 +1,6 @@
 from flask import Flask, redirect, render_template, request, url_for
 from flask import jsonify
-from flask_bootstrap import Bootstrap
+# from flask_bootstrap import Bootstrap
 from markupsafe import Markup
 import pandas as pd
 import poke_backend_v2 as sdg
@@ -34,6 +34,9 @@ def get_data():
             
             df1, df2, df_individual, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)
             #print(output)
+            
+            # Save the Plotly figure as an HTML file
+            plotly_html = pyo.plot(sdg.get_individual_plot(df_individual), output_type="div")
             
             #df with num_wins, num_games, win_rate
             overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
@@ -118,8 +121,6 @@ def get_data():
                 }
             </style>
             """
-            # Save the Plotly figure as an HTML file
-            plotly_html = pyo.plot(sdg.get_individual_plot(df_individual), output_type="div")
             
             # katies original html creation
             output_html = Markup(table_style +plotly_html+ "<br><br>" +individualStats+ "<br><br>" +heroStats+ "<br><br>" +villainStats+ "<br><br>" +sixTeamHeroStats+ "<br><br>" +sixTeamVillainStats)
