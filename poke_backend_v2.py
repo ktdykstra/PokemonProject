@@ -24,6 +24,8 @@ import pandas as pd
 #import json
 import re
 import warnings
+import plotly.express as px
+import plotly.graph_objects as go
 
 ## Logistics
 
@@ -959,6 +961,61 @@ def get_individual_rates(library):
 
 ## run code
 # get_individual_rates(library)
+
+## create plotly graph and render html
+def get_individual_plot(individual_result):
+    
+    ## reconfigure dataset so that shows up pretty in plot
+    df=individual_result.copy()
+    df=df.reset_index()
+    df.columns=["Hero Pokemon","Games Played","Games Won","Raw Win Rate","Weighted Win Rate"]
+    df["Games Played2"]=df["Games Played"]-df["Games Won"]
+    
+    ## the perfect chart
+    fig = go.Figure()
+    
+    
+    # Add the stacked bar plot for "Games Won" and "Games Played2"
+    fig.add_trace(
+        go.Bar(
+            x=df["Hero Pokemon"],
+            y=df["Games Won"],
+            marker_color="#72B7B2",
+            name="Games Won",
+        )
+    )
+    
+    fig.add_trace(
+        go.Bar(
+            x=df["Hero Pokemon"],
+            y=df["Games Played2"],
+            marker_color="#7F7F7F",
+            name="Games Played2",
+        )
+    )
+    
+    # Calculate the weighted win rate (Games Won / Games Played2) and add it as a line plot on the second y-axis
+    weighted_win_rate = df["Weighted Win Rate"]
+    fig.add_trace(
+        go.Scatter(
+            x=df["Hero Pokemon"],
+            y=weighted_win_rate,
+            mode="lines+markers",
+            line=dict(color="#FF0000"),  # You can specify the color you want for the line plot
+            name="Weighted Win Rate",
+            yaxis="y2",  # Specify the second y-axis for this trace
+        )
+    )
+    
+    # Update the layout with axis labels and other configurations
+    fig.update_layout(
+        barmode="stack",  # Set barmode to "stack" for stacked bar plots
+        yaxis=dict(title="Games", side="left"),  # Update the y-axis title as needed
+        yaxis2=dict(title="Weighted Win Rate %", overlaying="y", side="right"),
+        showlegend=False,
+    )
+        
+    return fig
 
 
 # In[9]:

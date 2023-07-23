@@ -6,6 +6,9 @@ import pandas as pd
 import poke_backend_v2 as sdg
 import socket 
 import pickle
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.offline as pyo
 
 app = Flask(__name__)
 
@@ -115,8 +118,11 @@ def get_data():
                 }
             </style>
             """
-
-            output_html = Markup(table_style +individualStats+ "<br><br>" +heroStats+ "<br><br>" +villainStats+ "<br><br>" +sixTeamHeroStats+ "<br><br>" +sixTeamVillainStats)
+            # Save the Plotly figure as an HTML file
+            plotly_html = pyo.plot(sdg.get_individual_plot(df_individual), output_type="div")
+            
+            # katies original html creation
+            output_html = Markup(table_style +plotly_html+ "<br><br>" +individualStats+ "<br><br>" +heroStats+ "<br><br>" +villainStats+ "<br><br>" +sixTeamHeroStats+ "<br><br>" +sixTeamVillainStats)
 
             return render_template('results.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
         else:
