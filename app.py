@@ -36,6 +36,7 @@ def index():
     #submitted = request.args.get('submitted')
     return render_template('index.html')
 
+
 #sample_username="Broskander" 
 #sample_game_type="gen9vgc2023series1"
 @app.route("/get_data", methods=['GET','POST'])
@@ -147,7 +148,6 @@ def get_data():
         else:
             print("did not retrieve input")
             return render_template('index.html')
-
 
 
 @app.route('/ip')
