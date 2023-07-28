@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Form</title>
+</head>
+<body>
+    <!-- Replace 'YOUR_EMBED_CODE' with the actual iframe embed code from your Google Form -->
+    <iframe id= "myIframe" src="https://docs.google.com/forms/d/e/1FAIpQLSeW1OsxKUhI5DLT7aSFaxJYkJsG19VJQrCIoNwgkpm0mDrOjA/viewform?embedded=true" width="640" height="1277" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>    
+              
+    <script>
+        // Function to adjust the position of the "Proceed to Beta" button
+        function adjustButtonPosition() {
+            const iframe = document.querySelector('iframe');
+            const button = window.parent.document.getElementById('proceedButton');
+            if (iframe && button) {
+                const adjustPosition = () => {
+                    const iframeBottom = iframe.offsetTop + iframe.offsetHeight;
+                    button.style.marginTop = `${iframeBottom}px`;
+                };
+
+                adjustPosition();
+
+                // Listen for iframe's load and resize events to reposition the button
+                iframe.addEventListener('load', adjustPosition);
+                window.addEventListener('resize', adjustPosition);
+            }
+        }
+    </script>
+</body>
+</html>

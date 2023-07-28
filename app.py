@@ -14,6 +14,24 @@ app = Flask(__name__)
 
 
 @app.route('/')
+def collect_email():
+    #submitted = request.args.get('submitted')
+    return render_template('email.html')
+
+
+# Route to handle the form submission
+@app.route('/submit_form', methods=['POST'])
+def submit_form():
+    # Process the form data (you can save the email to your database or perform any other actions here)
+    # Google forms does this for us, yay!
+    # email = request.form.get('email')
+
+    # Redirect the user to the main page page
+    return redirect('/main')
+
+
+
+@app.route('/main')
 def index():
     #submitted = request.args.get('submitted')
     return render_template('index.html')

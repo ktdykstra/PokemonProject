@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,300,400,500,700,900" rel="stylesheet">
+
+    <title>Serapis</title>
+    <!--
+SOFTY PINKO
+https://templatemo.com/tm-535-softy-pinko
+-->
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/bootstrap.min.css') }}">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/font-awesome.css') }}">
+
+    <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static', filename='assets/css/templatemo-softy-pinko.css') }}">
+
+        <style>
+            /* CSS to center the form */
+            .form-wrapper {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh; /* This will center the form vertically */
+            }
+        </style>
+
+</head>
+
+<body>
+
+    <!-- ***** Preloader Start ***** -->
+    <div id="preloader">
+        <div class="jumper">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <!-- ***** Preloader End ***** -->
+
+
+    <!-- ***** Header Area Start ***** -->
+    <header class="header-area header-sticky">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <nav class="main-nav">
+                        <!-- ***** Logo Start ***** -->
+                        <a href="#" class="logo">
+                            <img src="/static/assets/images/snake.png" alt="Serapis" />
+                        </a>
+                        <!-- ***** Logo End ***** -->
+                        <!--Text Start-->
+                        <p style = "display: inline-block; justify-content: center; align-items: center; color: rgb(28 130 28)" class = "logo">Serapis</p>
+                        <!--Text End-->
+                        <!-- ***** Menu Start ***** -->
+                        <ul class="nav">
+                            
+                        </ul>
+                        <a class='menu-trigger'>
+                     
+                        </a>
+                        <!-- ***** Menu End ***** -->
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- ***** Header Area End ***** -->
+
+    <div class="row">
+
+    </div>
+    <!-- ***** Email Collection Start ***** -->
+    <section class="section colored" >
+        <div class="container">
+            <!-- ***** Section Title Start ***** -->
+            <div class="row" style="padding-top: 50px">
+                <div class="col-lg-12">
+                    <div class="center-heading">
+                        <h2 class="section-title">A Pokemon Showdown Match Analytics Service</h2>
+                        <p style = "padding-bottom: 20px;">Please fill out the form below then scroll to the button at the bottom to redirect to our beta service!</p>
+                    </div>
+                </div>
+            </div>
+            <!-- ***** Section Title End ***** -->
+
+            <div class="offset-md-2 col-lg-8 col-md-6 col-sm-12" style="display: flex; flex-direction: column; align-items: center;">
+                <form id="emailColl" action="/submit_form" method="POST">
+                    <!-- Replace 'YOUR_EMBED_CODE' with the actual iframe embed code from your Google Form -->
+                    <iframe id= "myIframe" src="https://docs.google.com/forms/d/e/1FAIpQLSeW1OsxKUhI5DLT7aSFaxJYkJsG19VJQrCIoNwgkpm0mDrOjA/viewform?embedded=true" width="640" height="1277" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>    
+                </form>
+                <a href="/main" class="main-button-slider" id="proceedBeta" style="margin-top: 20px">Proceed to Beta</a>
+            </div>
+            
+        </div>
+    </section>
+    <!-- ***** Email Collection End ***** -->
+  
+
+    <!-- ***** Footer Start ***** -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <ul class="social">
+                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                        <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
+                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
+                        <li><a href="#"><i class="fa fa-dribbble"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    </br>
+                    <!--<p class="copyright">Copyright &copy; 2020 Softy Pinko Company - Design: TemplateMo</p>-->
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+
+    <!-- jQuery -->
+    <script src="/static/assets/js/jquery-2.1.0.min.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/assets/js/popper.js"></script>
+    <script src="/static/assets/js/bootstrap.min.js"></script>
+
+    <!-- Plugins -->
+    <script src="/static/assets/js/scrollreveal.min.js"></script>
+    <script src="/static/assets/js/waypoints.min.js"></script>
+    <script src="/static/assets/js/jquery.counterup.min.js"></script>
+    <script src="/static/assets/js/imgfix.min.js"></script>
+
+    <!-- Global Init -->
+    <script src="/static/assets/js/custom.js"></script>
+
+   
+    <script>
+        // Function to adjust the position of the "Proceed to Beta" button
+        function adjustButtonPosition() {
+            const iframe = document.getElementById('myIframe');
+            const button = document.getElementById('proceedButton');
+
+            function setButtonPosition() {
+                const iframeContentHeight = iframe.contentWindow.document.body.scrollHeight;
+                button.style.marginTop = `${iframeContentHeight}px`;
+                button.style.display = 'block';
+            }
+
+            iframe.addEventListener('load', () => {
+                setButtonPosition();
+            });
+
+            // Check for changes in the iframe content height every 500ms
+            setInterval(() => {
+                const newHeight = iframe.contentWindow.document.body.scrollHeight;
+                if (newHeight !== lastHeight) {
+                    setButtonPosition();
+                    lastHeight = newHeight;
+                }
+            }, 500);
+        }
+        
+        let lastHeight = 0; // Variable to store the last known height of the iframe
+        adjustButtonPosition();
+    </script>
+
+
+
+</body>
+
+</html>
