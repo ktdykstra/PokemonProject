@@ -148,6 +148,8 @@ def get_data():
             print("did not retrieve input")
             return render_template('index.html')
 
+
+
 @app.route('/ip')
 def ip():
     hostname = socket.gethostname()    
