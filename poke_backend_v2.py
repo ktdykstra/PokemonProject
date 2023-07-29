@@ -1054,10 +1054,14 @@ def get_individual_plot(individual_result):
     # Update the layout with axis labels and other configurations
     fig.update_layout(
         barmode="stack",  # Set barmode to "stack" for stacked bar plots
-        yaxis=dict(title="Games Used", side="right"),  # Update the y-axis title as needed
-        yaxis2=dict(title="Weighted Win Rate %", overlaying="y", side="left"),
+        yaxis=dict(title="Games Used", side="left"),  # Update the y-axis title as needed
+        yaxis2=dict(title="Weighted Win Rate %", overlaying="y", side="right"),
         showlegend=True,
-        title=dict(text="Weighted Win Rate of Individual Pokemon (Used in Matches)",x=0.5)
+        title=dict(text="Weighted Win Rate of Individual Pokemon (Used in Matches)",x=0.5),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        xaxis_tickangle=-90, 
+        xaxis_automargin=True
     )
         
     return fig
@@ -1134,10 +1138,14 @@ def get_villain_indiv_plot(individual_result):
     # Update the layout with axis labels and other configurations
     fig.update_layout(
         barmode="stack",  # Set barmode to "stack" for stacked bar plots
-        yaxis=dict(title="Games Used", side="right"),  # Update the y-axis title as needed
-        yaxis2=dict(title="Weighted Loss Rate %", overlaying="y", side="left"),
+        yaxis=dict(title="Games Used", side="left"),  # Update the y-axis title as needed
+        yaxis2=dict(title="Weighted Loss Rate %", overlaying="y", side="right"),
         showlegend=True,
-        title=dict(text="Weighted Loss Rate Against Individual Pokemon (Used in Matches)",x=0.5)
+        title=dict(text="Weighted Loss Rate Against Individual Pokemon (Used in Matches)",x=0.5),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        xaxis_tickangle=-90, 
+        xaxis_automargin=True
     )
         
     return fig
