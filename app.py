@@ -10,7 +10,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.offline as pyo
 # bring in dash_app
-from dash_app import create_dash
+#from dash_app import create_dash
 
 
 app = Flask(__name__)
