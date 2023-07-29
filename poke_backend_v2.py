@@ -32,7 +32,7 @@ import plotly.graph_objects as go
 warnings.filterwarnings('ignore')
 
 ## constant variables
-ELO_SCALE=0.6
+ELO_SCALE=5
 ELO_BENCH=0.5
 
 
@@ -905,7 +905,7 @@ def get_metrics(sample_username, sample_game_type):
     hero_pairs_db, villain_pairs_db = get_pair_metrics(MATCH_DB)
     
     print("Metrics generated.")
-    return MATCH_DB, get_metametrics(MATCH_DB), get_individual_rates(MATCH_DB), hero_pairs_db, villain_pairs_db, hero_comps_db, villain_comps_db
+    return MATCH_DB, get_metametrics(MATCH_DB), get_individual_rates(MATCH_DB), get_villain_indiv_rates(MATCH_DB), hero_pairs_db, villain_pairs_db, hero_comps_db, villain_comps_db
 
 
 # In[127]:
@@ -946,30 +946,74 @@ def get_elo(elo_scale, elo_benchmark, win_series, total_match_series):
 
 # In[10]:
 
+## helper function for determining if pokemon assisted with win
+def check_conditional_win(row):
+    if (row.used_total==1 and row.win==1):
+        return 1
+    else:
+        return 0    
 
-## get individual pokemon win rates
+## helper function for determining if pokemon assisted with loss
+def check_conditional_loss(row):
+    if (row.used_total==1 and row.loss==1):
+        return 1
+    else:
+        return 0    
+
+
+## get HERO individual pokemon win rates
 def get_individual_rates(library):
     
-    ## implement algo
-    result=library[["match_id","hero_comp_six","win"]].explode("hero_comp_six")
+    ## second version
+    
+    result=library[["match_id","hero_comp_six","win","match_scorecards"]].explode("hero_comp_six")
+    result["used_total"]=0
+    holder=pd.DataFrame()
+    holder
+    for x in library.match_scorecards:
+        holder=pd.concat([holder,x.loc["hero_pokemon","begins_field"]])
+    holder.columns=["began"]
+    holder["used"]=holder.began.apply(lambda x: 0 if x==0 else 1)
+    result["used_total"]=holder["used"].values
+    result["win_conditional"]=result.apply(check_conditional_win,axis=1)
     result.rename(columns={"hero_comp_six":"hero_pokemon","match_id":"total_games"},inplace=True)
-    result=result.groupby("hero_pokemon").agg({"total_games":"count","win":"sum"})
-    result["win_rate"]=result.win/result.total_games*100
+    result=result.groupby("hero_pokemon").agg({"total_games":"count","used_total":"sum","win_conditional":"sum"})
+    result["win_rate"]=result.win_conditional/result.used_total*100
+    result.win_rate.fillna(0,inplace=True)
     result.win_rate=result.win_rate.apply(format_percent)
-    result["elo_score"]=get_elo(ELO_SCALE, ELO_BENCH, result.win, result.total_games).apply(format_percent)
-    return result.sort_values(by="elo_score", ascending=False)
+    result["elo_score"]=get_elo(ELO_SCALE, ELO_BENCH, result.win_conditional, result.used_total).apply(format_percent)
+    return result.sort_values(by="elo_score", ascending=True)
+    
+    # ## implement algo
+    # result=library[["match_id","hero_comp_six","win","match_scorecards"]].explode("hero_comp_six")
+    
+    # # search for played or not
+    # result["used"]=0
+    # holder=pd.DataFrame()
+    # for x in library.match_scorecards:
+    #     holder=pd.concat([holder,x.loc["hero_pokemon","begins_field"]])
+    # holder.columns=["began"]
+    # result["used"]=holder.began.apply(lambda x: 0 if x==0 else 1)
+    
+    # result.rename(columns={"hero_comp_six":"hero_pokemon","match_id":"total_games"},inplace=True)
+    # #result["conditional_total"]=result.total_games.apply
+    # result=result.groupby("hero_pokemon").agg({"total_games":"count","win":"sum"})
+    # result["win_rate"]=result.win/result.total_games*100
+    # result.win_rate=result.win_rate.apply(format_percent)
+    # result["elo_score"]=get_elo(ELO_SCALE, ELO_BENCH, result.win, result.total_games).apply(format_percent)
+    # return result.sort_values(by="elo_score", ascending=True)
 
 ## run code
 # get_individual_rates(library)
 
-## create plotly graph and render html
+## create HERO plotly graph and render html
 def get_individual_plot(individual_result):
     
     ## reconfigure dataset so that shows up pretty in plot
     df=individual_result.copy()
     df=df.reset_index()
-    df.columns=["Hero Pokemon","Games Played","Games Won","Raw Win Rate","Weighted Win Rate"]
-    df["Games Played2"]=df["Games Played"]-df["Games Won"]
+    df.columns=["Hero Pokemon","Games Played","Games Used", "Games Won","Raw Win Rate","Weighted Win Rate"]
+    df["Games Lost"]=df["Games Used"]-df["Games Won"]
     
     ## the perfect chart
     fig = go.Figure()
@@ -988,9 +1032,9 @@ def get_individual_plot(individual_result):
     fig.add_trace(
         go.Bar(
             x=df["Hero Pokemon"],
-            y=df["Games Played2"],
+            y=df["Games Lost"],
             marker_color="#7F7F7F",
-            name="Games Played2",
+            name="Games Lost",
         )
     )
     
@@ -1010,14 +1054,93 @@ def get_individual_plot(individual_result):
     # Update the layout with axis labels and other configurations
     fig.update_layout(
         barmode="stack",  # Set barmode to "stack" for stacked bar plots
-        yaxis=dict(title="Games", side="left"),  # Update the y-axis title as needed
-        yaxis2=dict(title="Weighted Win Rate %", overlaying="y", side="right"),
-        showlegend=False,
+        yaxis=dict(title="Games Used", side="right"),  # Update the y-axis title as needed
+        yaxis2=dict(title="Weighted Win Rate %", overlaying="y", side="left"),
+        showlegend=True,
+        title=dict(text="Weighted Win Rate of Individual Pokemon (Used in Matches)",x=0.5)
     )
         
     return fig
 
 
+## get VILLAIN individual pokemon win rates
+def get_villain_indiv_rates(library):
+    
+    ## second version
+    
+    result=library[["match_id","villain_comp_six","loss","match_scorecards"]].explode("villain_comp_six")
+    result["used_total"]=0
+    holder=pd.DataFrame()
+    holder
+    for x in library.match_scorecards:
+        holder=pd.concat([holder,x.loc["villain_pokemon","begins_field"]])
+    holder.columns=["began"]
+    holder["used"]=holder.began.apply(lambda x: 0 if x==0 else 1)
+    result["used_total"]=holder["used"].values
+    result["loss_conditional"]=result.apply(check_conditional_loss,axis=1)
+    result.rename(columns={"villain_comp_six":"villain_pokemon","match_id":"total_games"},inplace=True)
+    result=result.groupby("villain_pokemon").agg({"total_games":"count","used_total":"sum","loss_conditional":"sum"})
+    result["loss_rate"]=result.loss_conditional/result.used_total*100
+    result.loss_rate.fillna(0,inplace=True)
+    result.loss_rate=result.loss_rate.apply(format_percent)
+    result["elo_score"]=get_elo(ELO_SCALE, ELO_BENCH, result.loss_conditional, result.used_total).apply(format_percent)
+    return result.sort_values(by="elo_score", ascending=True)
+
+## create VILLAIN plotly graph and render html
+def get_villain_indiv_plot(individual_result):
+    
+    ## reconfigure dataset so that shows up pretty in plot
+    df=individual_result.copy()
+    df=df.reset_index()
+    df.columns=["Villain Pokemon","Games Played","Games Played Against", "Games Lost Against","Raw Loss Rate","Weighted Loss Rate"]
+    df["Games Won Against"]=df["Games Played Against"]-df["Games Lost Against"]
+    
+    ## the perfect chart
+    fig = go.Figure()
+    
+    
+    # Add the stacked bar plot for "Games Won" and "Games Played2"
+    fig.add_trace(
+        go.Bar(
+            x=df["Villain Pokemon"],
+            y=df["Games Lost Against"],
+            marker_color="#72B7B2",
+            name="Games Lost Against",
+        )
+    )
+    
+    fig.add_trace(
+        go.Bar(
+            x=df["Villain Pokemon"],
+            y=df["Games Won Against"],
+            marker_color="#7F7F7F",
+            name="Games Won Against",
+        )
+    )
+    
+    # Calculate the weighted win rate (Games Won / Games Played2) and add it as a line plot on the second y-axis
+    weighted_win_rate = df["Weighted Loss Rate"]
+    fig.add_trace(
+        go.Scatter(
+            x=df["Villain Pokemon"],
+            y=weighted_win_rate,
+            mode="lines+markers",
+            line=dict(color="#FF0000"),  # You can specify the color you want for the line plot
+            name="Weighted Loss Rate",
+            yaxis="y2",  # Specify the second y-axis for this trace
+        )
+    )
+    
+    # Update the layout with axis labels and other configurations
+    fig.update_layout(
+        barmode="stack",  # Set barmode to "stack" for stacked bar plots
+        yaxis=dict(title="Games Used", side="right"),  # Update the y-axis title as needed
+        yaxis2=dict(title="Weighted Loss Rate %", overlaying="y", side="left"),
+        showlegend=True,
+        title=dict(text="Weighted Loss Rate Against Individual Pokemon (Used in Matches)",x=0.5)
+    )
+        
+    return fig
 # In[9]:
 
 

@@ -9,8 +9,12 @@ import pickle
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.offline as pyo
+# bring in dash_app
+from dash_app import create_dash
+
 
 app = Flask(__name__)
+# create_dash(app)
 
 
 @app.route('/')
@@ -51,11 +55,12 @@ def get_data():
             
             #### WHERE EDITS BEGIN ####
             
-            df1, df2, df_individual, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)
+            df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)
             #print(output)
             
-            # Save the Plotly figure as an HTML file
-            plotly_html = pyo.plot(sdg.get_individual_plot(df_individual), output_type="div")
+            # hero individual plot
+            hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
+            villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
             
             #df with num_wins, num_games, win_rate
             overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
@@ -63,27 +68,37 @@ def get_data():
             num_wins = str(df2.loc[0, 'num_wins'])
             win_rate = str(df2.loc[0, 'win_rate'])
             
-            #dfs with individual pokemon winrates and elo scores
-            df_individual = df_individual.reset_index()
-            df_individual=df_individual.loc[:,["hero_pokemon","win","total_games","elo_score"]]
-            df_individual.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
-            # df_individual.to_csv("ind_stats.csv")
-            df_individual["Weighted Win Rate"]=df_individual["Weighted Win Rate"].apply(lambda x: x+"%")
-            individualStats = df_individual.to_html(index=False)
+            #dfs with individual hero pokemon winrates and elo scores
+            df_hero_indiv = df_hero_indiv.reset_index()
+            df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
+            df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
+            # df_hero_indiv.to_csv("ind_stats.csv")
+            df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
+            df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+            hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
+            
+            #dfs with individual villain pokemon loss rates and elo scores
+            df_villain_indiv = df_villain_indiv.reset_index()
+            df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
+            df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+            # df_hero_indiv.to_csv("ind_stats.csv")
+            df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
+            df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+            villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
             
             #dfs with hero pairs, games and win rates breakdown 
             df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
             df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
             df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
             df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
-            heroStats = df3.to_html(index=False)
+            heroPairStats = df3.head(5).to_html(index=False)
             
             ## villain pair stats
             df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
             df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
             df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
             df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
-            villainStats = df4.to_html(index=False)
+            villainPairStats = df4.head(5).to_html(index=False)
             
             ## hero comp stats
             df5=df5.loc[:,["hero_comp_six","num_wins","num_games","elo_score"]]
@@ -91,14 +106,14 @@ def get_data():
             df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
             df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
             df5
-            sixTeamHeroStats = df5.to_html(index=False)
+            sixTeamHeroStats = df5.head(5).to_html(index=False)
             
             ## hero comp stats
             df6=df6.loc[:,["villain_comp_six","num_losses","num_games","elo_score"]]
             df6.columns = ["Villain Teams","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
             df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
             df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
-            sixTeamVillainStats = df6.to_html(index=False)
+            sixTeamVillainStats = df6.head(5).to_html(index=False)
 
             # Define the CSS style for the table
             table_style = """
@@ -142,7 +157,25 @@ def get_data():
             """
             
             # katies original html creation
-            output_html = Markup(table_style +plotly_html+ "<br><br>" +individualStats+ "<br><br>" +heroStats+ "<br><br>" +villainStats+ "<br><br>" +sixTeamHeroStats+ "<br><br>" +sixTeamVillainStats)
+            output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
+                                 "<br><br>" +
+                                 hero_indiv_stats + 
+                                 "<br><br>" +
+                                 hero_plotly+ 
+                                 "<br><br>" +
+                                 "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
+                                 "<br><br>" +
+                                 villain_indiv_stats + 
+                                 "<br><br>" +
+                                 villain_plotly+ 
+                                 "<br><br>" +
+                                 "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
+                                 "<br><br>" +
+                                 sixTeamHeroStats+ 
+                                 "<br><br>" +
+                                 "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
+                                 "<br><br>" +
+                                 sixTeamVillainStats)
 
             return render_template('results.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
         else:

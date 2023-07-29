@@ -8,17 +8,70 @@ This is a temporary script file.
 import pandas as pd
 import numpy as np
 import poke_backend_v2 as sdg
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.offline as pyo
+import plotly.io as pio
+pio.renderers.default='browser'
 
 username = "Broskander"
 gametype = "gen9vgc2023series1"
 #print(username)
 #print(gametype)
 df1, df2, df_individual, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)
-print(sdg.get_individual_plot(sdg.get_individual_rates(df1)))
+x=sdg.get_individual_plot(sdg.get_individual_rates(df1))
+x.show()
 # x=sdg.get_individual_rates(df1)
+temp=sdg.get_individual_rates(df1)
+
+library=df1.copy()
+library.columns
+
+for i in range(df1.shape[0]):
+    print(df1.iloc[i].match_scorecards)
+df_individual
 
 
+## function for checking
 
+def check_conditional_win(row):
+    if (row.used_total==1 and row.win==1):
+        return 1
+    else:
+        return 0
+
+## check if played
+
+library.iloc[0].match_scorecards
+
+result=df1[["match_id","hero_comp_six","win","match_scorecards"]].explode("hero_comp_six")
+result["used_total"]=0
+holder=pd.DataFrame()
+holder
+for x in df1.match_scorecards:
+    holder=pd.concat([holder,x.loc["hero_pokemon","begins_field"]])
+holder.columns=["began"]
+holder["used"]=holder.began.apply(lambda x: 0 if x==0 else 1)
+result["used_total"]=holder["used"].values
+result["win_conditional"]=result.apply(check_conditional_win,axis=1)
+result.rename(columns={"hero_comp_six":"hero_pokemon","match_id":"total_games"},inplace=True)
+result=result.groupby("hero_pokemon").agg({"total_games":"count","used_total":"sum","win_conditional":"sum"})
+df1
+sdg.get_individual_rates(df1).reset_index().columns
+sdg.get_villain_indiv_plot(get_villain_indiv_rates(df1)).show()
+sdg.get_villain_indiv_rates(df1).reset_index().columns
+result
+df1.iloc[0].match_scorecards.columns
+for i in range(result.shape[0]):
+    target_pokemon=result.
+    match_scorecard=result.iloc[i].match_scorecards.reset_index()
+    for y in range(match_scorecard.shape[0]):
+        match_scorecard.loc
+
+result["win_rate"]=(result.win_conditional/result.used_total)*100
+result
+result.win_rate.fillna(0,inplace=True)
+result
 #print(output)
 
 # #df with num_wins, num_games, win_rate
