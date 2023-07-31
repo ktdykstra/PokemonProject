@@ -64,6 +64,47 @@ a:hover {
 }
 
 
+/* Styles for the dropdown container */
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Styles for the input field */
+#gametype {
+    width: 200px;
+    padding: 5px;
+    border-radius: 20px;
+}
+
+/* Styles for the dropdown menu */
+.dropdown-menu {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    z-index: 1;
+    background-color: white; /* Set background color to white */
+    border: 1px solid #ccc;
+    border-radius: 20px; /* Oval edges for the dropdown */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow effect */
+    width: 100%; /* Set the width to match the input field */
+    top: 100%; /* Position the dropdown below the input field */
+    left: 0;
+    display: none;
+}
+
+
+.dropdown-menu li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.dropdown-menu li:hover {
+    background-color: #ddd;
+}
+
+
 /* media queries */
 
 @media (max-width: 800px) {
