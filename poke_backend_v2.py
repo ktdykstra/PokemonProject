@@ -62,18 +62,18 @@ ELO_BENCH=0.5
 ## check person's browser during opening of page
 
 
-# Create an instance of Chrome WebDriver
-driver = webdriver.Chrome()
-sample_url="https://play.pokemonshowdown.com/"
-driver.get(sample_url)  # Replace with the website you want to access
+# # Create an instance of Chrome WebDriver
+# driver = webdriver.Chrome()
+# sample_url="https://play.pokemonshowdown.com/"
+# driver.get(sample_url)  # Replace with the website you want to access
 
-# Wait for the user to log in or perform any required actions in the browser
-input("Please log in and press Enter after login is complete.")
+# # Wait for the user to log in or perform any required actions in the browser
+# input("Please log in and press Enter after login is complete.")
 
-cookies = driver.get_cookies()
-driver.quit()
-print("test")
-## Gather matches via the API
+# cookies = driver.get_cookies()
+# driver.quit()
+# print("test")
+# ## Gather matches via the API
 
 def gather_matches(username, game_type,session):
     

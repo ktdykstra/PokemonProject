@@ -12,6 +12,10 @@ import plotly.offline as pyo
 # bring in dash_app
 #from dash_app import create_dash
 
+## global variables
+browser_type = "Unclear"
+cookies=[]
+
 
 app = Flask(__name__)
 # create_dash(app)
@@ -20,7 +24,14 @@ app = Flask(__name__)
 @app.route('/')
 def collect_email():
     #submitted = request.args.get('submitted')
+    browser_type = request.headers.get('User-Agent')
     return render_template('email.html')
+
+## testing route
+@app.route('/test')
+def print_browser():
+    browser_type = request.headers.get('User-Agent')
+    return render_template('test.html')
 
 
 # Route to handle the form submission
