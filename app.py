@@ -64,8 +64,8 @@ def open_login_tab(browser_type):
 def cookie_collecter(driver):
     driver.get('https://play.pokemonshowdown.com')
     cookies = driver.get_cookies()
-    #input("Hit enter when done") # @katie: delete this when ready to incorporate. just using for testing
-    #driver.quit()
+    input("Hit enter when done") # can't delete if want popup to stay open @katie: delete this when ready to incorporate. just using for testing
+    driver.quit()
     return cookies
 
 # create_dash(app)
@@ -91,9 +91,6 @@ def submit_form():
 @app.route('/main')
 def index():
     #submitted = request.args.get('submitted')
-    browser_type=get_browser()
-    driver=open_login_tab(browser_type)
-    cookies=cookie_collecter(driver)
     return render_template('index.html')
 
 
@@ -245,13 +242,15 @@ def get_data_private():
             #access the data from form
             ## Username
             username = request.form["usernamePrivate"]
-            gametype = request.form["gametypePrivate"]
-            #print(username)
-            #print(gametype)
+            gametype = request.form["gametype"]
             
-            #### WHERE EDITS BEGIN ####
+            # OPEN SHOWDOWN LOGIN
+            browser_type=get_browser()
+            driver=open_login_tab(browser_type)
+            cookies=cookie_collecter(driver)
             
-            df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)
+            
+            df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, cookies)
             #print(output)
             
             # hero individual plot
@@ -373,7 +372,7 @@ def get_data_private():
                                  "<br><br>" +
                                  sixTeamVillainStats)
 
-            return render_template('resultsPrivateAndPublic.html', username = usernamePrivate, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+            return render_template('resultsPrivateAndPublic.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
         else:
             print("did not retrieve input")
             return render_template('index.html')
