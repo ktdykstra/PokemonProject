@@ -59,7 +59,7 @@ ELO_BENCH=0.5
 # 6MAR: 1:15
 # Hours: 34
 
-## check person's browser
+## check person's browser during opening of page
 
 
 # Create an instance of Chrome WebDriver
@@ -72,7 +72,7 @@ input("Please log in and press Enter after login is complete.")
 
 cookies = driver.get_cookies()
 driver.quit()
-
+print("test")
 ## Gather matches via the API
 
 def gather_matches(username, game_type,session):
