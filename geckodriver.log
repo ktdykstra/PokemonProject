@@ -1,0 +1,20 @@
+1691077598149	geckodriver	INFO	Listening on 127.0.0.1:52144
+1691077598347	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofilewE2kOG"
+2023-08-03 11:46:49.139 firefox[69329:678423] AuthorizationCopyRights failed! NSOSStatusErrorDomain / -60006
+WebDriver BiDi listening on ws://127.0.0.1:52145
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:52145/devtools/browser/6645093e-973a-4f1f-ba29-351c478e6057
+1691077758193	geckodriver	INFO	Listening on 127.0.0.1:52228
+1691077758713	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofile4jgfMC"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691077759015	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691077759178	Marionette	INFO	Listening on port 52236
+WebDriver BiDi listening on ws://127.0.0.1:52229
+Read port: 52236
+1691077759287	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:52229/devtools/browser/a53e6469-d74c-4358-8a18-bbe6fd7c4c59
+1691077787970	Marionette	INFO	Stopped listening on port 52236
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.

@@ -9,6 +9,8 @@ import pickle
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.offline as pyo
+import re
+from selenium import webdriver
 # bring in dash_app
 #from dash_app import create_dash
 
@@ -16,22 +18,56 @@ import plotly.offline as pyo
 browser_type = "Unclear"
 cookies=[]
 
+## get the browser type of flask session
+# @app.route('/test')
+def get_browser():
+    og_type = request.headers.get('User-Agent')
+    if 'Chrome' in og_type:
+        browser_type=' Chrome'
+    elif 'Mozilla' in og_type:
+        browser_type='Mozilla'
+    elif 'Safari' in og_type:
+        browser_type='Safari'
+    elif 'Edge' in og_type:
+        browser_type='Edge'
+    elif 'Opera' in og_type:
+        browser_type="Opera"
+    else:
+        browser_type="Unclear"
+    return browser_type #,render_template('test.html')
+
+## generate webdriver depending on browser type
+def open_login_tab(browser_type):
+    driver="None"
+    if browser_type =="Chrome":
+        driver=webdriver.Chrome()
+        return driver
+    elif browser_type=="Mozilla":
+        driver=webdriver.Firefox()
+        return driver
+    elif browser_type=="Safari":
+        driver=webdriver.Safari()
+        return driver
+    elif browser_type=="Edge":
+        driver=webdriver.Edge()
+        return driver
+    else:
+        return driver
+
+## collect cookies
+def cookie_collecter(driver):
+    cookies = driver.get_cookies()
+    input("Hit enter when done") # @katie: delete this when ready to incorporate. just using for testing
+    driver.quit()
+    return cookies
 
 app = Flask(__name__)
 # create_dash(app)
 
-
 @app.route('/')
 def collect_email():
     #submitted = request.args.get('submitted')
-    browser_type = request.headers.get('User-Agent')
     return render_template('email.html')
-
-## testing route
-@app.route('/test')
-def print_browser():
-    browser_type = request.headers.get('User-Agent')
-    return browser_type, render_template('test.html')
 
 
 # Route to handle the form submission
@@ -49,6 +85,9 @@ def submit_form():
 @app.route('/main')
 def index():
     #submitted = request.args.get('submitted')
+    browser_type=get_browser()
+    driver=open_login_tab(browser_type)
+    cookies=cookie_collecter(driver)
     return render_template('index.html')
 
 
@@ -66,7 +105,7 @@ def get_data():
             
             #### WHERE EDITS BEGIN ####
             
-            df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)
+            df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, cookies)
             #print(output)
             
             # hero individual plot
