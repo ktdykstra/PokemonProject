@@ -26,6 +26,8 @@ import re
 import warnings
 import plotly.express as px
 import plotly.graph_objects as go
+from selenium import webdriver
+import user_agent
 
 ## Logistics
 
@@ -57,9 +59,19 @@ ELO_BENCH=0.5
 # 6MAR: 1:15
 # Hours: 34
 
+## check person's browser
 
-# In[16]:
 
+# Create an instance of Chrome WebDriver
+driver = webdriver.Chrome()
+sample_url="https://play.pokemonshowdown.com/"
+driver.get(sample_url)  # Replace with the website you want to access
+
+# Wait for the user to log in or perform any required actions in the browser
+input("Please log in and press Enter after login is complete.")
+
+cookies = driver.get_cookies()
+driver.quit()
 
 ## Gather matches via the API
 
