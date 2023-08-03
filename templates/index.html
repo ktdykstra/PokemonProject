@@ -98,14 +98,14 @@ https://templatemo.com/tm-535-softy-pinko
     </div>
     <!-- ***** Welcome Area End ***** -->
 
-    <!-- ***** Username Start ***** -->
-    <section class="section colored" id="data">
+    <!-- ***** Username Public Start ***** -->
+    <section class="section colored" id="data" style="padding-bottom:10px !important;">
         <div class="container">
             <!-- ***** Section Title Start ***** -->
             <div class="row">
                 <div class="col-lg-12">
                     <div class="center-heading">
-                        <h2 class="section-title">Enter Your Pokemon Showdown Information Below</h2>
+                        <h2 class="section-title">Enter Your Pokemon Showdown Information Below </h2>
                     </div>
                 </div>
             </div>
@@ -113,7 +113,7 @@ https://templatemo.com/tm-535-softy-pinko
 
             <div class="row">
 
-                <!-- ***** Username Form Start ***** -->
+                <!-- ***** Username Form Public Only Start ***** -->
                 <div class="offset-md-2 col-lg-8 col-md-6 col-sm-12">
                     <div class="contact-form">
                         <form id="username" action="/get_data" method="POST" name="inputUser" >
@@ -137,7 +137,7 @@ https://templatemo.com/tm-535-softy-pinko
                                 <div class="col-lg-12">
                                     <fieldset>
                                         <button type="submit" id="username-submit" class="main-button">
-                                            Display Match Analytics
+                                            Display <strong style="color:black;">Public</strong> Replay Match Analytics
                                         </button>
                                     </fieldset>
                                     <p style="padding-top: 20px; border-left: 20px;">Clicking will open a new tab. Please ensure pop-up blockers are disabled. </p>
@@ -148,11 +148,65 @@ https://templatemo.com/tm-535-softy-pinko
 
                     </div>
                 </div>
-                <!-- ***** Username Form End ***** -->
+                <!-- ***** Username Form Public Only End ***** -->
             </div>
         </div>
+        
     </section>
-    <!-- ***** Username End ***** -->
+
+    <!-- ***** Username Public  + Private End ***** -->
+
+        <!-- ***** Username  Public+PrivateStart ***** -->
+    
+        <section class="section colored" id="dataPrivate" style="padding-top: 10px !important;">
+            <hr></hr>
+            <div class="container" style="padding-top: 10px !important;">
+
+    
+                <div class="row">
+    
+                    <!-- ***** Username Form Public  + Private Start ***** -->
+                    <div class="offset-md-2 col-lg-8 col-md-6 col-sm-12">
+                        <div class="contact-form">
+                            <form id="usernamePrivate" action="/get_data_private" method="POST" name="inputUserPrivate" >
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12 col-sm-12">
+                                        <fieldset>
+                                            <input name="usernamePrivate" type="text" class="form-control" id="usernamePrivate"
+                                                placeholder="Username" required="">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-lg-6 col-md-12 col-sm-12">
+                                        <fieldset>
+                                           
+                                                <select style="border: 1px solid #eee !important; height: 50px !important; color: #777 !important; font-size: 14px!important;border: 1px solid #eee!important; outline: none!important; border-radius: 25px!important;" name="gametype" type="text" class="form-control" style aria-label="Game Type" id="gametypePrivate"
+                                                placeholder="Game Type" required="" >
+                                                    <option value="" disabled selected hidden>Choose a Game Type</option>
+                                                    <option value="gen9vgc2023regulationd">gen9vgc2023regulationd</option>
+                                                  </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <fieldset>
+                                            <button type="submit" id="username-submit-private" class="main-button">
+                                                Display <strong style="color:black;">Private & Public</strong> Replay Match Analytics
+                                            </button>
+                                        </fieldset>
+                                        <p style="padding-top: 20px; border-left: 20px;">Clicking will open a new tab. Please ensure pop-up blockers are disabled. </p>
+                                        <p style="padding-top: 20px; border-left: 20px;">    In the new tab, please login to your Showdown account. This will allow our service to run analytics on private matches. </p>
+                                        <p style="padding-top: 20px; border-left: 20px;">Due to the data processing load, it may take ~10 seconds for analytics to display.</p>
+                                    </div>
+                                </div>
+                            </form>
+    
+                        </div>
+                    </div>
+                    <!-- ***** Username Form Public  + Private End ***** -->
+                </div>
+            </div>
+        </section>
+        <!-- ***** Username Public  + Private End ***** -->
+
 
 
     <!-- Display Overall Stats-->
