@@ -64,8 +64,8 @@ def open_login_tab(browser_type):
 def cookie_collecter(driver):
     driver.get('https://play.pokemonshowdown.com')
     cookies = driver.get_cookies()
-    input("Hit enter when done") # @katie: delete this when ready to incorporate. just using for testing
-    driver.quit()
+    #input("Hit enter when done") # @katie: delete this when ready to incorporate. just using for testing
+    #driver.quit()
     return cookies
 
 # create_dash(app)
