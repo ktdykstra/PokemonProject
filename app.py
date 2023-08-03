@@ -31,7 +31,7 @@ def collect_email():
 @app.route('/test')
 def print_browser():
     browser_type = request.headers.get('User-Agent')
-    return render_template('test.html')
+    return browser_type, render_template('test.html')
 
 
 # Route to handle the form submission
