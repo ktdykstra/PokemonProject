@@ -13,9 +13,12 @@ import plotly.graph_objects as go
 import plotly.offline as pyo
 import plotly.io as pio
 pio.renderers.default='browser'
+from selenium import webdriver
 
 username = "Broskander"
 gametype = "gen9vgc2023series1"
+
+
 #print(username)
 #print(gametype)
 df1, df2, df_individual, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)

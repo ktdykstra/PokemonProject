@@ -26,6 +26,9 @@ import re
 import warnings
 import plotly.express as px
 import plotly.graph_objects as go
+from selenium import webdriver
+import user_agent
+import re
 
 ## Logistics
 
@@ -57,11 +60,48 @@ ELO_BENCH=0.5
 # 6MAR: 1:15
 # Hours: 34
 
+## check person's browser during opening of page
 
-# In[16]:
+
+# # Create an instance of Chrome WebDriver
+# driver = webdriver.Chrome()
+# sample_url="https://play.pokemonshowdown.com/"
+# driver.get(sample_url)  # Replace with the website you want to access
+
+# # Wait for the user to log in or perform any required actions in the browser
+# input("Please log in and press Enter after login is complete.")
+
+# cookies = driver.get_cookies()
+# driver.quit()
+# print("test")
 
 
-## Gather matches via the API
+## checks for mozilla
+def contains_mozilla(input_string):
+    pattern = r"Mozilla"
+    if re.search(pattern, input_string):
+        return "Mozilla"
+    else:
+        return "Unclear"
+    
+## checks for safari
+def contains_safari(input_string):
+    pattern = r"Safari"
+    if re.search(pattern, input_string):
+        return "Unclear"
+    else:
+        return input_string
+
+## checks for chrome
+def contains_chrome(input_string):
+    pattern = r"Google"
+    if re.search(pattern, input_string):
+        return "Unclear"
+    else:
+        return input_string
+    
+
+# ## Gather matches via the API
 
 def gather_matches(username, game_type,session):
     
@@ -884,10 +924,13 @@ def get_all_data(MATCH_DB):
 # In[36]:
 
 
-def get_metrics(sample_username, sample_game_type):
+def get_metrics(sample_username, sample_game_type, cookies):
     
     ## establish requests session
     s = requests.Session()
+    for cookie in cookies:
+        s.cookies.set(cookie["name"], cookie["value"])
+
     
     ## Gather matches from Showdown
     

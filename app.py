@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for, session
 from flask import jsonify
 # from flask_bootstrap import Bootstrap
 from markupsafe import Markup
@@ -9,13 +9,66 @@ import pickle
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.offline as pyo
+import re
+from selenium import webdriver
 # bring in dash_app
 #from dash_app import create_dash
 
+## global variables
+browser_type = "Unclear"
+cookies=[]
+
 
 app = Flask(__name__)
-# create_dash(app)
+#need secret key to save browser across sessions
+# app.secret_key = '839ef7964e67ea14d620a9e0e0cf0468e796a3ebc78e946cf8a3815390da5cdb'
 
+## get the browser type of flask session
+#@app.route('/test')
+def get_browser():
+    og_type = request.headers.get('User-Agent')
+    if 'Chrome' in og_type:
+        browser_type='Chrome'
+    elif 'Mozilla' in og_type:
+        browser_type='Mozilla'
+    elif 'Safari' in og_type:
+        browser_type='Safari'
+    elif 'Edge' in og_type:
+        browser_type='Edge'
+    elif 'Opera' in og_type:
+        browser_type='Opera'
+    else:
+        browser_type='Unclear'
+    return browser_type #,render_template('test.html')
+
+## generate webdriver depending on browser type
+def open_login_tab(browser_type):
+    if browser_type =="Chrome":
+        driver=webdriver.Chrome()
+        return driver
+    elif browser_type=="Mozilla":
+        driver=webdriver.Firefox()
+        return driver
+    elif browser_type=="Safari":
+        driver=webdriver.Safari()
+        return driver
+    elif browser_type=="Edge":
+        driver=webdriver.Edge()
+        return driver
+    else:
+        raise ValueError(f"Invalid browser_type: {browser_type}")
+
+    return driver
+
+## collect cookies
+def cookie_collecter(driver):
+    driver.get('https://play.pokemonshowdown.com')
+    cookies = driver.get_cookies()
+    #input("Hit enter when done") # @katie: delete this when ready to incorporate. just using for testing
+    #driver.quit()
+    return cookies
+
+# create_dash(app)
 
 @app.route('/')
 def collect_email():
@@ -38,6 +91,9 @@ def submit_form():
 @app.route('/main')
 def index():
     #submitted = request.args.get('submitted')
+    browser_type=get_browser()
+    driver=open_login_tab(browser_type)
+    cookies=cookie_collecter(driver)
     return render_template('index.html')
 
 
@@ -55,7 +111,7 @@ def get_data():
             
             #### WHERE EDITS BEGIN ####
             
-            df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)
+            df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, cookies)
             #print(output)
             
             # hero individual plot
