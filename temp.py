@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 import plotly.offline as pyo
 import plotly.io as pio
 pio.renderers.default='browser'
-
+import selenium 
 username = "Broskander"
 gametype = "gen9vgc2023series1"
 #print(username)
