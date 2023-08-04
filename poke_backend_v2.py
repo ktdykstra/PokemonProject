@@ -105,17 +105,35 @@ def contains_chrome(input_string):
 
 def gather_matches(username, game_type, driver):
     
-    ## Get first page
+    # ## Get first page
     
-    match_page=1
-    api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type 
-    # s=session
+    # match_page=1
+    # api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type 
+    # # s=session
+    # driver.get(api_url)
+    # json = driver.find_element(by="tag name", value='pre')
+    # print(json)
+    # json=json.text
+    # print(json)
+    # # json=s.get(api_url).json()
+    # base_db=pd.read_json(json)
+    # print(base_db)
+    # return base_db
+    match_page = 1
+    api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page)
+    print(api_url)
     driver.get(api_url)
-    json = driver.find_element(by="tag name", value='pre')
-    return json
-    # json=s.get(api_url).json()
-    # base_db=pd.json_normalize(json)
-    
+    json_element = driver.find_element(by="tag name", value='pre')
+    json_text = json_element.text
+
+    print("JSON Text:")
+    print(json_text)
+
+    base_db = pd.read_json(json_text)
+    print("Pandas DataFrame:")
+    print(base_db)
+
+    return base_db
     # ## Scroll through pages of games
 
     # pagination=False
