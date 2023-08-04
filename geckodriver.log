@@ -568,3 +568,23 @@ console.warn: LoginRecipes: "Falling back to a synchronous message for: https://
 1691114330993	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'uninitialized'.
 1691114331029	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'uninitialized'.
 1691114335807	Marionette	INFO	Stopped listening on port 51280
+1691178888677	geckodriver	INFO	Listening on 127.0.0.1:53292
+1691178889188	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofileEk2J5f"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691178889550	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691178889729	Marionette	INFO	Listening on port 53301
+WebDriver BiDi listening on ws://127.0.0.1:53293
+Read port: 53301
+1691178889860	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:53293/devtools/browser/b7bec2ec-4ad7-496a-9478-84192c694a90
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 374 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.error: ({})
+console.error: (new TypeError("watcher.browserElement.browsingContext is null", "resource://devtools/server/actors/watcher/target-helpers/frame-helper.js", 193))
+1691179213608	Marionette	INFO	Stopped listening on port 53301
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
