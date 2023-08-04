@@ -103,7 +103,7 @@ def contains_chrome(input_string):
 
 # ## Gather matches via the API
 
-def gather_matches(username, game_type,session):
+def gather_matches(username, game_type, session, all_matches):
     
     ## Get first page
     
@@ -120,16 +120,40 @@ def gather_matches(username, game_type,session):
         api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type +
         json=s.get(api_url).json()
         if json==[]:
-            print("Finished searching for matches.")
+            print("Finished searching for public matches.")
             pagination=True
         else:
-            print("Not done searching for matches...")
+            print("Not done searching for public matches...")
             new_db=pd.json_normalize(json).iloc[1:,]
             base_db=pd.concat([base_db,new_db])
             match_page+=1
     
-    ## Prettify match database
-    
+    ## check the private/public matches condition
+
+    if all_matches == True:
+        match_page=1
+        api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page) #"&format=" + game_type 
+        json=s.get(api_url).json()
+        print(json)
+        base_db2=pd.json_normalize(json)
+        pagination=False
+        while pagination == False:
+            api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page) #"&format=" + game_type +
+            json=s.get(api_url).json()
+            if json==[]:
+                print("Finished searching for private matches.")
+                pagination=True
+            else:
+                print("Not done searching for private matches...")
+                new_db=pd.json_normalize(json).iloc[1:,]
+                base_db2=pd.concat([base_db2,new_db])
+                match_page+=1
+        ## conslolidate private and public data
+        base_db=pd.concat([base_db,base_db2])
+    else:
+        pass
+
+    ## clean database columns
     base_db.rename(columns={"id":"match_id"},inplace=True)
     
     ## Add logs and turns to metadata df
@@ -924,17 +948,19 @@ def get_all_data(MATCH_DB):
 # In[36]:
 
 
-def get_metrics(sample_username, sample_game_type, cookies):
+def get_metrics(sample_username, sample_game_type, cookies, all_matches):
     
-    ## establish requests session
-    s = requests.Session()
-    for cookie in cookies:
-        s.cookies.set(cookie["name"], cookie["value"])
+    ## establish requests session with cookies from login for private matches
+    session= requests.Session()
+    if all_matches==True:
+        for cookie in cookies:
+            session.cookies.set(cookie["name"], cookie["value"])
+    else:
+        pass
 
-    
     ## Gather matches from Showdown
     
-    MATCH_DB=gather_matches(sample_username, sample_game_type,s)
+    MATCH_DB=gather_matches(sample_username, sample_game_type, session, all_matches)
     
     ## Aggregate data from matches
     
