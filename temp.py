@@ -20,21 +20,48 @@ from requests.sessions import Session
 
 username = "Broskander"
 gametype = "gen9vgc2023series1"
-
-## testing wrapper for driver
-
-    # Initialize the WebDriver (e.g., Chrome)
+api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + gametype + "&page=" + str(match_page)
 driver = webdriver.Chrome()
+# driver.quit()
+driver.implicitly_wait(10)
+sdg.gather_matches(username, gametype,driver).text
+# driver.quit()
+sample=sdg.gather_matches(username,gametype, driver, False)
+
+# def gather_matches(username, game_type, driver, all_matches):
+    
+#     ## Get first page
+    
+#     match_page=1
+#     api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type 
+#     # s=session
+#     driver.get(api_url)
+#     json = driver.find_element(by="tag name",value='pre')
+#     return json
+
+new_function
+## testing wrapper for driver
+def passing(driver):
+
+    driver.get(api_url)
+    json = driver.find_element(by="tag name",value='pre').text
+    return json
+passing(driver)
+    # Initialize the WebDriver (e.g., Chrome)
+
 
 match_page = 1
 base_db = pd.DataFrame()  # Initialize an empty DataFrame
 
 # Navigate to the API URL
-api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + gametype + "&page=" + str(match_page)
 driver.get(api_url)
 
+api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + gametype + "&page=" + str(match_page)
+driver.get(api_url)
 # Extract the JSON data from the page
-json_data = driver.find_element_by_tag_name('pre').text
+json_data = driver.find_element(by="tag name",value='pre')
+json_data.text
+driver.quit()
 json_data
 
 # Check if there is any data
