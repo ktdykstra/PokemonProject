@@ -273,26 +273,6 @@ def get_data():
             print("did not retrieve input")
             return render_template('index.html')
 
-#get driver from pop up
-@app.route('/get_driver', methods=['GET'])
-def get_driver():
-    # Retrieve the driver object from the session
-    driver_serialized = session.get('driver')
-
-    if driver_serialized is None:
-        # Handle the case when the driver is not present in the session
-        return jsonify({'error': 'Driver not found in the session'})
-
-    # Deserialize the driver object
-    try:
-        driver = pickle.loads(driver_serialized.encode('latin1'))
-    except Exception as e:
-        # Handle errors during deserialization
-        return jsonify({'error': 'Failed to deserialize the driver object'})
-
-    # Serialize the driver again and send it back to the client
-    serialized_driver = pickle.dumps(driver).decode('latin1')
-    return jsonify({'driver': serialized_driver})
 
 #opening the pop-up for private replay data login
 @app.route('/open_popup', methods=['POST'])
@@ -305,31 +285,16 @@ def open_popup():
     driver=cookie_collecter(driver) # takes user to login page via driver
     # custom_session = create_custom_session(driver)
 
-
-    driver.session_id  # Get the session ID
-
-    # Store the session ID in the session
-    session['driver_session_id'] = driver.session_id
-    
-
     # Return a JSON response to the AJAX call to indicate success
-    return jsonify({'status': 'success'})
+    return redirect(url_for('get_data_private', driver=driver))
 
 
 #function for retrieving analytics on private & public replays 
 @app.route("/get_data_private", methods=['GET','POST'])
-def get_data_private():
+def get_data_private(driver):
+        
         if request.method == 'POST':
-            # Retrieve the driver session ID from the session
-            driver_session_id = session.get('driver_session_id')
 
-            if driver_session_id is None:
-                # Handle the case when the driver session ID is not present in the session
-                return jsonify({'error': 'Driver session ID not found in the session'})
-
-            # Use the driver_session_id to connect to the existing Selenium driver
-            driver = webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', desired_capabilities={})
-            driver.session_id = driver_session_id
 
             # Retrieve the driver data from the request JSON
             form_data = request.json
@@ -338,13 +303,6 @@ def get_data_private():
             # Get the form data from the AJAX request
             username = form_data.get("usernamePrivate")
             gametype = form_data.get("gametype")
-
-            # Construct the response data
-            response_data = {
-                'success': True,  # Add any relevant success flag or data here
-                'message': 'Form data successfully processed.',
-                'additional_data': 'You can include any additional data you want to send back to the client.'
-            }
 
            
             ## run the data gathering
