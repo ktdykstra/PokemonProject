@@ -1,5 +1,7 @@
 from flask import Flask, redirect, render_template, request, url_for, session
 from flask import jsonify
+import os
+import time
 # from flask_bootstrap import Bootstrap
 from markupsafe import Markup
 import pandas as pd
@@ -12,6 +14,10 @@ import plotly.offline as pyo
 import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 from requests.adapters import BaseAdapter
 from requests.sessions import Session
 # bring in dash_app
@@ -42,7 +48,8 @@ browser_type = "Unclear"
 
 app = Flask(__name__)
 #need secret key to save browser across sessions
-# app.secret_key = '839ef7964e67ea14d620a9e0e0cf0468e796a3ebc78e946cf8a3815390da5cdb'
+app.secret_key = os.urandom(24)
+
 
 ## get the browser type of flask session
 #@app.route('/test')
@@ -80,16 +87,17 @@ def open_login_tab(browser_type):
         raise ValueError(f"Invalid browser_type: {browser_type}")
 
 
-
-## login to play.pokemon for session cookies
 def cookie_collecter(driver):
     driver.get('https://play.pokemonshowdown.com')
-    # cookies = driver.get_cookies()
-    input("Hit enter when done") # can't delete if want popup to stay open @katie: delete this when ready to incorporate. just using for testing
-    # driver.quit()
+
+    # Define a list of button identifiers (names or XPath expressions)
+    #button_identifiers = ['login',   '/html/body/div[5]/div/form/p[5]/button[1]']
+    
+
+    time.sleep(30)
+
     return driver
 
-# create_dash(app)
 
 @app.route('/')
 def collect_email():
@@ -136,7 +144,7 @@ def get_data():
             chrome_options.add_argument("--headless")
             driver = webdriver.Chrome(options=chrome_options)
 
-            # driver=cookie_collecter(driver)
+            #driver=cookie_collecter(driver)
             df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
             driver.quit()
             #print(output)
@@ -265,22 +273,117 @@ def get_data():
             print("did not retrieve input")
             return render_template('index.html')
 
+#get driver from pop up
+@app.route('/get_driver', methods=['GET'])
+def get_driver():
+    # Retrieve the driver object from the session
+    driver_serialized = session.get('driver')
+
+    if driver_serialized is None:
+        # Handle the case when the driver is not present in the session
+        return jsonify({'error': 'Driver not found in the session'})
+
+    # Deserialize the driver object
+    try:
+        driver = pickle.loads(driver_serialized.encode('latin1'))
+    except Exception as e:
+        # Handle errors during deserialization
+        return jsonify({'error': 'Failed to deserialize the driver object'})
+
+    # Serialize the driver again and send it back to the client
+    serialized_driver = pickle.dumps(driver).decode('latin1')
+    return jsonify({'driver': serialized_driver})
+
+#opening the pop-up for private replay data login
+@app.route('/open_popup', methods=['POST'])
+def open_popup():
+    global user_interaction_complete
+    # OPEN SHOWDOWN LOGIN
+    # browser_type=get_browser()
+    # driver=open_login_tab(browser_type) # builds initial driver
+    driver = webdriver.Chrome()
+    
+    driver=cookie_collecter(driver) # takes user to login page via driver
+    # custom_session = create_custom_session(driver)
+
+    # Set user_interaction_complete to False at the beginning of interaction
+    user_interaction_complete = False
+
+    driver.session_id  # Get the session ID
+
+    # Store the session ID in the session
+    session['driver_session_id'] = driver.session_id
+    
+
+    # Return a JSON response to the AJAX call to indicate success
+    return jsonify({'status': 'success'})
+
+# Function to handle user interaction in the Selenium browser
+def handle_user_interaction():
+    global user_interaction_complete
+    while not user_interaction_complete:
+        try:
+            # Check if user interaction is complete (e.g., buttons are clickable)
+            # Modify this part based on your specific website and user interaction requirements
+            # For example, you can use WebDriverWait to wait for elements to be clickable.
+            # Example: button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.NAME, 'button_name')))
+            # If user interaction is detected, set user_interaction_complete to True
+
+            # For demonstration purposes, we use a simple input() function here to simulate user input.
+            # In your actual implementation, you should replace this with your specific user interaction checks.
+            user_input = input("Enter 'done' when user interaction is complete: ")
+            if user_input.lower() == 'done':
+                user_interaction_complete = True
+        except Exception as e:
+            print("Error during user interaction check:", e)
+            # Handle any exceptions during the interaction check
+
+# Function to notify the server when the user has completed the interaction
+@app.route('/user_interaction_complete', methods=['POST'])
+def user_interaction_complete_route():
+    global user_interaction_complete
+    # Set user_interaction_complete to True when the AJAX request is received
+    user_interaction_complete = True
+    return jsonify({'status': 'success'})
+
 #function for retrieving analytics on private & public replays 
 @app.route("/get_data_private", methods=['GET','POST'])
 def get_data_private():
+        global user_interaction_complete
+
+        # Check if the user has completed the interaction
+        if not user_interaction_complete:
+            # If the user has not completed the interaction, return an error response or do nothing
+            return jsonify({'error': 'User interaction not complete'})
+
         if request.method == 'POST':
-            #access the data from form
-            ## Username
-            username = request.form["usernamePrivate"]
-            gametype = request.form["gametype"]
-            
-            # OPEN SHOWDOWN LOGIN
-            # browser_type=get_browser()
-            # driver=open_login_tab(browser_type) # builds initial driver
-            driver = webdriver.Chrome()
-            driver=cookie_collecter(driver) # takes user to login page via driver
-            # custom_session = create_custom_session(driver)
-            
+            # Retrieve the driver session ID from the session
+            driver_session_id = session.get('driver_session_id')
+
+            if driver_session_id is None:
+                # Handle the case when the driver session ID is not present in the session
+                return jsonify({'error': 'Driver session ID not found in the session'})
+
+            # Use the driver_session_id to connect to the existing Selenium driver
+            driver = webdriver.Remote(command_executor='http://127.0.0.1:4444/wd/hub', desired_capabilities={})
+            driver.session_id = driver_session_id
+
+            # Retrieve the driver data from the request JSON
+            form_data = request.json
+
+            # ... Process the form data and other actions on the server-side ...
+            # Get the form data from the AJAX request
+            username = form_data.get("usernamePrivate")
+            gametype = form_data.get("gametype")
+
+            # Construct the response data
+            response_data = {
+                'success': True,  # Add any relevant success flag or data here
+                'message': 'Form data successfully processed.',
+                'additional_data': 'You can include any additional data you want to send back to the client.'
+            }
+
+           
             ## run the data gathering
             df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, True)
             driver.quit()
@@ -404,7 +507,15 @@ def get_data_private():
                                  "<br><br>" +
                                  sixTeamVillainStats)
 
-            return render_template('resultsPrivateAndPublic.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+            #close pop-up after data is processed
+            driver.close()
+            # Optional: If you need to store additional data in the session, you can do so here
+            # For example, if you want to store the processed data in the session and retrieve it in another route
+
+            # Clear the driver from the session to release resources
+            session.pop('driver', None)
+
+            return render_template('resultsPrivateAndPublic.html', data=response_data, username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
         else:
             print("did not retrieve input")
             return render_template('index.html')
@@ -444,4 +555,5 @@ def test_db_connection():
     return jsonify(d)
 
 if __name__ == '__main__':
+
     app.run(host="0.0.0.0", debug=True)
