@@ -226,14 +226,7 @@ def gather_matches(username, game_type, driver, all_matches):
     return base_db
 
 
-
-
-# In[104]:
-
-
-# In[17]:
-
-
+## getting logs for individual match ids
 def get_logs(df, driver):
     
     ## Storage lists
@@ -926,14 +919,26 @@ def get_comps_metrics(MATCH_DB):
     hero_comps_db["hero_two"]=hero_comps_db.hero_comp_six.apply(lambda x: x[1])
     hero_comps_db["hero_three"]=hero_comps_db.hero_comp_six.apply(lambda x: x[2])
     hero_comps_db["hero_four"]=hero_comps_db.hero_comp_six.apply(lambda x: x[3])
-    try:
-        hero_comps_db["hero_five"]=hero_comps_db.hero_comp_six.apply(lambda x: x[4])
-    except IndexError:
-        pass
-    try:
-        hero_comps_db["hero_six"]=hero_comps_db.hero_comp_six.apply(lambda x: x[5])
-    except IndexError:
-        pass
+    hero_comps_db["comp_size"]=hero_comps_db.hero_comp_six.apply(lambda x: len(x))
+    hero_comps_db["hero_five"]=np.nan
+    hero_comps_db["hero_six"]=np.nan
+    for i in range(hero_comps_db.shape[0]):
+        # check the size of comp
+        # print(hero_comps_db.iloc[i].comp_size)
+        # print(hero_comps_db.iloc[i].hero_comp_six[4])
+        if hero_comps_db.iloc[i].comp_size==5:
+            hero_comps_db.loc[i,"hero_five"]=hero_comps_db.iloc[i].hero_comp_six[4]
+        if hero_comps_db.iloc[i].comp_size==6:
+            hero_comps_db.loc[i,"hero_five"]=hero_comps_db.iloc[i].hero_comp_six[4]
+            hero_comps_db.loc[i,"hero_six"]=hero_comps_db.iloc[i].hero_comp_six[5]
+    # try:
+    #     hero_comps_db["hero_five"]=hero_comps_db.hero_comp_six.apply(lambda x: x[4])
+    # except IndexError:
+    #     pass
+    # try:
+    #     hero_comps_db["hero_six"]=hero_comps_db.hero_comp_six.apply(lambda x: x[5])
+    # except IndexError:
+    #     pass
 
     villain_comps_db=MATCH_DB.groupby(["villain_comp_fused"]).agg({"villain_comp_six":"first","loss":"sum","match_id":"count"}).reset_index()
     villain_comps_db["comps_lossrate"]=villain_comps_db.loss/villain_comps_db.match_id*100
@@ -944,14 +949,24 @@ def get_comps_metrics(MATCH_DB):
     villain_comps_db["villain_two"]=villain_comps_db.villain_comp_six.apply(lambda x: x[1])
     villain_comps_db["villain_three"]=villain_comps_db.villain_comp_six.apply(lambda x: x[2])
     villain_comps_db["villain_four"]=villain_comps_db.villain_comp_six.apply(lambda x: x[3])
-    try:
-        villain_comps_db["villain_five"]=villain_comps_db.villain_comp_six.apply(lambda x: x[4])
-    except IndexError:
-        pass
-    try:
-        villain_comps_db["villain_six"]=villain_comps_db.villain_comp_six.apply(lambda x: x[5])
-    except IndexError:
-        pass
+    villain_comps_db["comp_size"]=villain_comps_db.villain_comp_six.apply(lambda x: len(x))
+    villain_comps_db["villain_five"]=np.nan
+    villain_comps_db["villain_six"]=np.nan
+    for i in range(villain_comps_db.shape[0]):
+        # check the size of comp
+        if villain_comps_db.iloc[i].comp_size==5:
+            villain_comps_db.loc[i,"villain_five"]=villain_comps_db.iloc[i].villain_comp_six[4]
+        if villain_comps_db.iloc[i].comp_size==6:
+            villain_comps_db.loc[i,"villain_five"]=villain_comps_db.iloc[i].villain_comp_six[4]
+            villain_comps_db.loc[i,"villain_six"]=villain_comps_db.iloc[i].villain_comp_six[5]
+    # try:
+    #     villain_comps_db["villain_five"]=villain_comps_db.villain_comp_six.apply(lambda x: x[4])
+    # except IndexError:
+    #     pass
+    # try:
+    #     villain_comps_db["villain_six"]=villain_comps_db.villain_comp_six.apply(lambda x: x[5])
+    # except IndexError:
+    #     pass
     
     return hero_comps_db, villain_comps_db
 
@@ -985,24 +1000,19 @@ def get_metametrics(MATCH_DB):
 def get_all_data(MATCH_DB):
     
     ## Head and tail metadata
-    
     MATCH_DB=get_head_tail_data(MATCH_DB)
     
     ## Aggregate scorecards
-
     MATCH_DB["match_scorecards"]=scorecards(MATCH_DB)
     
     
     ## Get lead pairs fused
-    
     MATCH_DB=publish_lead_pairs(MATCH_DB)
     
     ## Get comps fused
-    
     MATCH_DB=publish_comps(MATCH_DB)
     
     ## Get losses
-    
     MATCH_DB=publish_losses(MATCH_DB)
     
     return MATCH_DB
