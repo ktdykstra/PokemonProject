@@ -65,33 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     
-
-    // Function to notify the server when the user has completed the interaction
-    function notifyUserInteractionComplete() {
-        fetch('/user_interaction_complete', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({})
-        })
-        .then(response => {
-            if (response.ok) {
-                // The request was successful, proceed with the form submission
-                document.getElementById('usernamePrivate').submit();
-            } else {
-                // Handle any errors that occurred during the request
-                console.error('Failed to notify the server about user interaction.');
-            }
-        })
-        .catch(error => {
-            console.error('An error occurred during the request:', error);
-        });
-    }
-
-
-
-  
     // Attach event listener to the form button
     document.getElementById('username-submit-private').addEventListener('click', function(event) {
       // Prevent the default form submission behavior

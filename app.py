@@ -297,7 +297,6 @@ def get_driver():
 #opening the pop-up for private replay data login
 @app.route('/open_popup', methods=['POST'])
 def open_popup():
-    global user_interaction_complete
     # OPEN SHOWDOWN LOGIN
     # browser_type=get_browser()
     # driver=open_login_tab(browser_type) # builds initial driver
@@ -306,8 +305,6 @@ def open_popup():
     driver=cookie_collecter(driver) # takes user to login page via driver
     # custom_session = create_custom_session(driver)
 
-    # Set user_interaction_complete to False at the beginning of interaction
-    user_interaction_complete = False
 
     driver.session_id  # Get the session ID
 
@@ -318,44 +315,10 @@ def open_popup():
     # Return a JSON response to the AJAX call to indicate success
     return jsonify({'status': 'success'})
 
-# Function to handle user interaction in the Selenium browser
-def handle_user_interaction():
-    global user_interaction_complete
-    while not user_interaction_complete:
-        try:
-            # Check if user interaction is complete (e.g., buttons are clickable)
-            # Modify this part based on your specific website and user interaction requirements
-            # For example, you can use WebDriverWait to wait for elements to be clickable.
-            # Example: button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.NAME, 'button_name')))
-            # If user interaction is detected, set user_interaction_complete to True
-
-            # For demonstration purposes, we use a simple input() function here to simulate user input.
-            # In your actual implementation, you should replace this with your specific user interaction checks.
-            user_input = input("Enter 'done' when user interaction is complete: ")
-            if user_input.lower() == 'done':
-                user_interaction_complete = True
-        except Exception as e:
-            print("Error during user interaction check:", e)
-            # Handle any exceptions during the interaction check
-
-# Function to notify the server when the user has completed the interaction
-@app.route('/user_interaction_complete', methods=['POST'])
-def user_interaction_complete_route():
-    global user_interaction_complete
-    # Set user_interaction_complete to True when the AJAX request is received
-    user_interaction_complete = True
-    return jsonify({'status': 'success'})
 
 #function for retrieving analytics on private & public replays 
 @app.route("/get_data_private", methods=['GET','POST'])
 def get_data_private():
-        global user_interaction_complete
-
-        # Check if the user has completed the interaction
-        if not user_interaction_complete:
-            # If the user has not completed the interaction, return an error response or do nothing
-            return jsonify({'error': 'User interaction not complete'})
-
         if request.method == 'POST':
             # Retrieve the driver session ID from the session
             driver_session_id = session.get('driver_session_id')
