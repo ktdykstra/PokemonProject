@@ -62,6 +62,8 @@ os.environ['PATH'] += ":/chromedriver"
 # Set up ChromeOptions for headless mode
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--headless")
+# Set the path to the Chrome binary using the GOOGLE_CHROME_BIN environment variable from Heroku
+#chrome_options.binary_location = os.environ.get('GOOGLE_CHROME_BIN')
 
 CORS(app)
 
@@ -302,7 +304,7 @@ def open_popup():
     global driver
     # Initialize the driver only if it hasn't been created yet
     if driver is None:
-        driver = webdriver.Chrome()
+        driver = webdriver.Chrome(options=chrome_options)
     driver=cookie_collecter(driver) # takes user to login page via driver
     
     # custom_session = create_custom_session(driver)
