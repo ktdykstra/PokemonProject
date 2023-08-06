@@ -28,7 +28,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from selenium import webdriver
 import user_agent
-import re
+import json
 
 ## Logistics
 
@@ -101,40 +101,116 @@ def contains_chrome(input_string):
         return input_string
     
 
-# ## Gather matches via the API
+# ## Gather matches via the API. DOUBLE CHECK THAT NOT DOUBLE COUNTING MATCHES
 
-def gather_matches(username, game_type,session):
+def gather_matches(username, game_type, driver, all_matches):
     
-    ## Get first page
-    
-    match_page=1
-    api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type 
-    s=session
-    json=s.get(api_url).json()
-    base_db=pd.json_normalize(json)
-    
-    ## Scroll through pages of games
+    # ## Get first page
+    match_type=[]
+    # match_page=1
+    # api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type 
+    # # s=session
+    # driver.get(api_url)
+    # json = driver.find_element(by="tag name", value='pre')
+    # print(json)
+    # json=json.text
+    # print(json)
+    # # json=s.get(api_url).json()
+    # base_db=pd.read_json(json)
+    # print(base_db)
+    # return base_db
+    match_page = 1
+    api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page)
+    # print(api_url)
+    driver.get(api_url)
+    json_element = driver.find_element(by="tag name", value='pre')
+    json_text = json_element.text
+    base_db = pd.read_json(json_text)
+    base_db["match_type"]="public"
 
+    # ## Scroll through pages of games
+    match_page+=1
     pagination=False
     while pagination == False:
         api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type +
-        json=s.get(api_url).json()
-        if json==[]:
-            print("Finished searching for matches.")
+        # json=s.get(api_url).json()
+        driver.get(api_url)
+        json_element = driver.find_element(by="tag name", value='pre')
+        json_text = json_element.text
+        if json_text=='[]':
+            print("Finished searching for public matches.")
             pagination=True
         else:
-            print("Not done searching for matches...")
-            new_db=pd.json_normalize(json).iloc[1:,]
+            print("Not done searching for public matches...")
+            new_db=pd.read_json(json_text).iloc[1:,] # this is where im worried about double counting
+            new_db["match_type"]="public"
             base_db=pd.concat([base_db,new_db])
             match_page+=1
-    
-    ## Prettify match database
-    
+
+    ## check the private/public matches condition
+    if all_matches == True:
+        match_page = 1
+        api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page)
+        # print(api_url)
+        driver.get(api_url)
+        json_element = driver.find_element(by="tag name", value='pre')
+        json_text = json_element.text
+        base_db2 = pd.read_json(json_text)
+        base_db2["match_type"]="private"
+
+        ## scroll through pages
+        match_page+=1
+        pagination=False
+        while pagination == False:
+            api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page) #"&format=" + game_type +
+            # json=s.get(api_url).json()
+            driver.get(api_url)
+            json_element = driver.find_element(by="tag name", value='pre')
+            json_text = json_element.text
+            if json_text=='[]':
+                print("Finished searching for private matches.")
+                pagination=True
+            else:
+                print("Not done searching for private matches...")
+                new_db=pd.read_json(json_text).iloc[1:,] # this is where im worried about double counting
+                new_db["match_type"]="private"
+                base_db2=pd.concat([base_db2,new_db])
+                match_page+=1
+        base_db=pd.concat([base_db,base_db2])
+
+    # if all_matches == True:
+    #     match_page=1
+    #     api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page) #"&format=" + game_type 
+    #     # json=s.get(api_url).json()
+    #     driver.get(api_url)
+    #     json = driver.find_element(by="tag name",value='pre')
+    #     # print(json)
+    #     base_db2=pd.json_normalize(json)
+    #     pagination=False
+    #     while pagination == False:
+    #         api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page) #"&format=" + game_type +
+    #         # json=s.get(api_url).json()
+    #         driver.get(api_url)
+    #         json = driver.find_element(by="tag name",value='pre')
+    #         if json==[]:
+    #             print("Finished searching for private matches.")
+    #             pagination=True
+    #         else:
+    #             print("Not done searching for private matches...")
+    #             new_db=pd.json_normalize(json).iloc[1:,]
+    #             base_db2=pd.concat([base_db2,new_db])
+    #             match_page+=1
+    #     ## conslolidate private and public data
+    #     base_db=pd.concat([base_db,base_db2])
+    # else:
+    #     pass
+
+    ## clean database columns
     base_db.rename(columns={"id":"match_id"},inplace=True)
     
     ## Add logs and turns to metadata df
 
-    body_logs, head_logs, tail_logs, turns, turn_count = get_logs(base_db, s)
+    body_logs, head_logs, tail_logs, turns, turn_count = get_logs(base_db, driver)
     base_db["body_logs"]=body_logs
     base_db["head_logs"]=head_logs
     base_db["tail_logs"]=tail_logs
@@ -144,10 +220,12 @@ def gather_matches(username, game_type,session):
     # Get a hero/villian designator
 
     # MATCH_DB.loc[MATCH_DB['p1']==username, 'hero'] = 'p1'
-    base_db['hero'] = base_db['p1'].apply(lambda x: 'p1' if x==username else 'p2')
+    base_db['hero'] = base_db['p1'].apply(lambda x: 'p1' if (x==username or x==("!"+username)) else 'p2')
     base_db['villian'] = base_db['hero'].apply(lambda x: 'p2' if x=="p1" else 'p1')
-    
+
     return base_db
+
+
 
 
 # In[104]:
@@ -156,10 +234,7 @@ def gather_matches(username, game_type,session):
 # In[17]:
 
 
-def get_logs(df, session):
-    
-    ## static requests
-    s = session
+def get_logs(df, driver):
     
     ## Storage lists
 
@@ -175,14 +250,20 @@ def get_logs(df, session):
     
     print("Chunking match log...")
 
-    for i in df.match_id:
+    for i in range(df.shape[0]):
         
         ## Identify match
         
-        match_id=i
-        match_url=base_url + "/" + match_id + ".json"
-        json=s.get(match_url).json()
-        log=json["log"]
+        match_id=df.iloc[i].match_id
+        if df.iloc[i].match_type=="private":
+            match_url=base_url + "/" + match_id + "pw"+".json"
+        else:
+            match_url=base_url + "/" + match_id +".json"
+        driver.get(match_url)
+        json_element = driver.find_element(by="tag name", value='pre')
+        json_text = json_element.text
+        json_file=json.loads(json_text)
+        log=json_file["log"]
 
         ## Make LOG
         
@@ -845,8 +926,14 @@ def get_comps_metrics(MATCH_DB):
     hero_comps_db["hero_two"]=hero_comps_db.hero_comp_six.apply(lambda x: x[1])
     hero_comps_db["hero_three"]=hero_comps_db.hero_comp_six.apply(lambda x: x[2])
     hero_comps_db["hero_four"]=hero_comps_db.hero_comp_six.apply(lambda x: x[3])
-    hero_comps_db["hero_five"]=hero_comps_db.hero_comp_six.apply(lambda x: x[4])
-    hero_comps_db["hero_six"]=hero_comps_db.hero_comp_six.apply(lambda x: x[5])
+    try:
+        hero_comps_db["hero_five"]=hero_comps_db.hero_comp_six.apply(lambda x: x[4])
+    except IndexError:
+        pass
+    try:
+        hero_comps_db["hero_six"]=hero_comps_db.hero_comp_six.apply(lambda x: x[5])
+    except IndexError:
+        pass
 
     villain_comps_db=MATCH_DB.groupby(["villain_comp_fused"]).agg({"villain_comp_six":"first","loss":"sum","match_id":"count"}).reset_index()
     villain_comps_db["comps_lossrate"]=villain_comps_db.loss/villain_comps_db.match_id*100
@@ -857,8 +944,14 @@ def get_comps_metrics(MATCH_DB):
     villain_comps_db["villain_two"]=villain_comps_db.villain_comp_six.apply(lambda x: x[1])
     villain_comps_db["villain_three"]=villain_comps_db.villain_comp_six.apply(lambda x: x[2])
     villain_comps_db["villain_four"]=villain_comps_db.villain_comp_six.apply(lambda x: x[3])
-    villain_comps_db["villain_five"]=villain_comps_db.villain_comp_six.apply(lambda x: x[4])
-    villain_comps_db["villain_six"]=villain_comps_db.villain_comp_six.apply(lambda x: x[5])
+    try:
+        villain_comps_db["villain_five"]=villain_comps_db.villain_comp_six.apply(lambda x: x[4])
+    except IndexError:
+        pass
+    try:
+        villain_comps_db["villain_six"]=villain_comps_db.villain_comp_six.apply(lambda x: x[5])
+    except IndexError:
+        pass
     
     return hero_comps_db, villain_comps_db
 
@@ -924,17 +1017,19 @@ def get_all_data(MATCH_DB):
 # In[36]:
 
 
-def get_metrics(sample_username, sample_game_type, cookies):
+def get_metrics(sample_username, sample_game_type, driver, all_matches):
     
-    ## establish requests session
-    s = requests.Session()
-    for cookie in cookies:
-        s.cookies.set(cookie["name"], cookie["value"])
+    ## establish requests session with cookies from login for private matches
+    # session= requests.Session()
+    # if all_matches==True:
+    #     for cookie in cookies:
+    #         session.cookies.set(cookie["name"], cookie["value"])
+    # else:
+    #     pass
 
-    
     ## Gather matches from Showdown
     
-    MATCH_DB=gather_matches(sample_username, sample_game_type,s)
+    MATCH_DB=gather_matches(sample_username, sample_game_type, driver, all_matches)
     
     ## Aggregate data from matches
     

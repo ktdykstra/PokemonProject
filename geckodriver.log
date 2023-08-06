@@ -18,3 +18,573 @@ UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadabl
 DevTools listening on ws://127.0.0.1:52229/devtools/browser/a53e6469-d74c-4358-8a18-bbe6fd7c4c59
 1691077787970	Marionette	INFO	Stopped listening on port 52236
 console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+1691102948146	geckodriver	INFO	Listening on 127.0.0.1:56539
+1691102948664	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofilehAmTZE"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691102948973	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691102949136	Marionette	INFO	Listening on port 56547
+WebDriver BiDi listening on ws://127.0.0.1:56540
+Read port: 56547
+1691102949243	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:56540/devtools/browser/425a69ee-5805-4897-88a6-69c4f0a17796
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 373 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691102957921	Marionette	INFO	Stopped listening on port 56547
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+1691104266602	geckodriver	INFO	Listening on 127.0.0.1:57447
+1691104267115	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofile6E3I46"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691104267440	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691104267535	Marionette	INFO	Listening on port 57458
+WebDriver BiDi listening on ws://127.0.0.1:57448
+Read port: 57458
+1691104267652	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:57448/devtools/browser/a151b489-9bd8-434a-9f11-470965d5d024
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 374 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6163 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+JavaScript error: resource://gre/actors/PictureInPictureChild.sys.mjs, line 1548: TypeError: shadowRoot is null
+1691104294181	Marionette	INFO	Stopped listening on port 57458
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+1691104324086	geckodriver	INFO	Listening on 127.0.0.1:57910
+1691104324603	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofileQIYd9i"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691104324916	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691104325084	Marionette	INFO	Listening on port 57918
+WebDriver BiDi listening on ws://127.0.0.1:57911
+Read port: 57918
+1691104325185	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:57911/devtools/browser/c2b70c34-18d8-4541-878a-a898f4aa5196
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 373 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+1691104340747	Marionette	INFO	Stopped listening on port 57918
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+1691104426486	geckodriver	INFO	Listening on 127.0.0.1:58367
+1691104427006	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofileeJ7F1k"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691104427337	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691104427438	Marionette	INFO	Listening on port 58375
+WebDriver BiDi listening on ws://127.0.0.1:58368
+Read port: 58375
+1691104427550	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:58368/devtools/browser/815c168c-677f-46d7-9b5b-ecc26f859ea3
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 385 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+1691104443863	Marionette	INFO	Stopped listening on port 58375
+1691104997322	geckodriver	INFO	Listening on 127.0.0.1:59080
+1691104997841	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofilePqjPtD"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691104998156	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691104998326	Marionette	INFO	Listening on port 59088
+WebDriver BiDi listening on ws://127.0.0.1:59081
+Read port: 59088
+1691104998432	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:59081/devtools/browser/1af60a12-668f-405d-835d-802e79cdc5a3
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 373 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 3774 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691105011043	Marionette	INFO	Stopped listening on port 59088
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691105130393	geckodriver	INFO	Listening on 127.0.0.1:59553
+1691105130912	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofileWwbMpr"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691105131237	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691105131405	Marionette	INFO	Listening on port 59561
+WebDriver BiDi listening on ws://127.0.0.1:59554
+Read port: 59561
+1691105131510	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:59554/devtools/browser/198f3700-5437-4828-9980-703067ce4f25
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 373 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+1691105142161	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'uninitialized'.
+1691105142162	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'uninitialized'.
+JavaScript warning: https://z.moatads.com/acuityadsdisplayupdate178047432174/moatad.js#moatClientLevel1=228788&moatClientLevel2=209944&moatClientLevel3=870006&moatClientLevel4=1469700&moatClientSlicer1=2&zMoatExchPub=17272&zMoatRequestDomain=http%3A%2F%2Fpokemonshowdown.com, line 282: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 171 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pixel.yabidos.com/flimpobj.js?cb=1691105142733&ver1=2.2.3&qid=838363f5039363f5730343&rnd=ruptq65t5mju&cid=407 line 1 > eval, line 175: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5621 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5678 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+1691106260905	geckodriver	INFO	Listening on 127.0.0.1:60285
+1691106261424	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofileo3Mklp"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691106261740	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691106261915	Marionette	INFO	Listening on port 60293
+WebDriver BiDi listening on ws://127.0.0.1:60286
+Read port: 60293
+1691106262020	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:60286/devtools/browser/d02309bd-697d-4df7-8e2c-d6d1dc90b073
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 375 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+Missing chrome or resource URL: chrome://browser/skin/aboutSessionRestore-window-icon.png
+Missing chrome or resource URL: chrome://browser/skin/abyss/img/waterfox-abyss-preview.svg
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+1691106299441	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691106300287	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 6696 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1127 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 7694 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691106327403	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 1005 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6579 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5788 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2139 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5775 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 7161 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1603 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691106418734	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691106419024	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691106419085	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6254 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 7465 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691106447406	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5931 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691106448327	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 7798 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691106477461	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 6381 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691106478306	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691106507453	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4353 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691106508276	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5090 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6135 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1090 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5495 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5571 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691106597795	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 3678 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4612 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 3349 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4224 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5516 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://z.moatads.com/wpromotepeacockdcmdisplay515722200356/moatad.js#moatClientLevel1=28467526&moatClientLevel2=6031710&moatClientLevel3=345610242&moatClientLevel4=177870144&zMoatG=ct=US&st=PA&city=13328&dma=10&zp=15206&bw=4&zMoatADV=9902108&zMoatENV=j, line 283: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4600 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 710 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6992 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 7819 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 7001 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5981 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6826 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 3433 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4011 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 5033 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 6827 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 7099 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2901 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pixel.yabidos.com/flimpobj.js?cb=1691106871450&ver1=2.2.3&qid=838363f5039363f5730343&rnd=kxqkz8gggk8a&cid=407 line 1 > eval, line 175: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4799 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pixel.yabidos.com/flimpobj.js?cb=1691106901778&ver1=2.2.3&qid=838363f5039363f5730343&rnd=f6807jf88e3f&cid=407 line 1 > eval, line 175: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 168 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+Missing chrome or resource URL: chrome://browser/skin/aboutSessionRestore-window-icon.png
+Missing chrome or resource URL: chrome://browser/skin/abyss/img/waterfox-abyss-preview.svg
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1667 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pixel.yabidos.com/flimpobj.js?cb=1691106936394&ver1=2.2.3&qid=838363f5039363f5730343&rnd=jw5ybrslo6ka&cid=407 line 1 > eval, line 175: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691106962043	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691106962046	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+JavaScript warning: https://pix.adrta.com/cdnf.js?v=22.120, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 3958 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 466 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6573 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5499 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107083112	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 6637 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1570 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4238 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 815 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 416 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 2953 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 7319 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pixel.yabidos.com/flimpobj.js?cb=1691107179782&ver1=2.2.3&qid=838363f5039363f5730343&rnd=92g75f3t50iz&cid=407 line 1 > eval, line 175: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 3971 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5885 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2591 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2387 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2546 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1146 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pixel.yabidos.com/flimpobj.js?cb=1691107297044&ver1=2.2.3&qid=838363f5039363f5730343&rnd=5tjotmq475d1&cid=407 line 1 > eval, line 175: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 1464 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6005 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107304712	geckodriver	INFO	Listening on 127.0.0.1:62103
+1691107305226	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofile63NDUp"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691107305537	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691107305710	Marionette	INFO	Listening on port 62112
+WebDriver BiDi listening on ws://127.0.0.1:62104
+Read port: 62112
+1691107305815	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:62104/devtools/browser/40e59fd9-c122-45cc-8d6a-ca56a4e64ec6
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+1691107317124	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'uninitialized'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 2865 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1179 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pixel.yabidos.com/flimpobj.js?cb=1691107328762&ver1=2.2.3&qid=838363f5039363f5730343&rnd=5m4fd9q0t3oq&cid=407 line 1 > eval, line 175: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2253 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107341018	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107341050	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107341055	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107341064	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107341852	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107341874	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2741 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1102 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5112 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107372957	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107372964	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107373576	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4758 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4850 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 451 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pixel.yabidos.com/flimpobj.js?cb=1691107389836&ver1=2.2.3&qid=838363f5039363f5730343&rnd=xap1bk6gsmz3&cid=407 line 1 > eval, line 175: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107400805	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107400815	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107401492	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2270 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1475 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107431697	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107431714	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 764 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107432108	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pixel.yabidos.com/flimpobj.js?cb=1691107446910&ver1=2.2.3&qid=838363f5039363f5730343&rnd=aomsppc476p2&cid=407 line 1 > eval, line 175: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 200 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107460831	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107460841	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107461142	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 7804 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 6530 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 6063 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107490867	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107490879	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107491216	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://z.moatads.com/cpxigen865632366955/moatad.js#moatClientLevel1=8131260&moatClientLevel2=21741134&moatClientLevel3=286740566&moatClientLevel4=447999348&moatClientSlicer1=https%3A%2F%2Fplay.pokemonshowdown.com%2F&zMoatTAG=21900093&zMoatAUC=6415467656160286919, line 281: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 6924 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2204 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107520928	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107520938	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107521245	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107521738	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4858 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1386 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107550902	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107550925	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107551223	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107551758	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 473 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5021 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107580816	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107580840	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107581130	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1304 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6900 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107611061	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107611072	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107611419	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2867 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2616 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107640914	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107640927	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107641280	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5360 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4812 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 54 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107670921	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107670931	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107671264	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107671749	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 1236 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2825 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107700872	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107700890	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107701181	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107701923	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2778 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 2031 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107731713	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107731722	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107731744	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107732034	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4231 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 293 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107762323	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107762337	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107762880	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107764315	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4366 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5533 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107791442	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107791453	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107791750	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 7496 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107821374	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107823254	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107851456	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107851467	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107851833	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+Missing chrome or resource URL: chrome://browser/skin/aboutSessionRestore-window-icon.png
+Missing chrome or resource URL: chrome://browser/skin/abyss/img/waterfox-abyss-preview.svg
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4317 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://z.moatads.com/padsquaddisplay869612188659/moatad.js#moatClientLevel1=Best%20Buy&moatClientLevel2=Starcom-CHI%20-%20Best%20Buy%20-%20FY24%20BTS%20Lenovo%20Parents%20PMP%20PREFERRED%20%20(7/31/2023%20-%208/6/2023)&moatClientLevel3=27465&moatClientLevel4=6788&zMoatFORMAT=Reactive%20Tile, line 283: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107881586	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107881604	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107881931	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 5420 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691107911403	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'loading'.
+1691107911415	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107911784	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+1691107912040	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 6292 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 4861 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691107976247	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+JavaScript warning: https://pagead2.googlesyndication.com/bg/fEcdG_B7pUQXAq0S1D0jGwFCW0QHifFmsZMHxcblrt4.js line 2 > eval line 3155 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691108036306	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'interactive'.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+1691108068713	Marionette	INFO	Stopped listening on port 60293
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691108129367	geckodriver	INFO	Listening on 127.0.0.1:64189
+1691108129884	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofile0lu9W6"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691108130198	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691108130362	Marionette	INFO	Listening on port 64197
+WebDriver BiDi listening on ws://127.0.0.1:64190
+Read port: 64197
+1691108130468	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:64190/devtools/browser/b3a16802-f997-4f90-a44e-54bd512cf306
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+JavaScript warning: https://pagead2.googlesyndication.com/bg/YWyqd_Oya_dSvH525JbJDwnpcpeKFun9cRHY8jAJ9QQ.js line 2 > eval line 5502 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691108145301	Marionette	INFO	Stopped listening on port 64197
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1691114282066	geckodriver	INFO	Listening on 127.0.0.1:50684
+1691114282584	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofilegsppaC"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691114282895	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691114283064	Marionette	INFO	Listening on port 50697
+WebDriver BiDi listening on ws://127.0.0.1:50685
+Read port: 50697
+1691114283166	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:50685/devtools/browser/89afb945-d01c-41d4-bf50-2df3b6603bcb
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 376 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+1691114293043	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'uninitialized'.
+JavaScript warning: https://play.pokemonshowdown.com/ line 1 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1691114295668	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'uninitialized'.
+1691114297440	Marionette	INFO	Stopped listening on port 50697
+1691114320676	geckodriver	INFO	Listening on 127.0.0.1:51268
+1691114321195	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofileVvi5da"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691114321521	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691114321690	Marionette	INFO	Listening on port 51280
+WebDriver BiDi listening on ws://127.0.0.1:51269
+Read port: 51280
+1691114321794	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:51269/devtools/browser/59e18ea6-7529-4f46-8a74-823dfdae4e76
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 373 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+1691114330993	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'uninitialized'.
+1691114331029	Marionette	WARN	Ignoring event 'pageshow' because document has an invalid readyState of 'uninitialized'.
+1691114335807	Marionette	INFO	Stopped listening on port 51280
+1691178888677	geckodriver	INFO	Listening on 127.0.0.1:53292
+1691178889188	mozrunner::runner	INFO	Running command: MOZ_CRASHREPORTER="1" MOZ_CRASHREPORTER_NO_REPORT="1" MOZ_CRASHREPORTER_SHUTDOWN="1" MOZ_NO_REMOTE="1" "/App ... s" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/vx/1xvwcstn195fw8fqyt54kr480000gn/T/rust_mozprofileEk2J5f"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1691178889550	Marionette	INFO	Marionette enabled
+console.error: "Warning: unrecognized command line flag -remote-allow-hosts\n"
+1691178889729	Marionette	INFO	Listening on port 53301
+WebDriver BiDi listening on ws://127.0.0.1:53293
+Read port: 53301
+1691178889860	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+UNSUPPORTED (log once): POSSIBLE ISSUE: unit 1 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
+DevTools listening on ws://127.0.0.1:53293/devtools/browser/b7bec2ec-4ad7-496a-9478-84192c694a90
+JavaScript warning: https://play.pokemonshowdown.com/js/battledata.js?2cc14b5d, line 2894: unreachable code after return statement
+JavaScript error: https://play.pokemonshowdown.com/ line 374 > injectedScript, line 2: ReferenceError: __tcfapi is not defined
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://play.pokemonshowdown.com."
+console.error: ({})
+console.error: (new TypeError("watcher.browserElement.browsingContext is null", "resource://devtools/server/actors/watcher/target-helpers/frame-helper.js", 193))
+1691179213608	Marionette	INFO	Stopped listening on port 53301
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.

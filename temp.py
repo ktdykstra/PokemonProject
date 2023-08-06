@@ -14,67 +14,190 @@ import plotly.offline as pyo
 import plotly.io as pio
 pio.renderers.default='browser'
 from selenium import webdriver
+import requests
+from requests.adapters import BaseAdapter
+from requests.sessions import Session
 
 username = "Broskander"
 gametype = "gen9vgc2023series1"
+api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + gametype + "&page=" + str(match_page)
+driver = webdriver.Chrome()
+# driver.quit()
+driver.implicitly_wait(10)
+sdg.gather_matches(username, gametype,driver).text
+# driver.quit()
+sample=sdg.gather_matches(username,gametype, driver, False)
+
+# def gather_matches(username, game_type, driver, all_matches):
+    
+#     ## Get first page
+    
+#     match_page=1
+#     api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type 
+#     # s=session
+#     driver.get(api_url)
+#     json = driver.find_element(by="tag name",value='pre')
+#     return json
+
+new_function
+## testing wrapper for driver
+def passing(driver):
+
+    driver.get(api_url)
+    json = driver.find_element(by="tag name",value='pre').text
+    return json
+passing(driver)
+    # Initialize the WebDriver (e.g., Chrome)
+
+
+match_page = 1
+base_db = pd.DataFrame()  # Initialize an empty DataFrame
+
+# Navigate to the API URL
+driver.get(api_url)
+
+api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + gametype + "&page=" + str(match_page)
+driver.get(api_url)
+# Extract the JSON data from the page
+json_data = driver.find_element(by="tag name",value='pre')
+json_data.text
+driver.quit()
+json_data
+
+# Check if there is any data
+if json_data == "[]":
+# print("Finished searching for public matches.")
+# break
+
+print("Not done searching for public matches...")
+
+# Convert the JSON data to a DataFrame
+df = pd.read_json(json_data)
+
+# Concatenate the new DataFrame with the base_db
+base_db = pd.concat([base_db, df], ignore_index=True)
+
+# match_page += 1
+# finally:
+# # Close the WebDriver when done
+# driver.quit()
+
+
+
+
+def open_login_tab(browser_type):
+    if browser_type =="Chrome":
+        driver=webdriver.Chrome()
+        return driver
+    elif browser_type=="Mozilla":
+        driver=webdriver.Firefox()
+        return driver
+    elif browser_type=="Safari":
+        driver=webdriver.Safari()
+        return driver
+    elif browser_type=="Edge":
+        driver=webdriver.Edge()
+        return driver
+    else:
+        raise ValueError(f"Invalid browser_type: {browser_type}")
+
+    return driver
+
+## collect cookies
+def cookie_collecter(driver):
+    driver.get('https://play.pokemonshowdown.com')
+    cookies = driver.get_cookies()
+    input("Hit enter when done") # can't delete if want popup to stay open @katie: delete this when ready to incorporate. just using for testing
+    driver.quit()
+    return cookies
+
+class WebDriverAdapter(BaseAdapter):
+    def __init__(self, webdriver):
+        self.webdriver = webdriver
+
+    def send(self, request, *args, **kwargs):
+        response = self.webdriver.execute_script(
+            f"return fetch('{request.url}', {kwargs})")
+        return response
+
+# Create a custom session using the WebDriverAdapter
+def create_custom_session(webdriver):
+    session = Session()
+    session.mount('http://', WebDriverAdapter(webdriver))
+    session.mount('https://', WebDriverAdapter(webdriver))
+    return session
+
+# Example usage
+driver = webdriver.Chrome()  # Use the appropriate WebDriver for your browser
+custom_session = create_custom_session(driver)
+
+
+# Now you can use the custom session to make requests, and it will use the webdriver
+response = custom_session.get('https://play.pokemonshowdown.com/')
+x=requests.Session()
+x.get('https://play.pokemonshowdown.com/')
+print(response.text)
+
+# Don't forget to quit the driver when you're done
+driver.quit()
 
 
 #print(username)
 #print(gametype)
 df1, df2, df_individual, df3, df4, df5, df6 = sdg.get_metrics(username, gametype)
-x=sdg.get_individual_plot(sdg.get_individual_rates(df1))
-x.show()
-# x=sdg.get_individual_rates(df1)
-temp=sdg.get_individual_rates(df1)
+# x=sdg.get_individual_plot(sdg.get_individual_rates(df1))
+# x.show()
+# # x=sdg.get_individual_rates(df1)
+# temp=sdg.get_individual_rates(df1)
 
-library=df1.copy()
-library.columns
+# library=df1.copy()
+# library.columns
 
-for i in range(df1.shape[0]):
-    print(df1.iloc[i].match_scorecards)
-df_individual
+# for i in range(df1.shape[0]):
+#     print(df1.iloc[i].match_scorecards)
+# df_individual
 
 
-## function for checking
+# ## function for checking
 
-def check_conditional_win(row):
-    if (row.used_total==1 and row.win==1):
-        return 1
-    else:
-        return 0
+# def check_conditional_win(row):
+#     if (row.used_total==1 and row.win==1):
+#         return 1
+#     else:
+#         return 0
 
-## check if played
+# ## check if played
 
-library.iloc[0].match_scorecards
+# library.iloc[0].match_scorecards
 
-result=df1[["match_id","hero_comp_six","win","match_scorecards"]].explode("hero_comp_six")
-result["used_total"]=0
-holder=pd.DataFrame()
-holder
-for x in df1.match_scorecards:
-    holder=pd.concat([holder,x.loc["hero_pokemon","begins_field"]])
-holder.columns=["began"]
-holder["used"]=holder.began.apply(lambda x: 0 if x==0 else 1)
-result["used_total"]=holder["used"].values
-result["win_conditional"]=result.apply(check_conditional_win,axis=1)
-result.rename(columns={"hero_comp_six":"hero_pokemon","match_id":"total_games"},inplace=True)
-result=result.groupby("hero_pokemon").agg({"total_games":"count","used_total":"sum","win_conditional":"sum"})
-df1
-sdg.get_individual_rates(df1).reset_index().columns
-sdg.get_villain_indiv_plot(get_villain_indiv_rates(df1)).show()
-sdg.get_villain_indiv_rates(df1).reset_index().columns
-result
-df1.iloc[0].match_scorecards.columns
-for i in range(result.shape[0]):
-    target_pokemon=result.
-    match_scorecard=result.iloc[i].match_scorecards.reset_index()
-    for y in range(match_scorecard.shape[0]):
-        match_scorecard.loc
+# result=df1[["match_id","hero_comp_six","win","match_scorecards"]].explode("hero_comp_six")
+# result["used_total"]=0
+# holder=pd.DataFrame()
+# holder
+# for x in df1.match_scorecards:
+#     holder=pd.concat([holder,x.loc["hero_pokemon","begins_field"]])
+# holder.columns=["began"]
+# holder["used"]=holder.began.apply(lambda x: 0 if x==0 else 1)
+# result["used_total"]=holder["used"].values
+# result["win_conditional"]=result.apply(check_conditional_win,axis=1)
+# result.rename(columns={"hero_comp_six":"hero_pokemon","match_id":"total_games"},inplace=True)
+# result=result.groupby("hero_pokemon").agg({"total_games":"count","used_total":"sum","win_conditional":"sum"})
+# df1
+# sdg.get_individual_rates(df1).reset_index().columns
+# sdg.get_villain_indiv_plot(get_villain_indiv_rates(df1)).show()
+# sdg.get_villain_indiv_rates(df1).reset_index().columns
+# result
+# df1.iloc[0].match_scorecards.columns
+# for i in range(result.shape[0]):
+#     target_pokemon=result.
+#     match_scorecard=result.iloc[i].match_scorecards.reset_index()
+#     for y in range(match_scorecard.shape[0]):
+#         match_scorecard.loc
 
-result["win_rate"]=(result.win_conditional/result.used_total)*100
-result
-result.win_rate.fillna(0,inplace=True)
-result
+# result["win_rate"]=(result.win_conditional/result.used_total)*100
+# result
+# result.win_rate.fillna(0,inplace=True)
+# result
 #print(output)
 
 # #df with num_wins, num_games, win_rate

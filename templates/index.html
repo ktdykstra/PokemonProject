@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
@@ -133,15 +132,28 @@ https://templatemo.com/tm-535-softy-pinko
                                               </select>
                                     </fieldset>
                                 </div>
+
+
                                 <div class="col-lg-12">
                                     <fieldset>
                                         <button type="submit" id="username-submit-private" class="main-button">
                                             Display <strong style="color:black;">Private & Public</strong> Replay Match Analytics
                                         </button>
+                                        <div id="overlay">
+                                            <div id="overlay-content" style="display:none;">
+                                                <p>Wait a few seconds to be automatically redirected to Showdown.</p>
+                                                <p>Click the button below after you have logged in to your Pokémon Showdown Account.</p>
+                                            
+                                                <button id="overlay-button" type="submit" class="main-button" >
+                                                    Display Match Analytics 
+                                                </button>
+                                            </div>
+                                            
+                                        </div>
                                     </fieldset>
-                                    <p style="padding-top: 20px; border-left: 20px;">Clicking will open a new tab. Please ensure pop-up blockers are disabled. </p>
-                                    <p style="padding-top: 20px; border-left: 20px;">    In the new tab, please login to your Showdown account. This will allow our service to run analytics on private matches. </p>
-                                    <p style="padding-top: 20px; border-left: 20px;">Due to the data processing load, it may take ~10 seconds for analytics to display.</p>
+                                    <p style="padding-top: 20px; border-left: 20px;">Clicking will open a new window in Google Chrome. Please ensure pop-up blockers are disabled and you have Chrome installed. </p>
+                                    <p style="padding-top: 20px; border-left: 20px;">    In the new window, please login to your Showdown account. This will allow our service to run analytics on private matches. </p>
+                                    <p style="padding-top: 20px; border-left: 20px;">Due to the data processing load, it may take ~10 seconds for analytics to display after you login.</p>
                                 </div>
                             </div>
                         </form>
@@ -186,7 +198,7 @@ https://templatemo.com/tm-535-softy-pinko
                                     </div>
                                     <div class="col-lg-12">
                                         <fieldset>
-                                            <button type="submit" id="username-submit" class="main-button">
+                                            <button type="submit" id="username-submit" class="main-button" style = "center;">
                                                 Display <strong style="color:black;">Public</strong> Replay Match Analytics
                                             </button>
                                         </fieldset>
@@ -195,6 +207,7 @@ https://templatemo.com/tm-535-softy-pinko
                                     </div>
                                 </div>
                             </form>
+                        
     
                         </div>
                     </div>
@@ -276,6 +289,9 @@ https://templatemo.com/tm-535-softy-pinko
 
     </script> -->
     <!--JS END-->
+
+    <!--Script for tinted button-->
+    <script src="/static/assets/js/screenOverlay.js"></script>
 
     <!-- jQuery -->
     <script src="/static/assets/js/jquery-2.1.0.min.js"></script>

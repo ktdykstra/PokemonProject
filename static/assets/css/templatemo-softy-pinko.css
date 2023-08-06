@@ -20,6 +20,7 @@ Table of contents
 10. contact
 11. footer
 12. preloader
+13. Overlay
 
 --------------------------------------------- */
 /* 
@@ -1586,4 +1587,43 @@ preloader
   100% {
     opacity: 0;
   }
+}
+
+/* 
+---------------------------------------------
+overlay
+--------------------------------------------- 
+*/
+
+#overlay {
+  display: none;
+  /* Set the overlay to cover the entire viewport */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  /* Center the content vertically and horizontally */
+
+  align-items: center;
+  justify-content: center;
+}
+
+#overlay-content {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+#overlay-button{
+  display: none;
+  margin: 0 auto;
 }
