@@ -150,6 +150,7 @@ def get_data():
             driver = webdriver.Chrome(options=chrome_options)
 
             #driver=cookie_collecter(driver)
+            global df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 
             df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
             driver.quit()
             #print(output)
@@ -317,6 +318,7 @@ def get_data_private():
 
             
                 ## run the data gathering
+                global df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 
                 df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
                 driver.quit()
                 #print(output)
@@ -364,18 +366,19 @@ def get_data_private():
                 
                 ## hero comp stats
                 df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
-                df5.columns = ["Hero Comp ID",'Hero Teams', 'Games Won', "Games Played", "Weighted Win Rate"]
+                df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
                 df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
                 df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
-                df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/test/{x}'>{x}</a>") # trying
-                sixTeamHeroStats = df5.head(5).to_html(index=False,escape=False)
-                
+                df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
+                sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+
                 ## hero comp stats
                 df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
-                df6.columns = ["Villain Comp ID", "Villain Teams","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+                df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
                 df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
                 df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
-                sixTeamVillainStats = df6.head(5).to_html(index=False)
+                df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
+                sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
 
                 # Define the CSS style for the table
                 table_style = """
@@ -472,11 +475,136 @@ def ip():
     }   
     return jsonify(d)
 
-# try to create linked htmls to team comp identifiers
-@app.route('/test')
-def comp_link():
+# try to create linked htmls to hero comp identifiers
+@app.route('/hero_comp_data/<comp_id>',methods=["GET","POST"])
+def hero_comp_link(comp_id):
+    
+    ## make comp-specific match library
+    hero_comp_library=sdg.get_hero_comp_library(comp_id, df1) # isolate to comp id relevant matches
 
-    return render_template("test.html")
+    ## meta metrics for comp
+    comp_meta=sdg.get_metametrics(hero_comp_library)
+    overallStats = comp_meta.to_html(index=False, classes='table table-responsive table-hover')
+    num_games = str(comp_meta.loc[0, 'num_games'])
+    num_wins = str(comp_meta.loc[0, 'num_wins'])
+    win_rate = str(comp_meta.loc[0, 'win_rate']) # change to percent
+
+    # Define the CSS style for the table
+    table_style = """
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            margin-bottom: 1em;
+        }
+        
+        th {
+            font-weight: bold;
+            text-align: left;
+            color: white;
+            background-color: #9d5bd9;
+            padding: 0.5em;
+        }
+        
+        tr:hover {
+            background-color: #a759d13f;
+        }
+        
+        td, th {
+            border: 1px solid #ddd;
+            padding: 0.5em;
+            text-align: left;
+        }
+        
+        @media (max-width: 768px) {
+            table {
+                font-size: 0.8em;
+            }
+            
+            th, td {
+                padding: 0.25em;
+            }
+        }
+    </style>
+    """
+
+    ## individual pokemon stats
+    df_hero_indiv=sdg.get_individual_rates(hero_comp_library)
+    hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
+    # print(df_hero_indiv)
+    output_html = Markup(table_style +"<h3 style='text-align: center;'><strong>Hero Comp ID:</strong> {}</h3>".format(comp_id) +
+                    "<br><br>" +
+                    hero_plotly+ 
+                    "<br><br>" )
+    return render_template("hero_comp_data.html", num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+
+# try to create linked htmls to villain comp identifiers
+@app.route('/villain_comp_data/<comp_id>',methods=["GET","POST"])
+def villain_comp_link(comp_id):
+    
+    ## make comp-specific match library
+    villain_comp_library=sdg.get_villain_comp_library(comp_id, df1) # isolate to comp id relevant matches
+
+    ## meta metrics for comp
+    comp_meta=sdg.get_meta_losses(villain_comp_library)
+    overallStats = comp_meta.to_html(index=False, classes='table table-responsive table-hover')
+    num_games = str(comp_meta.loc[0, 'num_games'])
+    num_losses = str(comp_meta.loc[0, 'num_losses'])
+    loss_rate = str(comp_meta.loc[0, 'loss_rate']) # change to percent
+
+    # Define the CSS style for the table
+    table_style = """
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            margin-bottom: 1em;
+        }
+        
+        th {
+            font-weight: bold;
+            text-align: left;
+            color: white;
+            background-color: #9d5bd9;
+            padding: 0.5em;
+        }
+        
+        tr:hover {
+            background-color: #a759d13f;
+        }
+        
+        td, th {
+            border: 1px solid #ddd;
+            padding: 0.5em;
+            text-align: left;
+        }
+        
+        @media (max-width: 768px) {
+            table {
+                font-size: 0.8em;
+            }
+            
+            th, td {
+                padding: 0.25em;
+            }
+        }
+    </style>
+    """
+
+    ## individual pokemon stats
+    df_villain_indiv=sdg.get_villain_indiv_rates(villain_comp_library)
+    villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
+    # print(df_hero_indiv)
+    output_html = Markup(table_style +"<h3 style='text-align: center;'><strong>Villain Comp ID:</strong> {} </h3>".format(comp_id) +
+                    "<br><br>" +
+                    villain_plotly+ 
+                    "<br><br>" )
+    return render_template("villain_comp_data.html", num_games=num_games, loss_rate=loss_rate, num_losses=num_losses, result = output_html)
+
 
 @app.route('/test-mysql-db-connection')
 def test_db_connection():
