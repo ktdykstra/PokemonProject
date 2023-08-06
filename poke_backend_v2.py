@@ -869,6 +869,7 @@ def format_percent(line):
     return line
 
 
+
 # In[119]:
 
 
@@ -986,6 +987,15 @@ def get_metametrics(MATCH_DB):
     win_rate=(num_wins/num_games*100)
     win_rate=format_percent(win_rate)
     meta_df=pd.DataFrame({"num_wins":num_wins,"num_games":num_games,"win_rate":win_rate}, index=[0])
+    return meta_df
+
+def get_meta_losses(MATCH_DB):
+    
+    num_losses=MATCH_DB[MATCH_DB.loss==1].shape[0]
+    num_games=MATCH_DB.shape[0]
+    loss_rate=(num_losses/num_games*100)
+    loss_rate=format_percent(loss_rate)
+    meta_df=pd.DataFrame({"num_losses":num_losses,"num_games":num_games,"loss_rate":loss_rate}, index=[0])
     return meta_df
 
 
@@ -1297,6 +1307,17 @@ def get_villain_indiv_plot(individual_result):
     )
         
     return fig
+
+## generate match library for specific hero comp identifier
+def get_hero_comp_library(comp_identifier, MATCH_DB):
+    library=MATCH_DB.loc[MATCH_DB["hero_comp_fused"]==comp_identifier,:]
+    return library
+
+## generate match library for specific villain comp identifier
+def get_villain_comp_library(comp_identifier, MATCH_DB):
+    library=MATCH_DB.loc[MATCH_DB["villain_comp_fused"]==comp_identifier,:]
+    return library
+
 # In[9]:
 
 
