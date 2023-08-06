@@ -20,13 +20,15 @@ def cookie_collecter(driver):
     driver.get('https://play.pokemonshowdown.com')
     input("Hit enter when done") # can't delete if want popup to stay open @katie: delete this when ready to incorporate. just using for testing
     return driver
-
+x=4
+str(x)+"%"
 username = "DaFinisher"
 gametype = "gen9vgc2023regulationd"
 driver = webdriver.Chrome()
 driver=cookie_collecter(driver)
 
 df1, df2, df_individual_hero, df_indiv_villain, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, True)
+df2
 pd.set_option('display.max_rows', 500)
 df1.hero_comp_fused.max()
 specified_comp='Flutter ManeGholdengoMaushold-FourScream TailTalonflameUrshifu-*'
