@@ -63,7 +63,7 @@ os.environ['PATH'] += ":/chromedriver"
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--headless")
 # Set the path to the Chrome binary using the GOOGLE_CHROME_BIN environment variable from Heroku
-#chrome_options.binary_location = os.environ.get('GOOGLE_CHROME_BIN')
+chrome_options.binary_location = os.environ.get('GOOGLE_CHROME_BIN')
 
 CORS(app)
 
