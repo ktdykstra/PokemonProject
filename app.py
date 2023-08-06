@@ -54,6 +54,15 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 driver = None  # Global variable to store the driver object
+
+#for heroku selenium funcitonality 
+# Replace "path/to/chromedriver" with the actual path to the ChromeDriver executable
+os.environ['PATH'] += ":/chromedriver"
+
+# Set up ChromeOptions for headless mode
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--headless")
+
 CORS(app)
 
 ## get the browser type of flask session
@@ -77,7 +86,7 @@ def get_browser():
 ## generate webdriver depending on browser type
 def open_login_tab(browser_type):
     if browser_type =="Chrome":
-        driver=webdriver.Chrome()
+        driver=webdriver.Chrome(options=chrome_options)
         return driver
     elif browser_type=="Mozilla":
         driver=webdriver.Firefox()
@@ -147,6 +156,8 @@ def get_data():
             # prevent popup window when initializing driver
             chrome_options = Options()
             chrome_options.add_argument("--headless")
+
+
             driver = webdriver.Chrome(options=chrome_options)
 
             #driver=cookie_collecter(driver)
@@ -293,6 +304,7 @@ def open_popup():
     if driver is None:
         driver = webdriver.Chrome()
     driver=cookie_collecter(driver) # takes user to login page via driver
+    
     # custom_session = create_custom_session(driver)
     
     return {'success': True}
