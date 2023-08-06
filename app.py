@@ -363,16 +363,16 @@ def get_data_private():
                 villainPairStats = df4.head(5).to_html(index=False)
                 
                 ## hero comp stats
-                df5=df5.loc[:,["hero_comp_six","num_wins","num_games","elo_score"]]
-                df5.columns = ['Hero Teams', 'Games Won', "Games Played", "Weighted Win Rate"]
+                df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
+                df5.columns = ["Hero Comp ID",'Hero Teams', 'Games Won', "Games Played", "Weighted Win Rate"]
                 df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
                 df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
-                df5
-                sixTeamHeroStats = df5.head(5).to_html(index=False)
+                df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/test/{x}'>{x}</a>") # trying
+                sixTeamHeroStats = df5.head(5).to_html(index=False,escape=False)
                 
                 ## hero comp stats
-                df6=df6.loc[:,["villain_comp_six","num_losses","num_games","elo_score"]]
-                df6.columns = ["Villain Teams","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+                df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
+                df6.columns = ["Villain Comp ID", "Villain Teams","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
                 df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
                 df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
                 sixTeamVillainStats = df6.head(5).to_html(index=False)
@@ -471,6 +471,12 @@ def ip():
         "IPAddr": IPAddr,
     }   
     return jsonify(d)
+
+# try to create linked htmls to team comp identifiers
+@app.route('/test')
+def comp_link():
+
+    return render_template("test.html")
 
 @app.route('/test-mysql-db-connection')
 def test_db_connection():
