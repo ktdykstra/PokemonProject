@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to close the overlay
     function closeOverlay() {
       document.getElementById('overlay').style.display = 'none';
-      onsole.log('Overlay Closed');
+      console.log('Overlay Closed');
   
     }
   

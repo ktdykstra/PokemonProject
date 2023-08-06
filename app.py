@@ -451,9 +451,7 @@ def get_data_private():
                 #session.pop('driver', None)
 
                 # Store the processed data in the session
-                
-                #return redirect(url_for('show_results'))
-                #return {'success': True}
+
 
                 return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
             else:
@@ -463,20 +461,6 @@ def get_data_private():
         else:
                 return 'Pop-up window not opened yet!'
 
-@app.route("/show_results",  methods=['GET'])
-def show_results():
-     # Retrieve the processed data from the session
-    output_html = session.get('processed_data')
-    username_private = session.get('username_private')
-    num_games = session.get('num_games')
-    win_rate = session.get('win_rate')
-    num_wins = session.get('num_wins')
-
-    # Clear the processed data from the session to release resources
-    session.pop('processed_data', None)
-
-    # Render the new page with the processed data
-    return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
 
 @app.route('/ip')
 def ip():
