@@ -21,6 +21,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
 
 from requests.adapters import BaseAdapter
@@ -59,7 +61,7 @@ app.secret_key = os.urandom(24)
 
 #for heroku selenium funcitonality 
 # Replace "path/to/chromedriver" with the actual path to the ChromeDriver executable
-os.environ['PATH'] += ":/chromedriver"
+#os.environ['PATH'] += ":/chromedriver"
 
 # Set up ChromeOptions for headless mode
 #chrome_options = webdriver.ChromeOptions()
@@ -355,9 +357,15 @@ def get_data_private():
         # Set up the Chrome WebDriver in headless mode
         # chrome_options = Options()
         #chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
+        service = Service(ChromeDriverManager().install())
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome(options=chrome_options) #
+        # download and use the latest ChromeDriver automatically using
+        # Set up ChromeOptions for headless mode
+
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver.get("https://www.google.com/")
+        #driver = webdriver.Chrome(options=chrome_options) #
         #print("DRIVER:", driver)
         if request.method == 'POST':
 
