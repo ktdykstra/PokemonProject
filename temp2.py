@@ -54,7 +54,7 @@ result["elo_score"]=get_elo(ELO_SCALE, ELO_BENCH, result.win_conditional, result
 result
 # return result.sort_values(by="elo_score", ascending=True)
 df1.columns
-
+df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = None, None, None, None, None, None, None
 def check_conditional_loss(row):
     if (row.used_total==1 and row.loss==1):
         return 1
