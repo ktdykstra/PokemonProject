@@ -54,6 +54,7 @@ browser_type = "Unclear"
 
 
 app = Flask(__name__)
+
 #need secret key to save browser across sessions
 app.secret_key = os.urandom(24)
 
@@ -354,6 +355,7 @@ def login_showdown(username, password, driver):
 @app.route("/get_data_private", methods=['GET','POST'])
 def get_data_private():
         global driver
+        global df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6
         # Set up the Chrome WebDriver in headless mode
         # chrome_options = Options()
         #chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
@@ -388,7 +390,6 @@ def get_data_private():
 
             
                 ## run the data gathering
-                global df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 
                 df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
                 #driver.quit()
                 #print(output)
@@ -550,7 +551,7 @@ def ip():
 # try to create linked htmls to hero comp identifiers
 @app.route('/hero_comp_data/<comp_id>',methods=["GET","POST"])
 def hero_comp_link(comp_id):
-    
+    global df1
     ## make comp-specific match library
     hero_comp_library=sdg.get_hero_comp_library(comp_id, df1) # isolate to comp id relevant matches
 
