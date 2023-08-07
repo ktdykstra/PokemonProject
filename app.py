@@ -32,6 +32,7 @@ from requests.sessions import Session
 
 ## global variables
 browser_type = "Unclear"
+df1=None
 # cookies=[]
 # driver.quit()
 ## try chatgpts reco
@@ -57,6 +58,7 @@ app = Flask(__name__)
 
 #need secret key to save browser across sessions
 app.secret_key = os.urandom(24)
+df1=None
 
 # driver = None  # Global variable to store the driver object
 
@@ -170,7 +172,6 @@ def get_data():
             # driver = webdriver.Chrome(options=chrome_options)
 
             #driver=cookie_collecter(driver)
-            global df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 
             df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
             # driver.quit()
             #print(output)
@@ -355,7 +356,7 @@ def login_showdown(username, password, driver):
 @app.route("/get_data_private", methods=['GET','POST'])
 def get_data_private():
         global driver
-        global df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6
+        global df1
         # Set up the Chrome WebDriver in headless mode
         # chrome_options = Options()
         #chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
@@ -616,7 +617,7 @@ def hero_comp_link(comp_id):
 # try to create linked htmls to villain comp identifiers
 @app.route('/villain_comp_data/<comp_id>',methods=["GET","POST"])
 def villain_comp_link(comp_id):
-    
+    global df1
     ## make comp-specific match library
     villain_comp_library=sdg.get_villain_comp_library(comp_id, df1) # isolate to comp id relevant matches
 
