@@ -177,6 +177,13 @@ def index():
     return render_template('index.html')
 
 ############################################################
+# RENDER THE PRIVACY POLICY
+############################################################
+@app.route('/privacy')
+def privPol():
+    return render_template('PrivacyPolicy.html')
+
+############################################################
 #
 # PROCESSING PUBLICLY AVAILABLE MATCHES ONLY
 #
