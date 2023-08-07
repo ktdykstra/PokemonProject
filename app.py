@@ -52,6 +52,8 @@ app.secret_key = os.urandom(24)
 # OAUTH CONFIG
 ####################################################
 oauth = OAuth(app)
+client_id = os.environ.get('OAUTH_CLIENT_ID')
+client_secret = os.environ.get('OAUTH_CLIENT_SECRET')
 
 google = oauth.remote_app(
     'google',
@@ -65,6 +67,7 @@ google = oauth.remote_app(
     access_token_method='POST',
     access_token_url='https://accounts.google.com/o/oauth2/token',
     authorize_url='https://accounts.google.com/o/oauth2/auth',
+    debug=True
 )
 
 ####################################################
