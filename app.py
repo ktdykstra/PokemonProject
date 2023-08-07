@@ -30,7 +30,7 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 
-
+from flask_oauthlib.client import OAuth
 
 from requests.adapters import BaseAdapter
 from requests.sessions import Session
@@ -47,6 +47,25 @@ df1=None
 app = Flask(__name__)
 #need secret key to save browser across sessions
 app.secret_key = os.urandom(24)
+
+####################################################
+# OAUTH CONFIG
+####################################################
+oauth = OAuth(app)
+
+google = oauth.remote_app(
+    'google',
+    consumer_key='112552042731-92ta2f95bd7s9hpk9po29t4k97lthemv.apps.googleusercontent.com',  # client ID
+    consumer_secret='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',  # client secret
+    request_token_params={
+        'scope': 'email',
+    },
+    base_url='https://www.googleapis.com/oauth2/v1/',
+    request_token_url=None,
+    access_token_method='POST',
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+)
 
 ####################################################
 # SETTING UP CACHE
@@ -71,6 +90,34 @@ redis_client = redis.Redis.from_url(
     app.config['CACHE_REDIS_URL'],
     connection_class=redis.Connection
 )
+
+####################################################
+# ROUTES FOR Google Login and Callback 
+####################################################
+@app.route('/login')
+def login():
+    return google.authorize(callback=url_for('authorized', _external=True))
+
+@app.route('/login/authorized')
+def authorized():
+    resp = google.authorized_response()
+
+    if resp is None or resp.get('access_token') is None:
+        return 'Access denied: reason={} error={}'.format(
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+
+    session['access_token'] = resp['access_token']
+    user_info = google.get('userinfo')
+    # Here, you can store the user_info data in the database or use it as needed.
+
+    #return 'Logged in as: ' + user_info.data['email']
+    return redirect('/infoForm')
+
+@google.tokengetter
+def get_google_oauth_token():
+    return session.get('access_token')
 
 ####################################################
 # FXNS FOR STORING DF1 IN CACHE 
@@ -151,8 +198,12 @@ def cookie_collecter(driver):
 
     return driver
 
-
+#Route for login button
 @app.route('/')
+def login_OAuth():
+    return render_template('loginOAuth.html')
+
+@app.route('/infoForm')
 def collect_email():
     #submitted = request.args.get('submitted')
     return render_template('email.html')
