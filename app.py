@@ -55,7 +55,7 @@ app = Flask(__name__)
 #need secret key to save browser across sessions
 app.secret_key = os.urandom(24)
 
-driver = None  # Global variable to store the driver object
+# driver = None  # Global variable to store the driver object
 
 #for heroku selenium funcitonality 
 # Replace "path/to/chromedriver" with the actual path to the ChromeDriver executable
@@ -91,7 +91,7 @@ def get_browser():
 ## generate webdriver depending on browser type
 def open_login_tab(browser_type):
     if browser_type =="Chrome":
-        driver=webdriver.Chrome(options=chrome_options)
+        driver=webdriver.Chrome()#options=chrome_options
         return driver
     elif browser_type=="Mozilla":
         driver=webdriver.Firefox()
@@ -160,16 +160,16 @@ def get_data():
             #### WHERE EDITS BEGIN ####
 
             # prevent popup window when initializing driver
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
+            # chrome_options = Options()
+            # chrome_options.add_argument("--headless")
 
 
-            driver = webdriver.Chrome(options=chrome_options)
+            # driver = webdriver.Chrome(options=chrome_options)
 
             #driver=cookie_collecter(driver)
             global df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 
             df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
-            driver.quit()
+            # driver.quit()
             #print(output)
             
             # hero individual plot
@@ -299,41 +299,35 @@ def get_data():
 
 
 #opening the pop-up for private replay data login
-@app.route('/open_popup', methods=['POST'])
-def open_popup():
-    # OPEN SHOWDOWN LOGIN
-    # browser_type=get_browser()
-    # driver=open_login_tab(browser_type) # builds initial driver
+# @app.route('/open_popup', methods=['POST'])
+# def open_popup():
+#     # OPEN SHOWDOWN LOGIN
+#     # browser_type=get_browser()
+#     # driver=open_login_tab(browser_type) # builds initial driver
     
 
-    global driver
-    # Initialize the driver only if it hasn't been created yet
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
+#     global driver
+#     # Initialize the driver only if it hasn't been created yet
+#     chrome_options = Options()
+#     chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
 
-    if driver is None:
-        driver = webdriver.Chrome(options=chrome_options)
-    driver=cookie_collecter(driver) # takes user to login page via driver
+#     if driver is None:
+#         driver = webdriver.Chrome(options=chrome_options)
+#     driver=cookie_collecter(driver) # takes user to login page via driver
     
-    # custom_session = create_custom_session(driver)
+#     # custom_session = create_custom_session(driver)
     
-    return {'success': True}
+#     return {'success': True}
 
 # Run selenium for user login
-def login_showdown(username, password):
-    global driver
-
-    # Set up the Chrome WebDriver in headless mode
-    chrome_options = Options()
-    #chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
-    driver = webdriver.Chrome(options=chrome_options)
-
+def login_showdown(username, password, driver):
+    # global driver
     # Navigate to the login page
     login_url = "https://play.pokemonshowdown.com/"
     driver.get(login_url)
 
     # Wait for the login page to load
-    time.sleep(1)  # Adjust the wait time as needed
+    time.sleep(2)  # Adjust the wait time as needed
 
     # Submit the login form
     login_button = driver.find_element(By.NAME, "login")
@@ -350,20 +344,28 @@ def login_showdown(username, password):
     pw_field.send_keys(password)
     button = driver.find_element(By.XPATH, "//button[@type='submit']")
     button.click()
+    time.sleep(2)
     
-    return {'success': True}
+    return driver
 
 #function for retrieving analytics on private & public replays 
 @app.route("/get_data_private", methods=['GET','POST'])
 def get_data_private():
         global driver
+        # Set up the Chrome WebDriver in headless mode
+        # chrome_options = Options()
+        #chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome(options=chrome_options) #
         #print("DRIVER:", driver)
         if request.method == 'POST':
 
             username_private = request.form.get('usernamePrivate')
             password = request.form.get('showdown_pw')
             gametype = request.form.get('gametype')
-            login_showdown(username_private, password)
+            driver=login_showdown(username_private, password, driver)
+            # time.sleep(3)
             print("DRIVER:", driver)
             print("User:", username_private)
             print("pass:", password)
@@ -480,7 +482,7 @@ def get_data_private():
                 """
 
                 driver.quit()
-                driver = None
+                # driver = None
                 
                 # katies original html creation
                 output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
