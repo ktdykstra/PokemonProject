@@ -9,7 +9,7 @@ import json
 import os
 import time
 from flask_cors import CORS
-# from flask_bootstrap import Bootstrap
+
 from markupsafe import Markup
 import pandas as pd
 import poke_backend_v2 as sdg
@@ -30,35 +30,13 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 
-
-
 from requests.adapters import BaseAdapter
 from requests.sessions import Session
-# bring in dash_app
-#from dash_app import create_dash
+
 
 ## global variables
 browser_type = "Unclear"
 df1=None
-# cookies=[]
-# driver.quit()
-## try chatgpts reco
-# class WebDriverAdapter(BaseAdapter):
-#     def __init__(self, webdriver):
-#         self.webdriver = webdriver
-
-#     def send(self, request, *args, **kwargs):
-#         response = self.webdriver.execute_script(
-#             f"return fetch('{request.url}', {kwargs})")
-#         return response
-
-# # Create a custom session using the WebDriverAdapter
-# def create_custom_session(webdriver):
-#     session = Session()
-#     session.mount('http://', WebDriverAdapter(webdriver))
-#     session.mount('https://', WebDriverAdapter(webdriver))
-#     return session
-
 
 
 app = Flask(__name__)
@@ -103,6 +81,22 @@ def set_df1(df):
     df_bytes = pickle.dumps(df)
     redis_client.set('df', df_bytes)
 
+# setting up code for concurrent sessions, need to wait for account management
+""" def get_user_df(username):
+    cache_key = f'user_df:{username}'
+    df_bytes = redis_client.get(cache_key)
+    if df_bytes is not None:
+        df = pickle.loads(df_bytes)
+        return df
+    else:
+        return None
+    
+def set_user_df(username, df):
+    cache_key = f'user_df:{username}'
+    df_bytes = pickle.dumps(df)
+    redis_client.set(cache_key, df_bytes)
+ """
+
 ## get the browser type of flask session
 #@app.route('/test')
 def get_browser():
@@ -141,11 +135,6 @@ def open_login_tab(browser_type):
 
 def cookie_collecter(driver):
     driver.get('https://play.pokemonshowdown.com')
-
-    # Define a list of button identifiers (names or XPath expressions)
-    #button_identifiers = ['login',   '/html/body/div[5]/div/form/p[5]/button[1]']
-    
-
     time.sleep(30)
 
     return driver
@@ -330,26 +319,6 @@ def get_data():
             return render_template('index.html')
 
 
-#opening the pop-up for private replay data login
-# @app.route('/open_popup', methods=['POST'])
-# def open_popup():
-#     # OPEN SHOWDOWN LOGIN
-#     # browser_type=get_browser()
-#     # driver=open_login_tab(browser_type) # builds initial driver
-    
-
-#     global driver
-#     # Initialize the driver only if it hasn't been created yet
-#     chrome_options = Options()
-#     chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
-
-#     if driver is None:
-#         driver = webdriver.Chrome(options=chrome_options)
-#     driver=cookie_collecter(driver) # takes user to login page via driver
-    
-#     # custom_session = create_custom_session(driver)
-    
-#     return {'success': True}
 
 # Run selenium for user login
 def login_showdown(username, password, driver):
@@ -385,11 +354,8 @@ def login_showdown(username, password, driver):
 @cache.cached(timeout=60)
 def get_data_private():
         global driver
-        #global df1
 
         # Set up the Chrome WebDriver in headless mode
-        # chrome_options = Options()
-        #chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
         service = Service(ChromeDriverManager().install())
         chrome_options = Options()
         chrome_options.add_argument("--headless")
@@ -415,10 +381,6 @@ def get_data_private():
 
             if driver is not None:
 
-                # Deserialize the driver object from the request data
-                #driver_serialized = data.get('driverData')
-                #driver = json.loads(base64.b64decode(driver_serialized).decode('utf-8'))
-
             
                 ## run the data gathering
                 df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
@@ -427,7 +389,6 @@ def get_data_private():
                 #update value of df1 in cache
                 set_df1(df1)
 
-                #driver.quit()
                 #print(output)
                 # hero individual plot
                 hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
@@ -529,7 +490,6 @@ def get_data_private():
                 """
 
                 driver.quit()
-                # driver = None
                 
                 # katies original html creation
                 output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
@@ -551,17 +511,6 @@ def get_data_private():
                                     "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
                                     "<br><br>" +
                                     sixTeamVillainStats)
-
-                #close pop-up after data is processed
-                #driver.close()
-                # Optional: If you need to store additional data in the session, you can do so here
-                # For example, if you want to store the processed data in the session and retrieve it in another route
-
-                # Clear the driver from the session to release resources
-                #session.pop('driver', None)
-
-                # Store the processed data in the session
-
 
                 return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
         
@@ -646,7 +595,9 @@ def hero_comp_link(comp_id):
     ## individual pokemon stats
     df_hero_indiv=sdg.get_individual_rates(hero_comp_library)
     hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
+    
     # print(df_hero_indiv)
+    
     output_html = Markup(table_style +"<h3 style='text-align: center;'><strong>Hero Comp ID:</strong> {}</h3>".format(comp_id) +
                     "<br><br>" +
                     hero_plotly+ 
@@ -660,8 +611,6 @@ def villain_comp_link(comp_id):
 
     #get df1 from the cache
     df1 = get_df1()
-
-
 
     ## make comp-specific match library
     villain_comp_library=sdg.get_villain_comp_library(comp_id, df1) # isolate to comp id relevant matches
