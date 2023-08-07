@@ -1,4 +1,6 @@
 from flask import Flask, redirect, render_template, request, url_for, session
+from flask_caching import Cache
+
 from flask import jsonify
 import json
 import os
@@ -23,6 +25,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
+
 
 
 from requests.adapters import BaseAdapter
@@ -59,6 +62,10 @@ app = Flask(__name__)
 #need secret key to save browser across sessions
 app.secret_key = os.urandom(24)
 df1=None
+
+# Configure the cache
+app.config['CACHE_TYPE'] = 'simple'  
+cache = Cache(app)
 
 # driver = None  # Global variable to store the driver object
 
@@ -354,6 +361,7 @@ def login_showdown(username, password, driver):
 
 #function for retrieving analytics on private & public replays 
 @app.route("/get_data_private", methods=['GET','POST'])
+@cache.cached(timeout=60)
 def get_data_private():
         global driver
         global df1
