@@ -360,6 +360,8 @@ def get_data_private():
         service = Service(ChromeDriverManager().install())
         chrome_options = Options()
         chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--no-sandbox")
         # download and use the latest ChromeDriver automatically using
         # Set up ChromeOptions for headless mode
 
