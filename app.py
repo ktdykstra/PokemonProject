@@ -590,7 +590,7 @@ def hero_comp_link(comp_id):
     #global df1
 
     #get df1 from the cache
-    get_df1()
+    df1 = get_df1()
 
     ## make comp-specific match library
     hero_comp_library=sdg.get_hero_comp_library(comp_id, df1) # isolate to comp id relevant matches
@@ -659,7 +659,8 @@ def villain_comp_link(comp_id):
     #global df1
 
     #get df1 from the cache
-    get_df1()
+    df1 = get_df1()
+
 
 
     ## make comp-specific match library
