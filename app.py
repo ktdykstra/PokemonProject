@@ -48,6 +48,9 @@ app = Flask(__name__)
 #need secret key to save browser across sessions
 app.secret_key = os.urandom(24)
 
+####################################################
+# SETTING UP CACHE
+####################################################
 
 # Configure the shared cache
 # Configure Redis as the cache backend
@@ -69,8 +72,9 @@ redis_client = redis.Redis.from_url(
     connection_class=redis.Connection
 )
 
-
-
+####################################################
+# FXNS FOR STORING DF1 IN CACHE 
+####################################################
 #  fetch the df1 value from the cache
 def get_df1():
     df_bytes = redis_client.get('df')
@@ -85,7 +89,25 @@ def set_df1(df):
     df_bytes = pickle.dumps(df)
     redis_client.set('df', df_bytes)
 
-## get the browser type of flask session
+# setting up code for concurrent sessions, need to wait for account management
+""" def get_user_df(username):
+    cache_key = f'user_df:{username}'
+    df_bytes = redis_client.get(cache_key)
+    if df_bytes is not None:
+        df = pickle.loads(df_bytes)
+        return df
+    else:
+        return None
+    
+def set_user_df(username, df):
+    cache_key = f'user_df:{username}'
+    df_bytes = pickle.dumps(df)
+    redis_client.set(cache_key, df_bytes)
+ """
+
+####################################################
+# Get the browser type of flask session
+####################################################
 #@app.route('/test')
 def get_browser():
     og_type = request.headers.get('User-Agent')
@@ -103,7 +125,9 @@ def get_browser():
         browser_type='Unclear'
     return browser_type #,render_template('test.html')
 
-## generate webdriver depending on browser type
+####################################################
+# Generate webdriver depending on browser type
+####################################################
 def open_login_tab(browser_type):
     if browser_type =="Chrome":
         driver=webdriver.Chrome()#options=chrome_options
@@ -144,8 +168,9 @@ def submit_form():
     # Redirect the user to the main page page
     return redirect('/main')
 
-
-
+############################################################
+# RENDER THE MAIN PAGE
+############################################################
 @app.route('/main')
 def index():
     #submitted = request.args.get('submitted')
