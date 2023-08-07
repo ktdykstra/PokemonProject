@@ -392,6 +392,7 @@ def get_data_private():
             
                 ## run the data gathering
                 df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
+                time.sleep(2)
                 #driver.quit()
                 #print(output)
                 # hero individual plot
