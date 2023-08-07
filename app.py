@@ -20,6 +20,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+
 
 from requests.adapters import BaseAdapter
 from requests.sessions import Session
@@ -60,10 +62,11 @@ driver = None  # Global variable to store the driver object
 os.environ['PATH'] += ":/chromedriver"
 
 # Set up ChromeOptions for headless mode
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument("--headless")
+#chrome_options = webdriver.ChromeOptions()
+#chrome_options.add_argument("--headless")
+
 # Set the path to the Chrome binary using the GOOGLE_CHROME_BIN environment variable from Heroku
-chrome_options.binary_location = os.environ.get('GOOGLE_CHROME_BIN')
+#chrome_options.binary_location = os.environ.get('GOOGLE_CHROME_BIN')
 
 CORS(app)
 
@@ -113,6 +116,7 @@ def cookie_collecter(driver):
     time.sleep(30)
 
     return driver
+
 
 
 @app.route('/')
@@ -300,9 +304,13 @@ def open_popup():
     # OPEN SHOWDOWN LOGIN
     # browser_type=get_browser()
     # driver=open_login_tab(browser_type) # builds initial driver
+    
 
     global driver
     # Initialize the driver only if it hasn't been created yet
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
+
     if driver is None:
         driver = webdriver.Chrome(options=chrome_options)
     driver=cookie_collecter(driver) # takes user to login page via driver
@@ -311,20 +319,56 @@ def open_popup():
     
     return {'success': True}
 
+# Run selenium for user login
+def login_showdown(username, password):
+    global driver
 
+    # Set up the Chrome WebDriver in headless mode
+    chrome_options = Options()
+    #chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
+    driver = webdriver.Chrome(options=chrome_options)
+
+    # Navigate to the login page
+    login_url = "https://play.pokemonshowdown.com/"
+    driver.get(login_url)
+
+    # Wait for the login page to load
+    time.sleep(1)  # Adjust the wait time as needed
+
+    # Submit the login form
+    login_button = driver.find_element(By.NAME, "login")
+    login_button.click()
+
+    # Find the username and password input fields and fill them out
+    username_field = driver.find_element(By.NAME, "username")
+    username_field.send_keys(username)
+    button = driver.find_element(By.XPATH, "//button[@type='submit']")
+    button.click()
+    # time.sleep(2) 
+    wait = WebDriverWait(driver, 10)
+    pw_field = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "textbox")))
+    pw_field.send_keys(password)
+    button = driver.find_element(By.XPATH, "//button[@type='submit']")
+    button.click()
+    
+    return {'success': True}
 
 #function for retrieving analytics on private & public replays 
 @app.route("/get_data_private", methods=['GET','POST'])
 def get_data_private():
         global driver
-        if driver is not None:
-            # Add your data processing code here, using the 'driver' object
-            # For example, you can use driver.find_element_by_xpath() to locate and interact with elements on the pop-up window.
+        #print("DRIVER:", driver)
+        if request.method == 'POST':
 
-            if request.method == 'POST':
+            username_private = request.form.get('usernamePrivate')
+            password = request.form.get('showdown_pw')
+            gametype = request.form.get('gametype')
+            login_showdown(username_private, password)
+            print("DRIVER:", driver)
+            print("User:", username_private)
+            print("pass:", password)
 
-                username_private = request.form.get('usernamePrivate')
-                gametype = request.form.get('gametype')
+            if driver is not None:
 
                 # Deserialize the driver object from the request data
                 #driver_serialized = data.get('driverData')
@@ -334,7 +378,7 @@ def get_data_private():
                 ## run the data gathering
                 global df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 
                 df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
-                driver.quit()
+                #driver.quit()
                 #print(output)
                 # hero individual plot
                 hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
@@ -471,12 +515,14 @@ def get_data_private():
 
 
                 return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+        
             else:
-                print("did not retrieve input")
-                #return {'success': False}
-                return render_template('index.html')
-        else:
                 return 'Pop-up window not opened yet!'
+        else:
+            print("did not retrieve input")
+            #return {'success': False}
+            return render_template('index.html')
+
 
 
 @app.route('/ip')
