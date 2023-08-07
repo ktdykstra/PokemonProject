@@ -1,5 +1,8 @@
 from flask import Flask, redirect, render_template, request, url_for, session
 from flask_caching import Cache
+import redis 
+import certifi
+import ssl
 
 from flask import jsonify
 import json
@@ -16,6 +19,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.offline as pyo
 import re
+
 from selenium import webdriver
 import base64
 from selenium.webdriver.chrome.options import Options
@@ -63,24 +67,41 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 df1=None
 
-# Configure the cache
-app.config['CACHE_TYPE'] = 'simple'  
+# Configure the shared cache
+# Configure Redis as the cache backend
+app.config['CACHE_TYPE'] = 'redis'
+app.config['CACHE_REDIS_URL'] = os.environ.get('STACKHERO_REDIS_URL_CLEAR')
 cache = Cache(app)
 
-# driver = None  # Global variable to store the driver object
-
-#for heroku selenium funcitonality 
-# Replace "path/to/chromedriver" with the actual path to the ChromeDriver executable
-#os.environ['PATH'] += ":/chromedriver"
-
-# Set up ChromeOptions for headless mode
-#chrome_options = webdriver.ChromeOptions()
-#chrome_options.add_argument("--headless")
-
-# Set the path to the Chrome binary using the GOOGLE_CHROME_BIN environment variable from Heroku
-#chrome_options.binary_location = os.environ.get('GOOGLE_CHROME_BIN')
-
 CORS(app)
+
+# Set the REQUESTS_CA_BUNDLE environment variable to use certifi certificates
+os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
+
+# Create an SSL context with certificate verification
+ssl_context = ssl.create_default_context(cafile=certifi.where())
+
+# Create the Redis client with SSL context
+redis_client = redis.Redis.from_url(
+    app.config['CACHE_REDIS_URL'],
+    connection_class=redis.Connection
+)
+
+
+
+#  fetch the df1 value from the cache
+def get_df1():
+    df_bytes = redis_client.get('df')
+    if df_bytes is not None:
+        df = pickle.loads(df_bytes)
+        return df
+    else:
+        return None
+    
+# update the value of df1 in the cache
+def set_df1(df):
+    df_bytes = pickle.dumps(df)
+    redis_client.set('df', df_bytes)
 
 ## get the browser type of flask session
 #@app.route('/test')
@@ -364,7 +385,8 @@ def login_showdown(username, password, driver):
 @cache.cached(timeout=60)
 def get_data_private():
         global driver
-        global df1
+        #global df1
+
         # Set up the Chrome WebDriver in headless mode
         # chrome_options = Options()
         #chrome_options.add_argument("--headless")  # Uncomment this line to run headless (without GUI)
@@ -385,7 +407,7 @@ def get_data_private():
             username_private = request.form.get('usernamePrivate')
             password = request.form.get('showdown_pw')
             gametype = request.form.get('gametype')
-            driver=login_showdown(username_private, password, driver)
+            driver=login_showdown(username_private, password, driver)            
             # time.sleep(3)
             print("DRIVER:", driver)
             print("User:", username_private)
@@ -401,6 +423,10 @@ def get_data_private():
                 ## run the data gathering
                 df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
                 time.sleep(2)
+
+                #update value of df1 in cache
+                set_df1(df1)
+
                 #driver.quit()
                 #print(output)
                 # hero individual plot
@@ -561,7 +587,11 @@ def ip():
 # try to create linked htmls to hero comp identifiers
 @app.route('/hero_comp_data/<comp_id>',methods=["GET","POST"])
 def hero_comp_link(comp_id):
-    global df1
+    #global df1
+
+    #get df1 from the cache
+    get_df1()
+
     ## make comp-specific match library
     hero_comp_library=sdg.get_hero_comp_library(comp_id, df1) # isolate to comp id relevant matches
 
@@ -626,7 +656,12 @@ def hero_comp_link(comp_id):
 # try to create linked htmls to villain comp identifiers
 @app.route('/villain_comp_data/<comp_id>',methods=["GET","POST"])
 def villain_comp_link(comp_id):
-    global df1
+    #global df1
+
+    #get df1 from the cache
+    get_df1()
+
+
     ## make comp-specific match library
     villain_comp_library=sdg.get_villain_comp_library(comp_id, df1) # isolate to comp id relevant matches
 
