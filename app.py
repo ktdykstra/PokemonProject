@@ -263,10 +263,12 @@ def set_df1(df):
 def get_user_df1():
     # Retrieve the user email from the session
     user_email = session.get('user_email')
-    if user_email is None:
+    showdown_username = session.get('showdown_username')
+
+    if user_email is None or showdown_username is None:
         return None
 
-    cache_key = f'user_df:{user_email}'  # Use the user's email in the cache key
+    cache_key = f'user_df:{user_email}:{showdown_username}' # Use the user's email in the cache key
     df_bytes = redis_client.get(cache_key)
     if df_bytes is not None:
         df = pickle.loads(df_bytes)
@@ -278,8 +280,10 @@ def get_user_df1():
 def set_user_df1(df1):
     # Retrieve the user email from the session
     user_email = session.get('user_email')
-    if user_email is not None:
-        cache_key = f'user_df:{user_email}'  # Use the user's email in the cache key
+    showdown_username = session.get('showdown_username')
+
+    if user_email is not None or showdown_username is None:
+        cache_key = f'user_df:{user_email}:{showdown_username}'  # Use the user's email in the cache key
         df_bytes = pickle.dumps(df1)
         redis_client.set(cache_key, df_bytes)
 
@@ -401,6 +405,9 @@ def get_data():
 
             username = request.form.get('username')
             gametype = request.form.get('gametype')
+
+            #UPDATE USERNAME IN SESSION
+            session['showdown_username'] = username
 
             if driver is not None:
                 ## run the data gathering. all_matches == False 
@@ -604,6 +611,9 @@ def get_data_private():
             print("DRIVER:", driver)
             print("User:", username_private)
             print("pass:", password)
+
+            #UPDATE USERNAME IN SESSION
+            session['showdown_username'] = username_private
 
             if driver is not None:
                 ## run the data gathering
