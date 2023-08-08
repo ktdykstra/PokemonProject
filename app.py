@@ -3,6 +3,8 @@ from flask_caching import Cache
 import redis 
 import certifi
 import ssl
+import requests
+from flask_oauthlib.client import OAuthException
 
 from flask import jsonify
 import json
@@ -35,6 +37,8 @@ from flask_oauthlib.client import OAuth
 from requests.adapters import BaseAdapter
 from requests.sessions import Session
 
+from flask_session import Session
+
 #for testing:
 #sample_username="Broskander" 
 #sample_game_type="gen9vgc2023series1"
@@ -45,8 +49,36 @@ browser_type = "Unclear"
 df1=None
 
 app = Flask(__name__)
+app.debug=True
+
+#initialize session
+app.config.from_object(__name__)
+
+# Use Stackhero Redis as the session backend
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True
+
+# The Redis connection details
+redis_host = 'qoxjxb.stackhero-network.com'
+redis_port = '6380'
+redis_password = '2SSlD7FN0buUpMoGeb4iR2eKf8vJ87GDm67hq6LEiQK6IloP3X01WFbCTfhiU0h8'
+
+# Create a Redis connection using redis.StrictRedis
+redis_connection = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, ssl=True)
+
+# Set the Redis connection object as SESSION_REDIS
+app.config['SESSION_REDIS'] = redis_connection
+
 #need secret key to save browser across sessions
-app.secret_key = os.urandom(24)
+#comment out for heroku deployment
+app.secret_key = '3cef30899fc8ae609a4f6b7dce06617cb7440fbb8297597fd262055b4bb7dcd6'
+
+#comment in for heroku deployment
+#app.secret_key = os.environ.get('FLASK_SECRET_KEY')
+
+Session(app)
+
 
 ####################################################
 # OAUTH CONFIG
@@ -68,6 +100,8 @@ google = oauth.remote_app(
     access_token_url='https://accounts.google.com/o/oauth2/token',
     authorize_url='https://accounts.google.com/o/oauth2/auth',
 )
+
+
 
 ####################################################
 # SETTING UP CACHE
@@ -96,9 +130,47 @@ redis_client = redis.Redis.from_url(
 ####################################################
 # ROUTES FOR Google Login and Callback 
 ####################################################
+#Protect Pages from unauthenticated users
+@app.before_request
+def check_authentication():
+    # List of routes that do not require authentication
+    public_routes = ['/', 'login', 'privacy', 'authorized']
+
+    # If the requested route is public, allow access without authentication
+    if request.endpoint in public_routes or request.endpoint == '/':
+        return
+
+    # Check if the session identifier is present and the user is authenticated
+    if 'user_authenticated' not in session or not session['user_authenticated']:
+        # Redirect to the login page or display an access denied message
+        return redirect('/login')
+
 @app.route('/login')
 def login():
+    # Check if the user is already authenticated (optional)
+    #if 'user_authenticated' in session and session['user_authenticated']:
+    #return redirect('/infoForm')
+
+     # If not authenticated, initiate Google OAuth authentication
+     #http://127.0.0.1:5000
     return google.authorize(callback=url_for('authorized', _external=True))
+
+
+def verify_google_access_token(access_token):
+    # Make a request to Google's token validation endpoint
+    url = f'https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={access_token}'
+    response = requests.get(url)
+    if response.status_code != 200:
+        # Handle invalid response from the validation endpoint
+        return None
+
+    token_info = response.json()
+
+    if 'error' in token_info:
+        # Handle token validation error
+        return None
+
+    return token_info
 
 @app.route('/login/authorized')
 def authorized():
@@ -110,20 +182,67 @@ def authorized():
             request.args['error_description']
         )
 
-    session['access_token'] = resp['access_token']
-    user_info = google.get('userinfo')
-    # Here, you can store the user_info data in the database or use it as needed.
+    # Verify the access token with Google's token validation endpoint
+    access_token = resp['access_token']
+    token_info = verify_google_access_token(access_token)
 
-    #return 'Logged in as: ' + user_info.data['email']
+    if not token_info or 'error' in token_info:
+        # If the token validation fails or the token is expired, clear session data
+        session.clear()
+        return 'Token validation failed or expired. Please log in again.'
+
+    # Authentication successful, set the session flag to indicate user is authenticated
+    session['user_authenticated'] = True
+
+    # Fetch user email address from Google API using the access token
+    email = get_google_user_email(access_token)
+
+    # Store user email address in session
+    session['user_email'] = email
+
+    # Save the access_token in the session (optional, useful for future API calls)
+    session['access_token'] = resp['access_token']
+
     return redirect('/infoForm')
 
-@google.tokengetter
-def get_google_oauth_token():
-    return session.get('access_token')
+
+def verify_google_access_token(access_token):
+    # Make a request to Google's token validation endpoint
+    url = f'https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={access_token}'
+    response = requests.get(url)
+    if response.status_code != 200:
+        # Handle invalid response from the validation endpoint
+        return None
+    return response.json()
+
+
+
+def get_google_user_email(access_token):
+    # Make a request to Google's userinfo endpoint to get user information
+    headers = {'Authorization': f'Bearer {access_token}'}
+    url = 'https://www.googleapis.com/oauth2/v3/userinfo'
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        # Handle error response from the userinfo endpoint
+        return None
+
+    user_info = response.json()
+    return user_info.get('email')
+
+
+####################################################
+# LOGOUT FXN
+####################################################
+@app.route('/logout')
+def logout():
+    # Clear session data to log the user out
+    session.clear()
+    return redirect(url_for('login'))
 
 ####################################################
 # FXNS FOR STORING DF1 IN CACHE 
 ####################################################
+'''
 #  fetch the df1 value from the cache
 def get_df1():
     df_bytes = redis_client.get('df')
@@ -138,21 +257,33 @@ def set_df1(df):
     df_bytes = pickle.dumps(df)
     redis_client.set('df', df_bytes)
 
+    '''
+
 # setting up code for concurrent sessions, need to wait for account management
-""" def get_user_df(username):
-    cache_key = f'user_df:{username}'
+def get_user_df1():
+    # Retrieve the user email from the session
+    user_email = session.get('user_email')
+    if user_email is None:
+        return None
+
+    cache_key = f'user_df:{user_email}'  # Use the user's email in the cache key
     df_bytes = redis_client.get(cache_key)
     if df_bytes is not None:
         df = pickle.loads(df_bytes)
         return df
     else:
         return None
-    
-def set_user_df(username, df):
-    cache_key = f'user_df:{username}'
-    df_bytes = pickle.dumps(df)
-    redis_client.set(cache_key, df_bytes)
- """
+
+
+def set_user_df1(df1):
+    # Retrieve the user email from the session
+    user_email = session.get('user_email')
+    if user_email is not None:
+        cache_key = f'user_df:{user_email}'  # Use the user's email in the cache key
+        df_bytes = pickle.dumps(df1)
+        redis_client.set(cache_key, df_bytes)
+
+
 
 ####################################################
 # Get the browser type of flask session
@@ -270,7 +401,7 @@ def get_data():
                 time.sleep(2)
 
                 #update value of df1 in cache
-                set_df1(df1)
+                set_user_df1(df1)
 
                 #print(output)
                 # hero individual plot
@@ -473,7 +604,7 @@ def get_data_private():
                 time.sleep(2)
 
                 #update value of df1 in cache
-                set_df1(df1)
+                set_user_df1(df1)
 
                 #print(output)
                 # hero individual plot
@@ -626,7 +757,7 @@ def hero_comp_link(comp_id):
     #global df1
 
     #get df1 from the cache
-    df1 = get_df1()
+    df1 = get_user_df1()
 
     ## make comp-specific match library
     hero_comp_library=sdg.get_hero_comp_library(comp_id, df1) # isolate to comp id relevant matches
@@ -697,7 +828,7 @@ def villain_comp_link(comp_id):
     #global df1
 
     #get df1 from the cache
-    df1 = get_df1()
+    df1 = get_user_df1()
 
     ## make comp-specific match library
     villain_comp_library=sdg.get_villain_comp_library(comp_id, df1) # isolate to comp id relevant matches
@@ -785,7 +916,6 @@ def test_db_connection():
     return jsonify(d)
 
 if __name__ == '__main__':
-
     app.run(host="0.0.0.0", debug=True)
 
 
