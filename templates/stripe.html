@@ -23,7 +23,7 @@ https://templatemo.com/tm-535-softy-pinko
     <link rel="stylesheet" type="text/css"
         href="{{ url_for('static', filename='assets/css/templatemo-softy-pinko.css') }}">
     
-        <!-- Google tag (gtag.js) -->
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-REK63QPEPV"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
@@ -35,9 +35,59 @@ https://templatemo.com/tm-535-softy-pinko
 
 </head>
 <body>
-    <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
-    <stripe-pricing-table pricing-table-id="prctbl_1NciHZDypgtvgAYhjZArg4yj"
-    publishable-key="pk_test_51NchgQDypgtvgAYh43m3w8KWYAah51w7OvDgwvVmizsb4utvaPFgjUTSoYMlAg3zLc7VBlzgeJqXRIGFdpXsNppD00t6RgJjXM">
-    </stripe-pricing-table>
+
+    <!-- ***** Preloader Start ***** -->
+    <div id="preloader">
+        <div class="jumper">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <!-- ***** Preloader End ***** -->
+
+
+    <!-- ***** Header Area Start ***** -->
+    <header class="header-area header-sticky">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <nav class="main-nav">
+                        <!-- ***** Logo Start ***** -->
+                        <a href="#" class="logo">
+                            <img src="/static/assets/images/snake.png" alt="Serapis" />
+                        </a>
+                        <!-- ***** Logo End ***** -->
+                        <!--Text Start-->
+                        <p style = "display: inline-block; justify-content: center; align-items: center; color: rgb(28 130 28)" class = "logo">Serapis</p>
+                        <!--Text End-->
+                        <!-- ***** Menu Start ***** -->
+                        <ul class="nav">
+                            <li><a href="/main" class="active">Home</a></li>
+                            <!--<li><a href="#data">Analytics</a></li>-->
+                            <li><a href="/pricing">Pricing</a></li>
+                        </ul>
+                        <a class='menu-trigger'>
+                     
+                        </a>
+                        <!-- ***** Menu End ***** -->
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- ***** Header Area End ***** -->
+    <section class="section colored" >
+        <div class="container">
+            <div class="row">
+
+            </div>
+
+            <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+            <stripe-pricing-table pricing-table-id="prctbl_1NciHZDypgtvgAYhjZArg4yj"
+            publishable-key="pk_test_51NchgQDypgtvgAYh43m3w8KWYAah51w7OvDgwvVmizsb4utvaPFgjUTSoYMlAg3zLc7VBlzgeJqXRIGFdpXsNppD00t6RgJjXM">
+            </stripe-pricing-table>
+        </div>
+    </section>
 </body>
 </html>
