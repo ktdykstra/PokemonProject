@@ -420,7 +420,7 @@ def get_data():
                 num_games = str(df2.loc[0, 'num_games'])
                 num_wins = str(df2.loc[0, 'num_wins'])
                 win_rate = str(df2.loc[0, 'win_rate'])
-                
+
                 #dfs with individual hero pokemon winrates and elo scores
                 df_hero_indiv = df_hero_indiv.reset_index()
                 df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
