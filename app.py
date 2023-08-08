@@ -134,7 +134,7 @@ redis_client = redis.Redis.from_url(
 @app.before_request
 def check_authentication():
     # List of routes that do not require authentication
-    public_routes = ['/', 'login', 'privacy', 'authorized', 'ads.txt']
+    public_routes = ['/', 'login', 'privacy', 'authorized', 'ads.txt', 'stripe-test']
 
     # If the requested route is public, allow access without authentication
     if request.endpoint in public_routes or request.endpoint == '/':
@@ -901,11 +901,11 @@ def villain_comp_link(comp_id):
 ############################################################
 # LINK TO TEST HTML
 ############################################################
-@app.route('/test',methods=["GET","POST"])
+@app.route('/stripe-test',methods=["GET","POST"])
 def try_cool_stuff():
 
 
-    return render_template("test.html")
+    return render_template("stripe.html")
 
 
 @app.route('/test-mysql-db-connection')
