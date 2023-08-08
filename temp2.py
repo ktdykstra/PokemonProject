@@ -29,6 +29,28 @@ driver=cookie_collecter(driver)
 
 df1, df2, df_individual_hero, df_indiv_villain, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, True)
 df2
+temp=sdg.gather_matches(username, gametype, driver, True)
+temp[["hero","p1"]]
+df1.columns
+temp_p1=df1[["p1","match_type","match_id"]]
+temp_p1.apply(lambda x: )
+driver.quit()
+def remove_exclamation(row):
+    if row['match_type'] == 'private' and row['p1'].startswith('!'):
+        row['p1'] = row['p1'][1:]  # Remove the "!" character
+    return row
+df = temp_p1.apply(remove_exclamation, axis=1)
+df=sdg.gather_matches(username,gametype,driver,True)
+
+
+
+stored_data=df1.copy()
+stored_data=stored_data.loc[0:30,["match_id","win"]]
+stored_data
+df1.loc[0:30,["match_id","win"]]
+df1.iloc[1].match_id
+
+remove_exclamation(temp_p1.iloc[0])
 pd.set_option('display.max_rows', 500)
 df1.hero_comp_fused.max()
 specified_comp='Flutter ManeGholdengoMaushold-FourScream TailTalonflameUrshifu-*'
