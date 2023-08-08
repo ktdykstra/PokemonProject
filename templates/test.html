@@ -1,9 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>My test</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,300,400,500,700,900" rel="stylesheet">
+
+    <title>Serapis</title>
+    <link rel="icon" type="image/png" href="/static/assets/images/snake.png">
+    <!--
+SOFTY PINKO
+https://templatemo.com/tm-535-softy-pinko
+-->
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/bootstrap.min.css') }}">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/font-awesome.css') }}">
+
+    <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static', filename='assets/css/templatemo-softy-pinko.css') }}">
+    
+        <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-REK63QPEPV"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-REK63QPEPV');
+    </script>
+
 </head>
 <body>
-    <h1>{{browser_type}}</h1>
+    <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+    <stripe-pricing-table pricing-table-id="prctbl_1NciHZDypgtvgAYhjZArg4yj"
+    publishable-key="pk_test_51NchgQDypgtvgAYh43m3w8KWYAah51w7OvDgwvVmizsb4utvaPFgjUTSoYMlAg3zLc7VBlzgeJqXRIGFdpXsNppD00t6RgJjXM">
+    </stripe-pricing-table>
 </body>
 </html>
