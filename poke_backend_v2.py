@@ -205,8 +205,9 @@ def gather_matches(username, game_type, driver, all_matches):
     # else:
     #     pass
 
-    ## clean database columns
+    ## clean database columns and strip ! for private matches
     base_db.rename(columns={"id":"match_id"},inplace=True)
+    base_db=base_db.apply(remove_exclamation,axis=1)
     
     ## Add logs and turns to metadata df
 
@@ -564,9 +565,15 @@ def generate_turn_df(db_row):
 
 # In[111]:
 
+## remove exclamation for private matches
+def remove_exclamation(row):
+    if row['match_type'] == 'private' and row['p1'].startswith('!'):
+        row['p1'] = row['p1'][1:]  # Remove the "!" character
+    if row['match_type'] == 'private' and row['p2'].startswith('!'):
+        row['p2'] = row['p2'][1:]  # Remove the "!" character
+    return row
 
 # In[24]:
-
 
 def populate_fresh_scorecard(db_row, old_turn, turn_number):
 
