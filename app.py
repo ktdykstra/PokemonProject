@@ -157,7 +157,7 @@ def set_user_df(username, df):
 ####################################################
 # Get the browser type of flask session
 ####################################################
-#@app.route('/test')
+
 def get_browser():
     og_type = request.headers.get('User-Agent')
     if 'Chrome' in og_type:
@@ -759,6 +759,15 @@ def villain_comp_link(comp_id):
                     villain_plotly+ 
                     "<br><br>" )
     return render_template("villain_comp_data.html", num_games=num_games, loss_rate=loss_rate, num_losses=num_losses, result = output_html)
+
+############################################################
+# LINK TO TEST HTML
+############################################################
+@app.route('/test',methods=["GET","POST"])
+def try_cool_stuff():
+
+
+    return render_template("test.html")
 
 
 @app.route('/test-mysql-db-connection')
