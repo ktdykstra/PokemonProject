@@ -134,7 +134,7 @@ redis_client = redis.Redis.from_url(
 @app.before_request
 def check_authentication():
     # List of routes that do not require authentication
-    public_routes = ['/', 'login', 'privacy', 'authorized']
+    public_routes = ['/', 'login', 'privacy', 'authorized', 'ads']
 
     # If the requested route is public, allow access without authentication
     if request.endpoint in public_routes or request.endpoint == '/':
@@ -366,6 +366,13 @@ def index():
 @app.route('/privacy')
 def privPol():
     return render_template('PrivacyPolicy.html')
+
+############################################################
+# RENDER THE GOOGLE ADS TEXT
+############################################################
+@app.route('/ads')
+def ads():
+    return render_template('ads.txt')
 
 ############################################################
 #
