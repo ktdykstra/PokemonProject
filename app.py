@@ -43,6 +43,10 @@ from flask import g, flash
 import stripe
 from stripe import SignatureVerificationError
 
+import psycopg2
+from dotenv import load_dotenv
+
+
 #for testing:
 #sample_username="Broskander" 
 #sample_game_type="gen9vgc2023series1"
@@ -74,9 +78,8 @@ redis_connection = redis.StrictRedis(host=redis_host, port=redis_port, password=
 # Set the Redis connection object as SESSION_REDIS
 app.config['SESSION_REDIS'] = redis_connection
 
-#DB URL 
+#DB URL
 app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL')
-
 
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 
