@@ -22,6 +22,7 @@ class DatabaseHandler:
     def __init__(self):
         self.conn, self.cursor = connect_to_db()
 
+    # this is effectively the view/RUN query
     def get_data(self):
         try:
             self.cursor.execute("SELECT * FROM serapis_schema.serapis_users;")
