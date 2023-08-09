@@ -144,43 +144,53 @@ redis_client = redis.Redis.from_url(
 ####################################################
 # CONFIGURE DATABASE
 ####################################################
+# Initialize the DatabaseHandler
+db_handler = DatabaseHandler()
+
 def get_db():
     return connect_to_db()
 
 #called automatically at end of each request :)
 @app.teardown_appcontext
 def close_db(error):
-    close_connection()
+    db_handler.close_connection()
 
 
 ####################################################
 # FUNCTIONS FOR USER PROFILES IN OUR DATABASE
 ####################################################
 def create_user(user_email, subscription_status='free', click_count=0, stripe_customer_id=''):
-    db = get_db()
-    db.execute('INSERT INTO serapis_schema.serapis_users (email, subscription_status, click_count, stripe_customer_id) VALUES (?, ?, ?, ?)',
-               (user_email, subscription_status, click_count, stripe_customer_id))
+    db, cursor = get_db()
+    cursor.execute('INSERT INTO serapis_schema.serapis_users (email, subscription_status, click_count, stripe_customer_id) VALUES (%s, %s, %s, %s)',
+                   (user_email, subscription_status, click_count, stripe_customer_id))
     db.commit()
+    cursor.close()
 
 def get_user_by_email(user_email):
-    db = get_db()
-    return db.execute('SELECT * FROM serapis_schema.serapis_users WHERE email = ?', (user_email,)).fetchone()
+    db, cursor = get_db()
+    cursor.execute('SELECT * FROM serapis_schema.serapis_users WHERE email = %s', (user_email,))
+    user = cursor.fetchone()  # Fetch a single row
+    cursor.close()  # Close the cursor
+    return user
 
 def update_subscription_status(user_email, new_status):
-    db = get_db()
-    db.execute('UPDATE serapis_schema.serapis_users SET subscription_status = ? WHERE email = ?', (new_status, user_email))
+    db, cursor = get_db()
+    cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = ? WHERE email = %s', (new_status, user_email))
     db.commit()
+    cursor.close()
 
 def increment_click_count(user_email):
-    db = get_db()
-    db.execute('UPDATE serapis_schema.serapis_users SET click_count = click_count + 1 WHERE email = ?', (user_email,))
+    db, cursor = get_db()
+    cursor.execute('UPDATE serapis_schema.serapis_users SET click_count = click_count + 1 WHERE email = %s', (user_email,))
     db.commit()
+    cursor.close()
 
 
 def update_stripe_customer_id(user_email, stripe_customer_id):
-    db = get_db()
-    db.execute('UPDATE serapis_schema.serapis_users SET stripe_customer_id = ? WHERE email = ?', (stripe_customer_id, user_email))
+    db, cursor = get_db()
+    cursor.execute('UPDATE serapis_schema.serapis_users SET stripe_customer_id = ? WHERE email = %s', (stripe_customer_id, user_email))
     db.commit()
+    cursor.close()
 
 
 ####################################################
@@ -188,28 +198,30 @@ def update_stripe_customer_id(user_email, stripe_customer_id):
 ####################################################
 # Function to get user's subscription status from the database
 def get_subscription_status(user_email):
-    db = get_db()  # Replace with your database retrieval logic
-    user = db.execute('SELECT * FROM serapis_schema.serapis_users WHERE email = ?', (user_email,)).fetchone()
+    db, cursor = get_db()
+    cursor.execute('SELECT subscription_status FROM serapis_schema.serapis_users WHERE email = %s', (user_email,))
+    user = cursor.fetchone()
+    cursor.close()
     if user:
-        return user['subscription_status']
-    return 'free'  # Default to 'free' if user is not found
+        return user[0]
+    return 'free'
+
 
 
 def update_subscription_status(user_email, new_status):
-    db = get_db()
-    db.execute('UPDATE serapis_schema.serapis_users SET subscription_status = ? WHERE email = ?', (new_status, user_email))
+    db, cursor = get_db()
+    cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, user_email))
     db.commit()
+    cursor.close()
 
 def update_stripe_subscription(user_email, new_subscription_type):
     try:
-        # Retrieve the Stripe customer ID from your database
         user = get_user_by_email(user_email)
         if not user or not user['stripe_customer_id']:
             return False
 
         # Set the Stripe API key
         stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
-
 
         # Get the customer from Stripe
         customer = stripe.Customer.retrieve(user['stripe_customer_id'])
@@ -583,7 +595,7 @@ def get_data():
             # METERED PAYWALL LOGIC
             if 'user_email' in session:
                 user = get_user_by_email(session['user_email'])
-                if user['subscription_status'] == 'premium' or user['subscription_status'] == 'standard' or user['click_count'] < 5:
+                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 5:
                     username = request.form.get('username')
                     gametype = request.form.get('gametype')
 
@@ -796,7 +808,7 @@ def get_data_private():
             # METERED PAYWALL LOGIC
             if 'user_email' in session:
                 user = get_user_by_email(session['user_email'])
-                if user['subscription_status'] == 'premium' or user['subscription_status'] == 'standard' or user['click_count'] < 5:
+                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 5:
 
                     username_private = request.form.get('usernamePrivate')
                     password = request.form.get('showdown_pw')
@@ -1115,7 +1127,8 @@ def villain_comp_link(comp_id):
 ############################################################
 # SUBSCRIPTION FUNCTIONALITY
 ############################################################
-@app.route('/update_subscription', methods=['POST'])
+'''TESTING
+@app.route('/update_subscription', methods=['GET','POST'])
 def update_subscription():
     if 'user_email' in session:
         user = get_user_by_email(session['user_email'])
@@ -1124,8 +1137,8 @@ def update_subscription():
             new_subscription_price_id = request.form.get('subscription_price_id')
 
             # Update the subscription status on Stripe and in your database
-            if update_stripe_subscription(user['stripe_customer_id'], new_subscription_price_id):
-                update_subscription_status(user['user_email'], new_subscription_price_id)
+            if update_stripe_subscription(user[3], new_subscription_price_id):
+                update_subscription_status(user[0], new_subscription_price_id)
                 flash('Subscription updated successfully!')
                 return redirect(url_for('main'))  # Redirect to the home page or another relevant page
             else:
@@ -1134,6 +1147,7 @@ def update_subscription():
     flash('Please log in to update your subscription.')
     return redirect(url_for('login'))
 
+'''
 
 @app.route('/pricing',methods=["GET","POST"])
 def subscriptions():
