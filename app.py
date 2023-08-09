@@ -43,8 +43,9 @@ from flask import g, flash
 import stripe
 from stripe import SignatureVerificationError
 
-import psycopg2
-from dotenv import load_dotenv
+# IMPORT DB functionality from database.py
+from database import connect_to_db, close_connection, DatabaseHandler
+
 
 
 #for testing:
@@ -144,58 +145,42 @@ redis_client = redis.Redis.from_url(
 # CONFIGURE DATABASE
 ####################################################
 def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(app.config['DATABASE_URL'])
-        g.db.row_factory = sqlite3.Row
-    return g.db
+    return connect_to_db()
 
+#called automatically at end of each request :)
 @app.teardown_appcontext
 def close_db(error):
-    if hasattr(g, 'db'):
-        g.db.close()
+    close_connection()
 
 
 ####################################################
 # FUNCTIONS FOR USER PROFILES IN OUR DATABASE
 ####################################################
-def create_user(user_email, subscription_status='free', use_counter=0):
+def create_user(user_email, subscription_status='free', click_count=0, stripe_customer_id=''):
     db = get_db()
-    db.execute('INSERT INTO users (email, subscription_status, use_counter) VALUES (?, ?, ?)',
-               (user_email, subscription_status, use_counter))
+    db.execute('INSERT INTO serapis_schema.serapis_users (email, subscription_status, click_count, stripe_customer_id) VALUES (?, ?, ?, ?)',
+               (user_email, subscription_status, click_count, stripe_customer_id))
     db.commit()
 
 def get_user_by_email(user_email):
     db = get_db()
-    return db.execute('SELECT * FROM users WHERE user_email = ?', (user_email,)).fetchone()
+    return db.execute('SELECT * FROM serapis_schema.serapis_users WHERE email = ?', (user_email,)).fetchone()
 
 def update_subscription_status(user_email, new_status):
     db = get_db()
-    db.execute('UPDATE users SET subscription_status = ? WHERE user_email = ?', (new_status, user_email))
+    db.execute('UPDATE serapis_schema.serapis_users SET subscription_status = ? WHERE email = ?', (new_status, user_email))
     db.commit()
 
 def increment_click_count(user_email):
     db = get_db()
-    db.execute('UPDATE users SET use_counter = use_counter + 1 WHERE user_email = ?', (user_email,))
+    db.execute('UPDATE serapis_schema.serapis_users SET click_count = click_count + 1 WHERE email = ?', (user_email,))
     db.commit()
 
 
 def update_stripe_customer_id(user_email, stripe_customer_id):
     db = get_db()
-    db.execute('UPDATE users SET stripe_customer_id = ? WHERE user_email = ?', (stripe_customer_id, user_email))
+    db.execute('UPDATE serapis_schema.serapis_users SET stripe_customer_id = ? WHERE email = ?', (stripe_customer_id, user_email))
     db.commit()
-
-# Function to create a Stripe customer and store the customer ID in the database
-def create_stripe_customer_and_store_id(user_email, subscription_price_id):
-    # Create a customer in Stripe
-    customer = stripe.Customer.create(
-        email=user_email,
-        source='tok_visa',  # A test card token, replace with actual payment method details
-    )
-
-    # Update the existing user's Stripe customer ID in the database
-    update_stripe_customer_id(user_email, customer.id)
-
-    return customer
 
 
 ####################################################
@@ -204,7 +189,7 @@ def create_stripe_customer_and_store_id(user_email, subscription_price_id):
 # Function to get user's subscription status from the database
 def get_subscription_status(user_email):
     db = get_db()  # Replace with your database retrieval logic
-    user = db.execute('SELECT * FROM users WHERE email = ?', (user_email,)).fetchone()
+    user = db.execute('SELECT * FROM serapis_schema.serapis_users WHERE email = ?', (user_email,)).fetchone()
     if user:
         return user['subscription_status']
     return 'free'  # Default to 'free' if user is not found
@@ -212,7 +197,7 @@ def get_subscription_status(user_email):
 
 def update_subscription_status(user_email, new_status):
     db = get_db()
-    db.execute('UPDATE users SET subscription_status = ? WHERE user_email = ?', (new_status, user_email))
+    db.execute('UPDATE serapis_schema.serapis_users SET subscription_status = ? WHERE email = ?', (new_status, user_email))
     db.commit()
 
 def update_stripe_subscription(user_email, new_subscription_type):
@@ -598,7 +583,7 @@ def get_data():
             # METERED PAYWALL LOGIC
             if 'user_email' in session:
                 user = get_user_by_email(session['user_email'])
-                if user['subscription_status'] == 'premium' or user['subscription_status'] == 'standard' or user['use_counter'] < 5:
+                if user['subscription_status'] == 'premium' or user['subscription_status'] == 'standard' or user['click_count'] < 5:
                     username = request.form.get('username')
                     gametype = request.form.get('gametype')
 
@@ -811,7 +796,7 @@ def get_data_private():
             # METERED PAYWALL LOGIC
             if 'user_email' in session:
                 user = get_user_by_email(session['user_email'])
-                if user['subscription_status'] == 'premium' or user['subscription_status'] == 'standard' or user['use_counter'] < 5:
+                if user['subscription_status'] == 'premium' or user['subscription_status'] == 'standard' or user['click_count'] < 5:
 
                     username_private = request.form.get('usernamePrivate')
                     password = request.form.get('showdown_pw')
