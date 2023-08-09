@@ -280,7 +280,7 @@ def update_subscription_status(stripe_customer_id, new_status):
         cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, user_email))
         db.commit()
         close_connection(db,cursor) # close db
-        print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_idl}')
+        print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_id}')
     except Exception as e:
         db.rollback()
         close_connection(db,cursor) # close db
