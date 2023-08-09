@@ -40,6 +40,8 @@ from requests.sessions import Session
 from flask_session import Session
 import sqlite3
 from flask import g, flash 
+import stripe
+from stripe import SignatureVerificationError
 
 #for testing:
 #sample_username="Broskander" 
@@ -72,12 +74,18 @@ redis_connection = redis.StrictRedis(host=redis_host, port=redis_port, password=
 # Set the Redis connection object as SESSION_REDIS
 app.config['SESSION_REDIS'] = redis_connection
 
-#need secret key to save browser across sessions
-#comment out for heroku deployment
-app.secret_key = '3cef30899fc8ae609a4f6b7dce06617cb7440fbb8297597fd262055b4bb7dcd6'
+#DB URL 
+app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL')
 
-#comment in for heroku deployment
-#app.secret_key = os.environ.get('FLASK_SECRET_KEY')
+
+app.secret_key = os.environ.get('FLASK_SECRET_KEY')
+
+stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
+# This is your Stripe CLI webhook secret for testing your endpoint locally.
+endpoint_secret = 'whsec_8759ba8d433ed4026939d462faa19451fa6e83ac6a016c14f271a80259120607'
+
+PREMIUM_PRICE_ID = 'price_1NchwKDypgtvgAYhILRJc3RP'
+STANDARD_PRICE_ID = 'price_1NchuvDypgtvgAYhETrGiaoo'
 
 Session(app)
 
@@ -132,11 +140,9 @@ redis_client = redis.Redis.from_url(
 ####################################################
 # CONFIGURE DATABASE
 ####################################################
-app.config['DATABASE'] = 'your_database.db'
-
 def get_db():
     if 'db' not in g:
-        g.db = sqlite3.connect(app.config['DATABASE'])
+        g.db = sqlite3.connect(app.config['DATABASE_URL'])
         g.db.row_factory = sqlite3.Row
     return g.db
 
@@ -168,6 +174,137 @@ def increment_click_count(user_email):
     db = get_db()
     db.execute('UPDATE users SET use_counter = use_counter + 1 WHERE user_email = ?', (user_email,))
     db.commit()
+
+
+def update_stripe_customer_id(user_email, stripe_customer_id):
+    db = get_db()
+    db.execute('UPDATE users SET stripe_customer_id = ? WHERE user_email = ?', (stripe_customer_id, user_email))
+    db.commit()
+
+# Function to create a Stripe customer and store the customer ID in the database
+def create_stripe_customer_and_store_id(user_email, subscription_price_id):
+    # Create a customer in Stripe
+    customer = stripe.Customer.create(
+        email=user_email,
+        source='tok_visa',  # A test card token, replace with actual payment method details
+    )
+
+    # Update the existing user's Stripe customer ID in the database
+    update_stripe_customer_id(user_email, customer.id)
+
+    return customer
+
+
+####################################################
+# SUBSCRIPTION UPDATE FUNCTIONS
+####################################################
+# Function to get user's subscription status from the database
+def get_subscription_status(user_email):
+    db = get_db()  # Replace with your database retrieval logic
+    user = db.execute('SELECT * FROM users WHERE email = ?', (user_email,)).fetchone()
+    if user:
+        return user['subscription_status']
+    return 'free'  # Default to 'free' if user is not found
+
+
+def update_subscription_status(user_email, new_status):
+    db = get_db()
+    db.execute('UPDATE users SET subscription_status = ? WHERE user_email = ?', (new_status, user_email))
+    db.commit()
+
+def update_stripe_subscription(user_email, new_subscription_type):
+    try:
+        # Retrieve the Stripe customer ID from your database
+        user = get_user_by_email(user_email)
+        if not user or not user['stripe_customer_id']:
+            return False
+
+        # Set the Stripe API key
+        stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
+
+
+        # Get the customer from Stripe
+        customer = stripe.Customer.retrieve(user['stripe_customer_id'])
+
+        # Find the IDs of the old and new subscription plans
+        old_subscription_id = customer.subscriptions.data[0].id
+        if new_subscription_type == 'premium':
+            new_subscription_price_id = PREMIUM_PRICE_ID
+        elif new_subscription_type == 'standard':
+            new_subscription_price_id = STANDARD_PRICE_ID
+
+        # Update the subscription plan
+        customer.subscriptions.modify(
+            old_subscription_id,
+            items=[{
+                'id': customer.subscriptions.data[0].items.data[0].id,
+                'price': new_subscription_price_id,
+            }],
+        )
+
+        return True
+    except stripe.error.StripeError:
+        return False
+
+
+####################################################
+# STRIPE WEBHOOK LISTENERS
+####################################################
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    event = None
+    payload = request.data
+    sig_header = request.headers['STRIPE_SIGNATURE']
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        raise e
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        raise e
+
+    # Update subscription if stripe payment succeeds
+    if event['type'] == 'invoice.payment_succeeded':
+        # Extract relevant information from the event
+        subscription_id = event['data']['object']['subscription']
+        customer_id = event['data']['object']['customer']
+        subscription = stripe.Subscription.retrieve(subscription_id)
+
+        # Determine the new subscription status based on the subscription type
+        if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+            new_subscription_status = 'premium'
+        elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+            new_subscription_status = 'standard'
+
+        # Update the user's subscription status in the database
+        update_subscription_status(customer_id, new_subscription_status)
+
+    # If a user cancels
+    elif event['type'] == 'subscription_schedule.canceled':
+        subscription_schedule_id = event['data']['object']['id']
+        customer_id = event['data']['object']['customer']
+        
+        # Update the user's subscription status in the database to reflect cancellation
+        update_subscription_status(customer_id, 'canceled')
+
+    #user deletes subscription
+    elif event['type'] == 'customer.subscription.deleted':
+        subscription_id = event['data']['object']['id']
+        customer_id = event['data']['object']['customer']
+        
+        # Update the user's subscription status in the database to reflect subscription deletion
+        update_subscription_status(customer_id, 'deleted')
+
+    # ... handle other event types
+    else:
+      print('Unhandled event type {}'.format(event['type']))
+
+    return jsonify(success=True)
+
 
 
 ####################################################
@@ -458,7 +595,7 @@ def get_data():
             # METERED PAYWALL LOGIC
             if 'user_email' in session:
                 user = get_user_by_email(session['user_email'])
-                if user['subscription_status'] == 'premium' or user['use_counter'] < 5:
+                if user['subscription_status'] == 'premium' or user['subscription_status'] == 'standard' or user['use_counter'] < 5:
                     username = request.form.get('username')
                     gametype = request.form.get('gametype')
 
@@ -671,7 +808,7 @@ def get_data_private():
             # METERED PAYWALL LOGIC
             if 'user_email' in session:
                 user = get_user_by_email(session['user_email'])
-                if user['subscription_status'] == 'premium' or user['use_counter'] < 5:
+                if user['subscription_status'] == 'premium' or user['subscription_status'] == 'standard' or user['use_counter'] < 5:
 
                     username_private = request.form.get('usernamePrivate')
                     password = request.form.get('showdown_pw')
@@ -988,13 +1125,40 @@ def villain_comp_link(comp_id):
     return render_template("villain_comp_data.html", num_games=num_games, loss_rate=loss_rate, num_losses=num_losses, result = output_html)
 
 ############################################################
-# LINK TO TEST HTML
+# SUBSCRIPTION FUNCTIONALITY
 ############################################################
+@app.route('/update_subscription', methods=['POST'])
+def update_subscription():
+    if 'user_email' in session:
+        user = get_user_by_email(session['user_email'])
+
+        if request.method == 'POST':
+            new_subscription_price_id = request.form.get('subscription_price_id')
+
+            # Update the subscription status on Stripe and in your database
+            if update_stripe_subscription(user['stripe_customer_id'], new_subscription_price_id):
+                update_subscription_status(user['user_email'], new_subscription_price_id)
+                flash('Subscription updated successfully!')
+                return redirect(url_for('main'))  # Redirect to the home page or another relevant page
+            else:
+                flash('Failed to update subscription. Please try again or contact support.')
+                return redirect(url_for('update_subscription'))
+    flash('Please log in to update your subscription.')
+    return redirect(url_for('login'))
+
+
 @app.route('/pricing',methods=["GET","POST"])
 def subscriptions():
-    if 'user_id' in session:
+    if 'user_email' in session:
         user = get_user_by_email(session['user_email'])
-        return render_template('stripe.html', user=user)
+
+        # List of subscription plans and their price IDs
+        subscription_plans = [
+            {'name': 'premium', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'},
+            {'name': 'standard', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'}
+        ]
+
+        return render_template('stripe.html', user=user, subscription_plans=subscription_plans)
     flash('Please log in to subscribe.')
     return redirect(url_for('login'))
 
