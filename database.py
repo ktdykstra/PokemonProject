@@ -10,6 +10,31 @@ DATABASE_URL = os.environ.get('DATABASE_URL') #for when deployed
 conn=psycopg2.connect(DATABASE_URL, sslmode='require')
 cursor=conn.cursor()
 
+def connect_to_db():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cursor = conn.cursor()
+    return conn, cursor
+
+def close_connection(conn, cursor):
+    cursor.close()
+    conn.close()
+
+
+class DatabaseHandler:
+    def __init__(self):
+        self.conn, self.cursor = connect_to_db()
+
+    def get_data(self):
+        try:
+            self.cursor.execute("SELECT * FROM serapis_schema.serapis_users;")
+            rows = self.cursor.fetchall()
+            return rows
+        except Exception as e:
+            print("Error:", e)
+
+    def close(self):
+        close_connection(self.conn, self.cursor)
+
 ## table name is third_schema.serapis_users
 
 ## create schema
