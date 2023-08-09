@@ -211,12 +211,12 @@ def update_subscription_and_customer_id(customer_id, new_subscription_status):
                (new_subscription_status, customer_id, customer_id))
     db.commit()
 
-def update_subscription_status(user_email, new_status):
+def update_subscription_status(stripe_customer_id, new_status):
     db, cursor = get_db()
-    cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, user_email))
+    cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE stripe_customer_id = %s', (new_status, customer_id))
     db.commit()
     cursor.close()
-    print(f'Subscription status changed: {user_email}')
+    print(f'Subscription status changed for customer ID: {customer_id}')
 
 def update_stripe_subscription(user_email, new_subscription_type):
     try:
@@ -285,7 +285,7 @@ def webhook():
             new_subscription_status = 'standard'
 
         # Update the user's subscription status in the database
-        update_subscription_status(customer_id, new_subscription_status)
+        update_subscription_and_customer_id(customer_id, new_subscription_status)
 
     # If a user cancels
     elif event['type'] == 'subscription_schedule.canceled':
@@ -293,7 +293,7 @@ def webhook():
         customer_id = event['data']['object']['customer']
         
         # Update the user's subscription status in the database to reflect cancellation
-        update_subscription_status(customer_id, 'canceled')
+        update_subscription_and_customer_id(customer_id, 'canceled')
 
     #user deletes subscription
     elif event['type'] == 'customer.subscription.deleted':
@@ -301,7 +301,7 @@ def webhook():
         customer_id = event['data']['object']['customer']
         
         # Update the user's subscription status in the database to reflect subscription deletion
-        update_subscription_status(customer_id, 'deleted')
+        update_subscription_and_customer_id(customer_id, 'deleted')
 
     elif event['type'] == 'checkout.session.async_payment_succeeded':
         # Handle checkout.session.async_payment_succeeded event
