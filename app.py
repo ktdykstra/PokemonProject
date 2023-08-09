@@ -231,10 +231,24 @@ def get_google_user_email(access_token):
 
 
 ####################################################
-# LOGOUT FXN
+# LOGOUT FUNCTIONALITY
 ####################################################
+def clear_user_cache():
+    # Retrieve the user email and showdown username from the session
+    user_email = session.get('user_email')
+    showdown_username = session.get('showdown_username')
+
+    if user_email is not None and showdown_username is not None:
+        # Construct the cache key using the user's email and showdown username
+        cache_key = f'user_df:{user_email}:{showdown_username}'
+        # Delete the cache entry
+        redis_client.delete(cache_key)
+
 @app.route('/logout')
 def logout():
+    # Clear the user's cache
+    clear_user_cache()
+    
     # Clear session data to log the user out
     session.clear()
     return redirect(url_for('login'))
