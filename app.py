@@ -41,7 +41,7 @@ from flask_session import Session
 import sqlite3
 from flask import g, flash 
 import stripe
-from stripe import SignatureVerificationError
+from stripe.error import SignatureVerificationError
 
 # IMPORT DB functionality from database.py
 from database import connect_to_db, close_connection, DatabaseHandler
