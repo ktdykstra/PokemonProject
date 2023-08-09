@@ -165,6 +165,7 @@ def create_user(user_email, subscription_status='free', click_count=0, stripe_cu
                    (user_email, subscription_status, click_count, stripe_customer_id))
     db.commit()
     cursor.close()
+    print(f'User Created: {user_email}')
 
 def get_user_by_email(user_email):
     db, cursor = get_db()
@@ -173,17 +174,12 @@ def get_user_by_email(user_email):
     cursor.close()  # Close the cursor
     return user
 
-def update_subscription_status(user_email, new_status):
-    db, cursor = get_db()
-    cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = ? WHERE email = %s', (new_status, user_email))
-    db.commit()
-    cursor.close()
-
 def increment_click_count(user_email):
     db, cursor = get_db()
     cursor.execute('UPDATE serapis_schema.serapis_users SET click_count = click_count + 1 WHERE email = %s', (user_email,))
     db.commit()
     cursor.close()
+    print(f'Click count incremented: {user_email}')
 
 
 def update_stripe_customer_id(user_email, stripe_customer_id):
@@ -191,6 +187,7 @@ def update_stripe_customer_id(user_email, stripe_customer_id):
     cursor.execute('UPDATE serapis_schema.serapis_users SET stripe_customer_id = ? WHERE email = %s', (stripe_customer_id, user_email))
     db.commit()
     cursor.close()
+    print(f'Stripe ID updated: {user_email}')
 
 
 ####################################################
@@ -206,13 +203,12 @@ def get_subscription_status(user_email):
         return user[0]
     return 'free'
 
-
-
 def update_subscription_status(user_email, new_status):
     db, cursor = get_db()
     cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, user_email))
     db.commit()
     cursor.close()
+    print(f'Subscription status changed: {user_email}')
 
 def update_stripe_subscription(user_email, new_subscription_type):
     try:
@@ -245,7 +241,7 @@ def update_stripe_subscription(user_email, new_subscription_type):
         return True
     except stripe.error.StripeError:
         return False
-
+    
 
 ####################################################
 # STRIPE WEBHOOK LISTENERS
@@ -590,12 +586,15 @@ def get_data():
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.get("https://www.google.com/")
 
+        ## INCREMENT CLICK COUNT IN DB FOR USER
+        increment_click_count(session['user_email'])
+
         #print("DRIVER:", driver)
         if request.method == 'POST':
             # METERED PAYWALL LOGIC
             if 'user_email' in session:
                 user = get_user_by_email(session['user_email'])
-                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 5:
+                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
                     username = request.form.get('username')
                     gametype = request.form.get('gametype')
 
@@ -609,9 +608,6 @@ def get_data():
 
                         #update value of df1 in cache
                         set_user_df1(df1)
-
-                        ## INCREMENT CLICK COUNT IN DB FOR USER
-                        increment_click_count(session['user_email'])
 
                         #print(output)
                         # hero individual plot
@@ -803,12 +799,15 @@ def get_data_private():
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.get("https://www.google.com/")
 
+        ## INCREMENT CLICK COUNT IN DB FOR USER
+        increment_click_count(session['user_email'])
+
         if request.method == 'POST':
 
             # METERED PAYWALL LOGIC
             if 'user_email' in session:
                 user = get_user_by_email(session['user_email'])
-                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 5:
+                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
 
                     username_private = request.form.get('usernamePrivate')
                     password = request.form.get('showdown_pw')
@@ -830,8 +829,7 @@ def get_data_private():
                         #update value of df1 in cache
                         set_user_df1(df1)
 
-                        ## INCREMENT CLICK COUNT IN DB FOR USER
-                        increment_click_count(session['user_email'])
+                        
 
                         #print(output)
                         # hero individual plot
@@ -1127,7 +1125,15 @@ def villain_comp_link(comp_id):
 ############################################################
 # SUBSCRIPTION FUNCTIONALITY
 ############################################################
-'''TESTING
+@app.route('/subscription_success')
+def subscription_success():
+    return render_template('subscription_success.html')
+
+@app.route('/subscription_cancel')
+def subscription_cancel():
+    return render_template('subscription_cancel.html')
+
+
 @app.route('/update_subscription', methods=['GET','POST'])
 def update_subscription():
     if 'user_email' in session:
@@ -1138,19 +1144,34 @@ def update_subscription():
 
             # Update the subscription status on Stripe and in your database
             if update_stripe_subscription(user[3], new_subscription_price_id):
-                update_subscription_status(user[0], new_subscription_price_id)
-                flash('Subscription updated successfully!')
-                return redirect(url_for('main'))  # Redirect to the home page or another relevant page
-            else:
-                flash('Failed to update subscription. Please try again or contact support.')
-                return redirect(url_for('update_subscription'))
+                # Create a Stripe Checkout session
+                session = stripe.checkout.Session.create(
+                customer_email=user['user_email'],
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price': new_subscription_price_id,  # Replace with the appropriate price ID
+                        'quantity': 1,
+                    },
+                ],
+                mode='subscription',
+                success_url=url_for('subscription_success', _external=True),  # Replace with your success URL
+                cancel_url=url_for('subscription_cancel', _external=True),    # Replace with your cancel URL
+                )
+
+                # Redirect the user to the Stripe Checkout session
+                return redirect(session.url)
+
+        # Handle the GET request for rendering the update subscription form
+        return render_template('update_subscription.html', user=user)
+
     flash('Please log in to update your subscription.')
     return redirect(url_for('login'))
 
-'''
+
 
 @app.route('/pricing',methods=["GET","POST"])
-def subscriptions():
+def pricing():
     if 'user_email' in session:
         user = get_user_by_email(session['user_email'])
 

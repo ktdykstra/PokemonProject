@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <!--for google acct-->
+    <meta name="google-site-verification" content="88Jzu0jlj9WCaOWzTlKW6Ffi5ugaMmN2_Cqe8LJxVfI" />
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -22,7 +25,17 @@ https://templatemo.com/tm-535-softy-pinko
 
     <link rel="stylesheet" type="text/css"
         href="{{ url_for('static', filename='assets/css/templatemo-softy-pinko.css') }}">
-    
+
+        <style>
+            /* CSS to center the form */
+            .form-wrapper {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh; /* This will center the form vertically */
+            }
+        </style>
+    <!-- Google Analytics Tracking Code -->
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-REK63QPEPV"></script>
     <script>
@@ -34,6 +47,11 @@ https://templatemo.com/tm-535-softy-pinko
     </script>
 
 </head>
+
+<!--GOOGLE ADSENSE TAGS-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5250156251208133"
+     crossorigin="anonymous"></script>
+
 <body>
 
     <!-- ***** Preloader Start ***** -->
@@ -59,11 +77,11 @@ https://templatemo.com/tm-535-softy-pinko
                         </a>
                         <!-- ***** Logo End ***** -->
                         <!--Text Start-->
-                        <p style = "display: inline-block; justify-content: center; align-items: center; color: rgb(28 130 28);padding-top:3px;" class = "logo">Serapis</p>
+                        <p style = "display: inline-block; justify-content: center; align-items: center; color: rgb(28 130 28); padding-top:3px;" class = "logo">Serapis</p>
                         <!--Text End-->
                         <!-- ***** Menu Start ***** -->
                         <ul class="nav">
-                            <li><a href="/main" class="active">Home</a></li>
+                            li><a href="/main" class="active">Home</a></li>
                             <!--<li><a href="#data">Analytics</a></li>-->
                             <li><a href="/pricing">Pricing</a></li>
                         </ul>
@@ -77,63 +95,28 @@ https://templatemo.com/tm-535-softy-pinko
         </div>
     </header>
     <!-- ***** Header Area End ***** -->
-    <section class="section colored" style="padding-top:10%;" >
+
+    <div class="row">
+
+    </div>
+    <!-- ***** Email Collection Start ***** -->
+    <section class="section colored" >
         <div class="container">
             <!-- ***** Section Title Start ***** -->
-            <div class="row">
+            <div class="row" style="padding-top: 50px">
                 <div class="col-lg-12">
-                    <div class="center-heading" style="padding-bottom: 20px;">
-                        <h2 class="section-title"> <strong> Serapis Pricing </strong></h2>
-                        <p> First 5 uses 100% FREE! After you find out you love Serapis, select a subscription option below. Help us keep our servers running! </p>
+                    <div class="center-heading">
+                        <h2 class="section-title">Thank you for subscribing to Serapis. We are so excited to have you!</h2>
                     </div>
                 </div>
             </div>
+
             <!-- ***** Section Title End ***** -->
 
-            <div class="row">
-                <div class="col-lg-12">
-                    <form method="post" action="{{ url_for('update_subscription') }}">
-                        <stripe-pricing-table pricing-table-id="prctbl_1NciHZDypgtvgAYhjZArg4yj"
-                        publishable-key="pk_test_51NchgQDypgtvgAYh43m3w8KWYAah51w7OvDgwvVmizsb4utvaPFgjUTSoYMlAg3zLc7VBlzgeJqXRIGFdpXsNppD00t6RgJjXM">
-                        </stripe-pricing-table>
-                        
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const form = document.getElementById('subscription-form');
-                                const priceIdInput = document.getElementById('subscription_price_id');
-                                const pricingTable = document.querySelector('stripe-pricing-table');
-                                
-                                pricingTable.addEventListener('pricing-table-selected', function(event) {
-                                    const selectedPriceId = event.detail.priceId;
-                                    priceIdInput.value = selectedPriceId;
-                                });
-                                
-                                form.addEventListener('submit', function(event) {
-                                    if (!priceIdInput.value) {
-                                        event.preventDefault();
-                                        alert('Please select a subscription plan.');
-                                    }
-                                });
-                            });
-                        </script>
-
-                        <input type="hidden" id="subscription_price_id" name="subscription_price_id" value="">
-
-                        <button class="main-button" type="submit">Subscribe Now</button>
-                    </form>
-                    
-                    <script>
-                        // Handle click event on the pricing table buttons
-                        document.addEventListener("pricingtable:clicked", function(event) {
-                            const selectedPriceId = event.detail.selectedPricingItemId;
-                            document.getElementById("subscription_price_id").value = selectedPriceId;
-                        });
-                    </script>
-                    <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
-                </div>
-            </div>
         </div>
     </section>
+    <!-- ***** Email Collection End ***** -->
+  
 
     <!-- ***** Footer Start ***** -->
     <footer>
@@ -141,8 +124,9 @@ https://templatemo.com/tm-535-softy-pinko
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12">
                     <p style="color:white; text-align:center;">Please direct questions or concerns to rowananalytics2@gmail.com.</p>
-                    <p style="color:white; text-align:center;">Pokémon trademarks remain under the scope of Nintendo, all other functionality provided remains property of Rowan Analytics</p>
+                    <p style="color:white; text-align:center;">Pokémon trademarks remain under the scope of Nintendo, all other functionality provided remains property of Rowan Analytics.</p>
                     <ul class="social" style="padding-top: 30px;">
+                        
                         <li><a href="https://twitter.com/RowanAnalytics"><i class="fa fa-twitter"></i></a></li>
                         <li><a href="https://www.linkedin.com/company/rowan-analytics/?viewAsMember=true"><i class="fa fa-linkedin"></i></a></li>
                     </ul>
@@ -156,6 +140,7 @@ https://templatemo.com/tm-535-softy-pinko
             </div>
         </div>
     </footer>
+
 
 
     <!-- jQuery -->
@@ -174,6 +159,11 @@ https://templatemo.com/tm-535-softy-pinko
     <!-- Global Init -->
     <script src="/static/assets/js/custom.js"></script>
 
+   
+
+
+
 
 </body>
+
 </html>
