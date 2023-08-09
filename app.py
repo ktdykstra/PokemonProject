@@ -267,28 +267,57 @@ def get_subscription_status(user_email):
         print(f"Unable to get subscription status for user: {user_email}. Error:",e)
         return
 
-def update_subscription_and_customer_id(customer_id, new_subscription_status):
-    # Update subscription status and customer ID in your database
-    db, cursor = get_db()
-    cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s, stripe_customer_id = %s WHERE stripe_customer_id = %s',
-               (new_subscription_status, customer_id, customer_id))
-    db.commit()
-
-def update_subscription_status(stripe_customer_id, new_status):
+## updating stripe customer id for first-time subscriber
+def new_customer_id(user_email, new_customer_id):
     db, cursor = get_db()
     try:
-        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, user_email))
+        cursor.execute('UPDATE serapis_schema.serapis_users SET stripe_customer_id = %s WHERE email = %s', (new_customer_id, user_email))
         db.commit()
         close_connection(db,cursor) # close db
-        print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_idl}')
+        print(f'Stripe customer ID status added as {new_customer_id} for user with email: {user_email}')
+    except Exception as e:
+        db.rollback()
+        close_connection(db,cursor) # close db
+        print(f"Unable to create stripe customer ID for customer: {user_email}. Error:",e)
+    return
+
+## for updating subscriptions once stripe customer id exists
+def update_subscription_and_customer_id(stripe_customer_id, new_status):
+    db, cursor = get_db()
+    try:
+        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE stripe_customer_id = %s', (new_status, stripe_customer_id))
+        db.commit()
+        close_connection(db,cursor) # close db
+        print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_id}')
     except Exception as e:
         db.rollback()
         close_connection(db,cursor) # close db
         print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
+    # # Update subscription status AND stripe customer id IFF stripe customer id is ""
+    # if stripe_customer_id =="":
+
+    # db, cursor = get_db()
+    # try:
+
+    # cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s, stripe_customer_id = %s WHERE stripe_customer_id = %s',
+    #            (new_subscription_status, customer_id, customer_id))
+    # db.commit()
+
+# def update_subscription_status(stripe_customer_id, new_status):
+#     db, cursor = get_db()
+#     try:
+#         cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE stripe_customer_id = %s', (new_status, stripe_customer_id))
+#         db.commit()
+#         close_connection(db,cursor) # close db
+#         print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_id}')
+#     except Exception as e:
+#         db.rollback()
+#         close_connection(db,cursor) # close db
+#         print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
 
 
-## confusing
-def update_stripe_subscription(user_email, new_subscription_type):
+## allows someone to change their stripe subscription. Communicates with stripe, not the database
+def change_stripe_subscription(user_email, new_subscription_type):
     try:
         user = get_user_by_email(user_email)
         if not user or not user[3]:
@@ -298,7 +327,7 @@ def update_stripe_subscription(user_email, new_subscription_type):
         stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
 
         # Get the customer from Stripe
-        customer = stripe.Customer.retrieve(user['stripe_customer_id'])
+        customer = stripe.Customer.retrieve(user[3])
 
         # Find the IDs of the old and new subscription plans
         old_subscription_id = customer.subscriptions.data[0].id
@@ -316,9 +345,10 @@ def update_stripe_subscription(user_email, new_subscription_type):
             }],
         )
 
-        return True
+        return
     except stripe.error.StripeError:
-        return False
+        print("Error in subscription adjustment for this subscriber in Stripe")
+        return
     
 
 ####################################################
@@ -1313,25 +1343,29 @@ def update_subscription():
         if request.method == 'POST':
             new_subscription_price_id = request.form.get('subscription_price_id')
 
-            # Update the subscription status on Stripe and in your database
-            if update_stripe_subscription(user[3], new_subscription_price_id):
-                # Create a Stripe Checkout session
-                session = stripe.checkout.Session.create(
-                customer_email=user['user_email'],
-                payment_method_types=['card'],
-                line_items=[
-                    {
-                        'price': new_subscription_price_id,  # Replace with the appropriate price ID
-                        'quantity': 1,
-                    },
-                ],
-                mode='subscription',
-                success_url=url_for('subscription_success', _external=True),  # Replace with your success URL
-                cancel_url=url_for('subscription_cancel', _external=True),    # Replace with your cancel URL
-                )
+            ## check if existing subscriber
+            subscriber=False
+            if user[3]=="":
+                subscriber=True
 
-                # Redirect the user to the Stripe Checkout session
-                return redirect(session.url)
+            # Create a Stripe Checkout session
+            session = stripe.checkout.Session.create(
+            customer_email=user[0],
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price': new_subscription_price_id,  # Replace with the appropriate price ID
+                    'quantity': 1,
+                },
+            ],
+            mode='subscription',
+            success_url=url_for('subscription_success', _external=True),  # Replace with your success URL
+            cancel_url=url_for('subscription_cancel', _external=True),    # Replace with your cancel URL
+            )
+            # if subscriber=True:
+            #     change_stripe_subscription(user[0],)
+            # Redirect the user to the Stripe Checkout session
+            return redirect(session.url)
 
         # Handle the GET request for rendering the update subscription form
         return render_template('update_subscription.html', user=user)
