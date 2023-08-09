@@ -85,8 +85,9 @@ app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL')
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 
 stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
+
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
-endpoint_secret = 'whsec_8759ba8d433ed4026939d462faa19451fa6e83ac6a016c14f271a80259120607'
+endpoint_secret = 'whsec_y8g6j902YUMrBD7HoeETzGHeF39prUqs'
 
 PREMIUM_PRICE_ID = 'price_1NchwKDypgtvgAYhILRJc3RP'
 STANDARD_PRICE_ID = 'price_1NchuvDypgtvgAYhETrGiaoo'
@@ -203,6 +204,13 @@ def get_subscription_status(user_email):
         return user[0]
     return 'free'
 
+def update_subscription_and_customer_id(customer_id, new_subscription_status):
+    # Update subscription status and customer ID in your database
+    db, cursor = get_db()
+    cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s, stripe_customer_id = %s WHERE stripe_customer_id = %s',
+               (new_subscription_status, customer_id, customer_id))
+    db.commit()
+
 def update_subscription_status(user_email, new_status):
     db, cursor = get_db()
     cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, user_email))
@@ -246,7 +254,7 @@ def update_stripe_subscription(user_email, new_subscription_type):
 ####################################################
 # STRIPE WEBHOOK LISTENERS
 ####################################################
-@app.route('/webhook', methods=['POST'])
+@app.route('/stripe/webhook', methods=['POST'])
 def webhook():
     event = None
     payload = request.data
@@ -295,13 +303,106 @@ def webhook():
         # Update the user's subscription status in the database to reflect subscription deletion
         update_subscription_status(customer_id, 'deleted')
 
+    elif event['type'] == 'checkout.session.async_payment_succeeded':
+        # Handle checkout.session.async_payment_succeeded event
+        handle_checkout_session_async_payment_succeeded(event)
+
+    elif event['type'] == 'checkout.session.completed':
+        # Handle checkout.session.completed event
+        handle_checkout_session_completed(event)
+
+    elif event['type'] == 'customer.subscription.paused':
+        # Handle customer.subscription.paused event
+        handle_subscription_paused(event)
+
+    elif event['type'] == 'customer.subscription.resumed':
+        # Handle customer.subscription.resumed event
+        handle_subscription_resumed(event)
+
+    elif event['type'] == 'invoice.payment_succeeded':
+        # Handle invoice.payment_succeeded event
+        handle_invoice_payment_succeeded(event)
+
+    elif event['type'] == 'plan.updated':
+        # Handle plan.updated event
+        handle_plan_updated(event)
+
     # ... handle other event types
     else:
       print('Unhandled event type {}'.format(event['type']))
 
     return jsonify(success=True)
 
+## FXNS TO HANDLE WEBHOOK EVENT TYPES
 
+def handle_checkout_session_async_payment_succeeded(event):
+    # Handle checkout.session.async_payment_succeeded event
+    # Extract relevant information from the event
+    subscription_id = event['data']['object']['subscription']
+    customer_id = event['data']['object']['customer']
+    subscription = stripe.Subscription.retrieve(subscription_id)
+
+    # Determine the new subscription status based on the subscription type (replace with your logic)
+    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+            new_subscription_status = 'premium'
+    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+
+    # Update the user's subscription status and customer ID in the database
+    update_subscription_and_customer_id(customer_id, new_subscription_status)
+
+
+def handle_checkout_session_completed(event):
+    # Handle checkout.session.completed event
+    # Extract relevant information from the event
+    customer_id = event['data']['object']['customer']
+    subscription_id = event['data']['object']['subscription']
+    subscription = stripe.Subscription.retrieve(subscription_id)
+
+    # Determine the new subscription status based on the subscription type
+    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
+
+    # Update the subscription status and customer ID in your database
+    update_subscription_and_customer_id(customer_id, new_subscription_status)
+
+
+def handle_subscription_paused(event):
+    # Handle customer.subscription.paused event
+    customer_id = event['data']['object']['customer']
+    update_subscription_and_customer_id(customer_id, 'paused')
+
+
+def handle_subscription_resumed(event):
+    # Handle customer.subscription.resumed event
+    customer_id = event['data']['object']['customer']
+    update_subscription_and_customer_id(customer_id, 'resumed')
+
+
+def handle_invoice_payment_succeeded(event):
+    # Handle invoice.payment_succeeded event
+    customer_id = event['data']['object']['customer']
+    subscription_id = event['data']['object']['subscription']
+    subscription = stripe.Subscription.retrieve(subscription_id)
+    
+    # Determine the new subscription status based on the subscription type
+    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
+    
+    update_subscription_and_customer_id(customer_id, new_subscription_status)
+
+
+def handle_plan_updated(event):
+    # Handle plan.updated event
+    pass
 
 ####################################################
 # ROUTES FOR Google Login and Callback 
