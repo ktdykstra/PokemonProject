@@ -1371,7 +1371,7 @@ def subscription_success():
 
 @app.route('/subscription_cancel')
 def subscription_cancel():
-    return render_template('subscription_cancelled.html').
+    return render_template('subscription_cancelled.html')
 
 @app.route('/update_subscription', methods=['POST'])
 def update_subscription():
