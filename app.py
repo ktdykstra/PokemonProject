@@ -1424,10 +1424,30 @@ def update_subscription():
             return jsonify(success=False, error='User not found')
 
 
-@app.route('/pricing',methods=["GET","POST"])
+@app.route('/pricing', methods=["GET", "POST"])
 def pricing():
     if 'user_email' in session:
         user = get_user_by_email(session['user_email'])
+
+        if request.method == 'POST':
+            selected_price_id = request.form.get('selected_price_id')  # Retrieve the selected price ID from the form
+
+            # Create a Stripe Checkout session
+            session = stripe.checkout.Session.create(
+                customer_email=user[0],  # Use the user's email
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price': selected_price_id,  # Use the selected price ID
+                        'quantity': 1,
+                    },
+                ],
+                mode='subscription',
+                success_url=url_for('subscription_success', _external=True),
+                cancel_url=url_for('subscription_cancel', _external=True),
+            )
+
+            return redirect(session.url)  # Redirect the user to the Stripe Checkout session
 
         # List of subscription plans and their price IDs
         subscription_plans = [
@@ -1436,8 +1456,10 @@ def pricing():
         ]
 
         return render_template('stripe.html', user=user, subscription_plans=subscription_plans)
+
     flash('Please log in to subscribe.')
     return redirect(url_for('login'))
+
 
 
 @app.route('/test-mysql-db-connection')
