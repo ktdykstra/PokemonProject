@@ -111,18 +111,26 @@ https://templatemo.com/tm-535-softy-pinko
                                 },
                                 body: JSON.stringify({ sessionID: sessionID, user_email: '{{ user_email }}' }),
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    // Redirect back to your page
-                                    window.location.href = '/subscription_success';
-                                } else {
-                                    window.location.href = '/subscription_cancel';
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                            });
+                                .then(response => {
+                                    if (response.ok) {
+                                        return response.json();
+                                    } else {
+                                        throw new Error('Network response was not ok');
+                                    }
+                                })
+                                .then(data => {
+                                    if (data.success) {
+                                        // Redirect back to your page on successful subscription
+                                        window.location.href = '/subscription_success';
+                                    } else {
+                                        // Redirect to an error page or display an error message
+                                        console.error('Subscription failed');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    // Redirect to an error page or display an error message
+                                });
                             </script>
                             
                 </div>
