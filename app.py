@@ -152,9 +152,9 @@ def get_db():
     return connect_to_db()
 
 #called automatically at end of each request :)
-@app.teardown_appcontext
-def close_db(error):
-    db_handler.close_connection()
+#@app.teardown_appcontext
+#def close_db(error):
+#    db_handler.close_connection()
 
 ## handling INSERT, UPDATE, or DELETE queries
 def CUD_query(query, db, cursor):
