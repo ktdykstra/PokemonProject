@@ -38,6 +38,15 @@ from requests.adapters import BaseAdapter
 from requests.sessions import Session
 
 from flask_session import Session
+import sqlite3
+from flask import g, flash 
+import stripe
+from stripe.error import SignatureVerificationError
+
+# IMPORT DB functionality from database.py
+from database import connect_to_db, close_connection, DatabaseHandler
+import psycopg2
+
 
 #for testing:
 #sample_username="Broskander" 
@@ -70,12 +79,18 @@ redis_connection = redis.StrictRedis(host=redis_host, port=redis_port, password=
 # Set the Redis connection object as SESSION_REDIS
 app.config['SESSION_REDIS'] = redis_connection
 
-#need secret key to save browser across sessions
-#comment out for heroku deployment
-app.secret_key = '3cef30899fc8ae609a4f6b7dce06617cb7440fbb8297597fd262055b4bb7dcd6'
+#DB URL
+app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL')
 
-#comment in for heroku deployment
-#app.secret_key = os.environ.get('FLASK_SECRET_KEY')
+app.secret_key = os.environ.get('FLASK_SECRET_KEY')
+
+stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
+
+# This is your Stripe CLI webhook secret for testing your endpoint locally.
+endpoint_secret = 'whsec_y8g6j902YUMrBD7HoeETzGHeF39prUqs'
+
+PREMIUM_PRICE_ID = 'price_1NchwKDypgtvgAYhILRJc3RP'
+STANDARD_PRICE_ID = 'price_1NchuvDypgtvgAYhETrGiaoo'
 
 Session(app)
 
@@ -126,6 +141,368 @@ redis_client = redis.Redis.from_url(
     app.config['CACHE_REDIS_URL'],
     connection_class=redis.Connection
 )
+
+####################################################
+# CONFIGURE DATABASE
+####################################################
+# Initialize the DatabaseHandler
+# db_handler = DatabaseHandler()
+
+def get_db():
+    return connect_to_db()
+
+#called automatically at end of each request :)
+@app.teardown_appcontext
+def close_db(error):
+    db_handler.close_connection()
+
+## handling INSERT, UPDATE, or DELETE queries
+def CUD_query(query, db, cursor):
+    try:
+        cursor.execute(query)
+        db.commit()
+        print("Successful query!")
+    except Exception as e:
+        db.rollback()
+        print("Error:", e)
+    return
+
+####################################################
+# FUNCTIONS FOR USER PROFILES IN OUR DATABASE
+####################################################
+
+# view all data in user table
+def view_user_data():
+    db, cursor = get_db() # open db
+    try:
+        cursor.execute("SELECT * FROM serapis_schema.serapis_users;")
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+        close_connection(db, cursor) # close db
+        return rows
+    except Exception as e:
+        close_connection(db, cursor) # close db
+        print("Unable to view data. Error:", e)
+        return
+
+## adds entry to the serapis_schema.serapis_users table
+def create_user(user_email, subscription_status='free', click_count=0, stripe_customer_id=''):
+    db, cursor = get_db() # open db
+    try:
+        # check if user exists
+        cursor.execute('SELECT email FROM serapis_schema.serapis_users WHERE email = %s', (user_email,))
+        existing_email = cursor.fetchone()
+        print(existing_email)
+        if existing_email:
+            print(f"User with email {user_email} already exists.")
+            close_connection(db, cursor)  # Close db
+            return
+        
+        # continue with entry
+        cursor.execute('INSERT INTO serapis_schema.serapis_users (email, subscription_status, click_count, stripe_customer_id) VALUES (%s, %s, %s, %s)',
+                   (user_email, subscription_status, click_count, stripe_customer_id))
+        db.commit()
+        print("Successful query! User created: {user_email}")
+    except Exception as e:
+        db.rollback()
+        print("Unable to create user. Error:", e)
+    close_connection(db, cursor) # close db
+    return
+
+## get individual user info filtering by email
+def get_user_by_email(user_email):
+    db, cursor = get_db()
+    try:
+        cursor.execute('SELECT * FROM serapis_schema.serapis_users WHERE email = %s', (user_email,))
+        result = cursor.fetchone()  # Fetch a single row
+        close_connection(db, cursor) # close db
+        print("Good query")
+        return result
+    except Exception as e:
+        close_connection(db, cursor)
+        print("Unable to get user. Error:",e)
+        return
+
+## update clicks
+def increment_click_count(user_email):
+    db, cursor = get_db()
+    try:
+        cursor.execute('UPDATE serapis_schema.serapis_users SET click_count = click_count + 1 WHERE email = %s', (user_email,))
+        db.commit()
+        close_connection(db,cursor) # close db
+        print(f'Click count incremented: {user_email}')
+    except Exception as e:
+         db.rollback()
+         close_connection(db,cursor) # close db
+         print("Unable to update click count. Error:",e)
+
+## update stripe customer ID
+def update_stripe_customer_id(user_email, stripe_customer_id):
+    db, cursor = get_db()
+    try:
+        cursor.execute('UPDATE serapis_schema.serapis_users SET stripe_customer_id = %s WHERE email = %s', (stripe_customer_id, user_email))
+        db.commit()
+        close_connection(db,cursor) # close db
+        print(f'Stripe ID updated to {stripe_customer_id} for user: {user_email}')
+    except Exception as e:
+        db.rollback()
+        close_connection(db,cursor) # close db
+        print(f"Unable to update Stripe ID for user: {user_email}. Error:",e)
+
+####################################################
+# SUBSCRIPTION UPDATE FUNCTIONS
+####################################################
+# Function to get user's subscription status from the database
+def get_subscription_status(user_email):
+    db, cursor = get_db()
+    try:
+        cursor.execute('SELECT subscription_status FROM serapis_schema.serapis_users WHERE email = %s', (user_email,))
+        result = cursor.fetchone()
+        close_connection(db, cursor) # close db
+        print(f"Found subscription status as {result} for user: {user_email}")
+        return result[0]
+    except Exception as e:
+        close_connection(db, cursor)
+        print(f"Unable to get subscription status for user: {user_email}. Error:",e)
+        return
+
+## updating stripe customer id for first-time subscriber
+def new_customer_id(user_email, new_customer_id):
+    db, cursor = get_db()
+    try:
+        cursor.execute('UPDATE serapis_schema.serapis_users SET stripe_customer_id = %s WHERE email = %s', (new_customer_id, user_email))
+        db.commit()
+        close_connection(db,cursor) # close db
+        print(f'Stripe customer ID status added as {new_customer_id} for user with email: {user_email}')
+    except Exception as e:
+        db.rollback()
+        close_connection(db,cursor) # close db
+        print(f"Unable to create stripe customer ID for customer: {user_email}. Error:",e)
+    return
+
+## for updating subscriptions once stripe customer id exists
+def update_subscription_and_customer_id(stripe_customer_id, new_status):
+    db, cursor = get_db()
+    try:
+        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE stripe_customer_id = %s', (new_status, stripe_customer_id))
+        db.commit()
+        close_connection(db,cursor) # close db
+        print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_id}')
+    except Exception as e:
+        db.rollback()
+        close_connection(db,cursor) # close db
+        print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
+    # # Update subscription status AND stripe customer id IFF stripe customer id is ""
+    # if stripe_customer_id =="":
+
+    # db, cursor = get_db()
+    # try:
+
+    # cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s, stripe_customer_id = %s WHERE stripe_customer_id = %s',
+    #            (new_subscription_status, customer_id, customer_id))
+    # db.commit()
+
+# def update_subscription_status(stripe_customer_id, new_status):
+#     db, cursor = get_db()
+#     try:
+#         cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE stripe_customer_id = %s', (new_status, stripe_customer_id))
+#         db.commit()
+#         close_connection(db,cursor) # close db
+#         print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_id}')
+#     except Exception as e:
+#         db.rollback()
+#         close_connection(db,cursor) # close db
+#         print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
+    
+
+####################################################
+# STRIPE WEBHOOK LISTENERS
+####################################################
+@app.route('/stripe/webhook', methods=['POST'])
+def webhook():
+    event = None
+    payload = request.data
+    sig_header = request.headers['STRIPE_SIGNATURE']
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        raise e
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        raise e
+
+    # Update subscription if stripe payment succeeds
+    if event['type'] == 'invoice.payment_succeeded':
+        # Extract relevant information from the event
+        subscription_id = event['data']['object']['subscription']
+        customer_id = event['data']['object']['customer']
+        customer_email = event['data']['object']['customer_details']['email']
+        update_stripe_customer_id(customer_email, customer_id)
+        subscription = stripe.Subscription.retrieve(subscription_id)
+
+        # Determine the new subscription status based on the subscription type
+        if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+            new_subscription_status = 'premium'
+        elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+            new_subscription_status = 'standard'
+
+        # Update the user's subscription status in the database
+        update_subscription_and_customer_id(customer_id, new_subscription_status)
+
+    # If a user cancels
+    elif event['type'] == 'subscription_schedule.canceled':
+        subscription_schedule_id = event['data']['object']['id']
+        customer_id = event['data']['object']['customer']
+        
+        # Update the user's subscription status in the database to reflect cancellation
+        update_subscription_and_customer_id(customer_id, 'canceled')
+
+    #user deletes subscription
+    elif event['type'] == 'customer.subscription.deleted':
+        subscription_id = event['data']['object']['id']
+        customer_id = event['data']['object']['customer']
+        
+        # Update the user's subscription status in the database to reflect subscription deletion
+        update_subscription_and_customer_id(customer_id, 'deleted')
+
+    elif event['type'] == 'checkout.session.async_payment_succeeded':
+        # Handle checkout.session.async_payment_succeeded event
+        handle_checkout_session_async_payment_succeeded(event)
+
+    elif event['type'] == 'checkout.session.completed':
+        # Handle checkout.session.completed event
+        handle_checkout_session_completed(event)
+
+    elif event['type'] == 'customer.subscription.paused':
+        # Handle customer.subscription.paused event
+        handle_subscription_paused(event)
+
+    elif event['type'] == 'customer.subscription.resumed':
+        # Handle customer.subscription.resumed event
+        handle_subscription_resumed(event)
+
+    elif event['type'] == 'invoice.payment_succeeded':
+        # Handle invoice.payment_succeeded event
+        handle_invoice_payment_succeeded(event)
+
+    elif event['type'] == 'plan.updated':
+        # Handle plan.updated event
+        handle_plan_updated(event)
+
+    # ... handle other event types
+    else:
+      print('Unhandled event type {}'.format(event['type']))
+
+    return jsonify(success=True)
+
+## FXNS TO HANDLE WEBHOOK EVENT TYPES
+
+def handle_checkout_session_async_payment_succeeded(event):
+    # Handle checkout.session.async_payment_succeeded event
+    # Extract relevant information from the event
+    subscription_id = event['data']['object']['subscription']
+    customer_id = event['data']['object']['customer']
+    subscription = stripe.Subscription.retrieve(subscription_id)
+    customer_email = event['data']['object']['customer_details']['email']
+    update_stripe_customer_id(customer_email, customer_id)
+
+    # Determine the new subscription status based on the subscription type (replace with your logic)
+    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+            new_subscription_status = 'premium'
+    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+
+    # Update the user's subscription status and customer ID in the database
+    update_subscription_and_customer_id(customer_id, new_subscription_status)
+
+
+def handle_checkout_session_completed(event):
+    # Handle checkout.session.completed event
+    # Extract relevant information from the event
+    customer_id = event['data']['object']['customer']
+    subscription_id = event['data']['object']['subscription']
+    subscription = stripe.Subscription.retrieve(subscription_id)
+    customer_email = event['data']['object']['customer_details']['email']
+    update_stripe_customer_id(customer_email, customer_id)
+
+    # Determine the new subscription status based on the subscription type
+    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
+
+    # Update the subscription status and customer ID in your database
+    update_subscription_and_customer_id(customer_id, new_subscription_status)
+
+
+def handle_subscription_paused(event):
+    # Handle customer.subscription.paused event
+    customer_id = event['data']['object']['customer']
+    update_subscription_and_customer_id(customer_id, 'paused')
+
+
+def handle_subscription_resumed(event):
+    # Handle customer.subscription.resumed event
+    customer_id = event['data']['object']['customer']
+    update_subscription_and_customer_id(customer_id, 'resumed')
+
+
+def handle_invoice_payment_succeeded(event):
+    # Handle invoice.payment_succeeded event
+    customer_id = event['data']['object']['customer']
+    subscription_id = event['data']['object']['subscription']
+    subscription = stripe.Subscription.retrieve(subscription_id)
+    
+    # Determine the new subscription status based on the subscription type
+    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
+    
+    update_subscription_and_customer_id(customer_id, new_subscription_status)
+
+
+def handle_plan_updated(event):
+    # try:
+    #     user = get_user_by_email(user_email)
+    #     if not user or not user[3]:
+    #         return False
+
+    #     # Set the Stripe API key
+    #     stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
+
+    #     # Get the customer from Stripe
+    #     customer = stripe.Customer.retrieve(user[3])
+
+    #     # Find the IDs of the old and new subscription plans
+    #     old_subscription_id = customer.subscriptions.data[0].id
+    #     if new_subscription_type == 'premium':
+    #         new_subscription_price_id = PREMIUM_PRICE_ID
+    #     elif new_subscription_type == 'standard':
+    #         new_subscription_price_id = STANDARD_PRICE_ID
+
+    #     # Update the subscription plan
+    #     customer.subscriptions.modify(
+    #         old_subscription_id,
+    #         items=[{
+    #             'id': customer.subscriptions.data[0].items.data[0].id,
+    #             'price': new_subscription_price_id,
+    #         }],
+    #     )
+    #     return
+    # except stripe.error.StripeError:
+    #     print("Error in subscription adjustment for this subscriber in Stripe")
+    #     return
+    pass
 
 ####################################################
 # ROUTES FOR Google Login and Callback 
@@ -199,6 +576,13 @@ def authorized():
 
     # Store user email address in session
     session['user_email'] = email
+
+    ## ADD USER TO DATABASE
+    # Check if the user already exists in your database
+    user = get_user_by_email(email)
+    if user is None:
+        # If the user doesn't exist, create a new user profile
+        create_user(email)  # Call the create_user function
 
     # Save the access_token in the session (optional, useful for future API calls)
     session['access_token'] = resp['access_token']
@@ -376,6 +760,9 @@ def submit_form():
 @app.route('/main')
 def index():
     #submitted = request.args.get('submitted')
+    if 'user_email' in session:
+        user = get_user_by_email(session['user_email'])
+        return render_template('index.html', user=user)
     return render_template('index.html')
 
 ############################################################
@@ -414,150 +801,162 @@ def get_data():
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.get("https://www.google.com/")
 
+        ## INCREMENT CLICK COUNT IN DB FOR USER
+        increment_click_count(session['user_email'])
+
         #print("DRIVER:", driver)
         if request.method == 'POST':
+            # METERED PAYWALL LOGIC
+            if 'user_email' in session:
+                user = get_user_by_email(session['user_email'])
+                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
+                    username = request.form.get('username')
+                    gametype = request.form.get('gametype')
 
-            username = request.form.get('username')
-            gametype = request.form.get('gametype')
+                    #UPDATE USERNAME IN SESSION
+                    session['showdown_username'] = username
 
-            #UPDATE USERNAME IN SESSION
-            session['showdown_username'] = username
+                    if driver is not None:
+                        ## run the data gathering. all_matches == False 
+                        df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
+                        time.sleep(2)
 
-            if driver is not None:
-                ## run the data gathering. all_matches == False 
-                df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
-                time.sleep(2)
+                        #update value of df1 in cache
+                        set_user_df1(df1)
 
-                #update value of df1 in cache
-                set_user_df1(df1)
-
-                #print(output)
-                # hero individual plot
-                hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
-                villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
-                
-                #df with num_wins, num_games, win_rate
-                overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
-                num_games = str(df2.loc[0, 'num_games'])
-                num_wins = str(df2.loc[0, 'num_wins'])
-                win_rate = str(df2.loc[0, 'win_rate'])
-
-                #dfs with individual hero pokemon winrates and elo scores
-                df_hero_indiv = df_hero_indiv.reset_index()
-                df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
-                df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
-                # df_hero_indiv.to_csv("ind_stats.csv")
-                df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
-                df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
-                
-                #dfs with individual villain pokemon loss rates and elo scores
-                df_villain_indiv = df_villain_indiv.reset_index()
-                df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
-                df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                # df_hero_indiv.to_csv("ind_stats.csv")
-                df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
-                df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
-                
-                #dfs with hero pairs, games and win rates breakdown 
-                df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
-                df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
-                df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
-                heroPairStats = df3.head(5).to_html(index=False)
-                
-                ## villain pair stats
-                df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
-                df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
-                villainPairStats = df4.head(5).to_html(index=False)
-                
-                ## hero comp stats
-                df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
-                df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
-                df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
-                df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
-                sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
-
-                ## hero comp stats
-                df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
-                df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
-                df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
-                sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
-
-                # Define the CSS style for the table
-                table_style = """
-                <style>
-                    table {
-                        border-collapse: collapse;
-                        width: 100%;
-                        max-width: 800px;
-                        margin: auto;
-                        margin-bottom: 1em;
-                    }
-                    
-                    th {
-                        font-weight: bold;
-                        text-align: left;
-                        color: white;
-                        background-color: #9d5bd9;
-                        padding: 0.5em;
-                    }
-                    
-                    tr:hover {
-                        background-color: #a759d13f;
-                    }
-                    
-                    td, th {
-                        border: 1px solid #ddd;
-                        padding: 0.5em;
-                        text-align: left;
-                    }
-                    
-                    @media (max-width: 768px) {
-                        table {
-                            font-size: 0.8em;
-                        }
+                        #print(output)
+                        # hero individual plot
+                        hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
+                        villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
                         
-                        th, td {
-                            padding: 0.25em;
-                        }
-                    }
-                </style>
-                """
+                        #df with num_wins, num_games, win_rate
+                        overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
+                        num_games = str(df2.loc[0, 'num_games'])
+                        num_wins = str(df2.loc[0, 'num_wins'])
+                        win_rate = str(df2.loc[0, 'win_rate'])
 
-                driver.quit()
+                        #dfs with individual hero pokemon winrates and elo scores
+                        df_hero_indiv = df_hero_indiv.reset_index()
+                        df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
+                        df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
+                        # df_hero_indiv.to_csv("ind_stats.csv")
+                        df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
+                        df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+                        hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
+                        
+                        #dfs with individual villain pokemon loss rates and elo scores
+                        df_villain_indiv = df_villain_indiv.reset_index()
+                        df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
+                        df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+                        # df_hero_indiv.to_csv("ind_stats.csv")
+                        df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
+                        df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+                        villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
+                        
+                        #dfs with hero pairs, games and win rates breakdown 
+                        df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
+                        df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
+                        df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+                        df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
+                        heroPairStats = df3.head(5).to_html(index=False)
+                        
+                        ## villain pair stats
+                        df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
+                        df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+                        df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+                        df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
+                        villainPairStats = df4.head(5).to_html(index=False)
+                        
+                        ## hero comp stats
+                        df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
+                        df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
+                        df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+                        df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
+                        df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
+                        sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+
+                        ## hero comp stats
+                        df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
+                        df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+                        df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+                        df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
+                        df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
+                        sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
+
+                        # Define the CSS style for the table
+                        table_style = """
+                        <style>
+                            table {
+                                border-collapse: collapse;
+                                width: 100%;
+                                max-width: 800px;
+                                margin: auto;
+                                margin-bottom: 1em;
+                            }
+                            
+                            th {
+                                font-weight: bold;
+                                text-align: left;
+                                color: white;
+                                background-color: #9d5bd9;
+                                padding: 0.5em;
+                            }
+                            
+                            tr:hover {
+                                background-color: #a759d13f;
+                            }
+                            
+                            td, th {
+                                border: 1px solid #ddd;
+                                padding: 0.5em;
+                                text-align: left;
+                            }
+                            
+                            @media (max-width: 768px) {
+                                table {
+                                    font-size: 0.8em;
+                                }
+                                
+                                th, td {
+                                    padding: 0.25em;
+                                }
+                            }
+                        </style>
+                        """
+
+                        driver.quit()
+                        
+                        # katies original html creation
+                        output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
+                                            "<br><br>" +
+                                            hero_indiv_stats + 
+                                            "<br><br>" +
+                                            hero_plotly+ 
+                                            "<br><br>" +
+                                            "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
+                                            "<br><br>" +
+                                            villain_indiv_stats + 
+                                            "<br><br>" +
+                                            villain_plotly+ 
+                                            "<br><br>" +
+                                            "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
+                                            "<br><br>" +
+                                            sixTeamHeroStats+ 
+                                            "<br><br>" +
+                                            "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
+                                            "<br><br>" +
+                                            sixTeamVillainStats)
+
+                        return render_template('resultsPrivateAndPublic.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
                 
-                # katies original html creation
-                output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
-                                    "<br><br>" +
-                                    hero_indiv_stats + 
-                                    "<br><br>" +
-                                    hero_plotly+ 
-                                    "<br><br>" +
-                                    "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
-                                    "<br><br>" +
-                                    villain_indiv_stats + 
-                                    "<br><br>" +
-                                    villain_plotly+ 
-                                    "<br><br>" +
-                                    "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
-                                    "<br><br>" +
-                                    sixTeamHeroStats+ 
-                                    "<br><br>" +
-                                    "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
-                                    "<br><br>" +
-                                    sixTeamVillainStats)
-
-                return render_template('resultsPrivateAndPublic.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
-        
+                    else:
+                        return 'Pop-up window not opened yet!'
+                else:
+                    flash('Please subscribe to access more content.')
+                    return redirect(url_for('pricing'))  # Redirect to the subscription page
             else:
-                return 'Pop-up window not opened yet!'
+                flash('Please log in to access content.')
+                return redirect(url_for('login'))  # Redirect to the login page
         else:
             print("did not retrieve input")
             return render_template('index.html')
@@ -615,155 +1014,171 @@ def get_data_private():
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.get("https://www.google.com/")
 
+        ## INCREMENT CLICK COUNT IN DB FOR USER
+        increment_click_count(session['user_email'])
+
         if request.method == 'POST':
 
-            username_private = request.form.get('usernamePrivate')
-            password = request.form.get('showdown_pw')
-            gametype = request.form.get('gametype')
-            driver=login_showdown(username_private, password, driver)            
-            # time.sleep(3)
-            print("DRIVER:", driver)
-            print("User:", username_private)
-            print("pass:", password)
+            # METERED PAYWALL LOGIC
+            if 'user_email' in session:
+                user = get_user_by_email(session['user_email'])
+                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
 
-            #UPDATE USERNAME IN SESSION
-            session['showdown_username'] = username_private
+                    username_private = request.form.get('usernamePrivate')
+                    password = request.form.get('showdown_pw')
+                    gametype = request.form.get('gametype')
+                    driver=login_showdown(username_private, password, driver)            
+                    # time.sleep(3)
+                    print("DRIVER:", driver)
+                    print("User:", username_private)
+                    print("pass:", password)
 
-            if driver is not None:
-                ## run the data gathering
-                df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
-                time.sleep(2)
+                    #UPDATE USERNAME IN SESSION
+                    session['showdown_username'] = username_private
 
-                #update value of df1 in cache
-                set_user_df1(df1)
+                    if driver is not None:
+                        ## run the data gathering
+                        df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
+                        time.sleep(2)
 
-                #print(output)
-                # hero individual plot
-                hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
-                villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
-                
-                #df with num_wins, num_games, win_rate
-                overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
-                num_games = str(df2.loc[0, 'num_games'])
-                num_wins = str(df2.loc[0, 'num_wins'])
-                win_rate = str(df2.loc[0, 'win_rate'])
-                
-                #dfs with individual hero pokemon winrates and elo scores
-                df_hero_indiv = df_hero_indiv.reset_index()
-                df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
-                df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
-                # df_hero_indiv.to_csv("ind_stats.csv")
-                df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
-                df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
-                
-                #dfs with individual villain pokemon loss rates and elo scores
-                df_villain_indiv = df_villain_indiv.reset_index()
-                df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
-                df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                # df_hero_indiv.to_csv("ind_stats.csv")
-                df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
-                df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
-                
-                #dfs with hero pairs, games and win rates breakdown 
-                df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
-                df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
-                df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
-                heroPairStats = df3.head(5).to_html(index=False)
-                
-                ## villain pair stats
-                df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
-                df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
-                villainPairStats = df4.head(5).to_html(index=False)
-                
-                ## hero comp stats
-                df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
-                df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
-                df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
-                df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
-                sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+                        #update value of df1 in cache
+                        set_user_df1(df1)
 
-                ## hero comp stats
-                df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
-                df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
-                df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
-                sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
-
-                # Define the CSS style for the table
-                table_style = """
-                <style>
-                    table {
-                        border-collapse: collapse;
-                        width: 100%;
-                        max-width: 800px;
-                        margin: auto;
-                        margin-bottom: 1em;
-                    }
-                    
-                    th {
-                        font-weight: bold;
-                        text-align: left;
-                        color: white;
-                        background-color: #9d5bd9;
-                        padding: 0.5em;
-                    }
-                    
-                    tr:hover {
-                        background-color: #a759d13f;
-                    }
-                    
-                    td, th {
-                        border: 1px solid #ddd;
-                        padding: 0.5em;
-                        text-align: left;
-                    }
-                    
-                    @media (max-width: 768px) {
-                        table {
-                            font-size: 0.8em;
-                        }
                         
-                        th, td {
-                            padding: 0.25em;
-                        }
-                    }
-                </style>
-                """
 
-                driver.quit()
+                        #print(output)
+                        # hero individual plot
+                        hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
+                        villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
+                        
+                        #df with num_wins, num_games, win_rate
+                        overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
+                        num_games = str(df2.loc[0, 'num_games'])
+                        num_wins = str(df2.loc[0, 'num_wins'])
+                        win_rate = str(df2.loc[0, 'win_rate'])
+                        
+                        #dfs with individual hero pokemon winrates and elo scores
+                        df_hero_indiv = df_hero_indiv.reset_index()
+                        df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
+                        df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
+                        # df_hero_indiv.to_csv("ind_stats.csv")
+                        df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
+                        df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+                        hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
+                        
+                        #dfs with individual villain pokemon loss rates and elo scores
+                        df_villain_indiv = df_villain_indiv.reset_index()
+                        df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
+                        df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+                        # df_hero_indiv.to_csv("ind_stats.csv")
+                        df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
+                        df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+                        villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
+                        
+                        #dfs with hero pairs, games and win rates breakdown 
+                        df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
+                        df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
+                        df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+                        df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
+                        heroPairStats = df3.head(5).to_html(index=False)
+                        
+                        ## villain pair stats
+                        df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
+                        df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+                        df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+                        df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
+                        villainPairStats = df4.head(5).to_html(index=False)
+                        
+                        ## hero comp stats
+                        df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
+                        df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
+                        df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+                        df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
+                        df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
+                        sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+
+                        ## hero comp stats
+                        df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
+                        df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+                        df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+                        df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
+                        df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
+                        sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
+
+                        # Define the CSS style for the table
+                        table_style = """
+                        <style>
+                            table {
+                                border-collapse: collapse;
+                                width: 100%;
+                                max-width: 800px;
+                                margin: auto;
+                                margin-bottom: 1em;
+                            }
+                            
+                            th {
+                                font-weight: bold;
+                                text-align: left;
+                                color: white;
+                                background-color: #9d5bd9;
+                                padding: 0.5em;
+                            }
+                            
+                            tr:hover {
+                                background-color: #a759d13f;
+                            }
+                            
+                            td, th {
+                                border: 1px solid #ddd;
+                                padding: 0.5em;
+                                text-align: left;
+                            }
+                            
+                            @media (max-width: 768px) {
+                                table {
+                                    font-size: 0.8em;
+                                }
+                                
+                                th, td {
+                                    padding: 0.25em;
+                                }
+                            }
+                        </style>
+                        """
+
+                        driver.quit()
+                        
+                        # katies original html creation
+                        output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
+                                            "<br><br>" +
+                                            hero_indiv_stats + 
+                                            "<br><br>" +
+                                            hero_plotly+ 
+                                            "<br><br>" +
+                                            "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
+                                            "<br><br>" +
+                                            villain_indiv_stats + 
+                                            "<br><br>" +
+                                            villain_plotly+ 
+                                            "<br><br>" +
+                                            "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
+                                            "<br><br>" +
+                                            sixTeamHeroStats+ 
+                                            "<br><br>" +
+                                            "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
+                                            "<br><br>" +
+                                            sixTeamVillainStats)
+
+                        return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
                 
-                # katies original html creation
-                output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
-                                    "<br><br>" +
-                                    hero_indiv_stats + 
-                                    "<br><br>" +
-                                    hero_plotly+ 
-                                    "<br><br>" +
-                                    "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
-                                    "<br><br>" +
-                                    villain_indiv_stats + 
-                                    "<br><br>" +
-                                    villain_plotly+ 
-                                    "<br><br>" +
-                                    "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
-                                    "<br><br>" +
-                                    sixTeamHeroStats+ 
-                                    "<br><br>" +
-                                    "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
-                                    "<br><br>" +
-                                    sixTeamVillainStats)
-
-                return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
-        
+                    else:
+                        return 'Pop-up window not opened yet!'
+                else:
+                    flash('Please subscribe to access more content.')
+                    return redirect(url_for('pricing'))  # Redirect to the subscription page
             else:
-                return 'Pop-up window not opened yet!'
+                flash('Please log in to access content.')
+                return redirect(url_for('login'))  # Redirect to the login page
         else:
             print("did not retrieve input")
             return render_template('index.html')
@@ -923,11 +1338,96 @@ def villain_comp_link(comp_id):
     return render_template("villain_comp_data.html", num_games=num_games, loss_rate=loss_rate, num_losses=num_losses, result = output_html)
 
 ############################################################
-# LINK TO TEST HTML
+# SUBSCRIPTION FUNCTIONALITY
 ############################################################
+
+## return a stripe customer id depending on whether existing or new subscriber
+def create_stripe_customer_and_store_id(user_email, subscription_price_id):
+    try:
+        # Check if the customer already exists in your application's database
+        existing_user = get_user_by_email(user_email)
+        if existing_user and existing_user[3]:
+            # If the customer already has a Stripe customer ID, return it
+            return existing_user[3]
+        
+        # Create a customer in Stripe
+        customer = stripe.Customer.create(
+            email=user_email,
+            source='tok_visa',  # Replace with the actual payment method details
+        )
+
+        # Store the customer ID in your application's database
+        # create_user(user_email, customer.id, subscription_price_id)  # Store customer ID along with other user data
+        return customer.id  # Return the Stripe customer ID
+    except stripe.error.StripeError as e:
+        # Handle any errors from Stripe
+        print(e)
+        return None
+
+
+@app.route('/subscription_success')
+def subscription_success():
+    return render_template('subscription_success.html')
+
+@app.route('/subscription_cancel')
+def subscription_cancel():
+    return render_template('subscription_cancel.html')
+
+
+@app.route('/update_subscription', methods=['GET','POST'])
+def update_subscription():
+    if 'user_email' in session:
+        user = get_user_by_email(session['user_email'])
+
+        if request.method == 'POST':
+            new_subscription_price_id = request.form.get('subscription_price_id')
+
+            # ## check if existing subscriber
+            # subscriber=False
+            # if user[3]=="":
+            #     subscriber=True
+
+            # Create a Stripe Checkout session
+            session = stripe.checkout.Session.create(
+            customer_email=user[0],
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price': new_subscription_price_id,  # Replace with the appropriate price ID
+                    'quantity': 1,
+                },
+            ],
+            mode='subscription',
+            success_url=url_for('subscription_success', _external=True),  # Replace with your success URL
+            cancel_url=url_for('subscription_cancel', _external=True),    # Replace with your cancel URL
+            )
+            # if subscriber=True:
+            #     change_stripe_subscription(user[0],)
+            # Redirect the user to the Stripe Checkout session
+            return redirect(session.url)
+
+        # Handle the GET request for rendering the update subscription form
+        return render_template('update_subscription.html', user=user)
+
+    flash('Please log in to update your subscription.')
+    return redirect(url_for('login'))
+
+
+
 @app.route('/pricing',methods=["GET","POST"])
-def subscriptions():
-    return render_template("stripe.html")
+def pricing():
+    if 'user_email' in session:
+        user = get_user_by_email(session['user_email'])
+
+        # List of subscription plans and their price IDs
+        subscription_plans = [
+            {'name': 'premium', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'},
+            {'name': 'standard', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'}
+        ]
+
+        return render_template('stripe.html', user=user, subscription_plans=subscription_plans)
+    flash('Please log in to subscribe.')
+    return redirect(url_for('login'))
 
 
 @app.route('/test-mysql-db-connection')
