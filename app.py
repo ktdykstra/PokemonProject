@@ -267,6 +267,20 @@ def get_subscription_status(user_email):
         print(f"Unable to get subscription status for user: {user_email}. Error:",e)
         return
 
+# Function to get user's stripe customer id status from the database
+def get_customer_id_from_email(user_email):
+    db, cursor = get_db()
+    try:
+        cursor.execute('SELECT stripe_customer_id FROM serapis_schema.serapis_users WHERE email = %s', (user_email,))
+        result = cursor.fetchone()
+        close_connection(db, cursor) # close db
+        print(f"Found stripe customer id as {result} for user: {user_email}")
+        return result[0]
+    except Exception as e:
+        close_connection(db, cursor)
+        print(f"Unable to get stripe customer id for user: {user_email}. Error:",e)
+        return
+
 ## updating stripe customer id for first-time subscriber
 def new_customer_id(user_email, new_customer_id):
     db, cursor = get_db()
