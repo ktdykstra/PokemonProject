@@ -1400,8 +1400,8 @@ def update_subscription():
         if customer_id:
             try:
                 # Retrieve the Stripe session and check its payment status
-                session = stripe.checkout.Session.retrieve(session_id)
-                if session.payment_status == 'paid':
+                stripe_session = stripe.checkout.Session.retrieve(session_id)
+                if stripe_session.payment_status == 'paid':
                     # Determine the new subscription status based on the session
                     subscription_price_id = session.display_items[0].custom.price
 
@@ -1433,7 +1433,7 @@ def pricing():
             selected_price_id = request.form.get('selected_price_id')  # Retrieve the selected price ID from the form
 
             # Create a Stripe Checkout session
-            session = stripe.checkout.Session.create(
+            stripe_session = stripe.checkout.Session.create(
                 customer_email=user[0],  # Use the user's email
                 payment_method_types=['card'],
                 line_items=[
@@ -1447,7 +1447,7 @@ def pricing():
                 cancel_url=url_for('subscription_cancel', _external=True),
             )
 
-            return redirect(session.url)  # Redirect the user to the Stripe Checkout session
+            return redirect(stripe_session.url)  # Redirect the user to the Stripe Checkout session
 
         # List of subscription plans and their price IDs
         subscription_plans = [
