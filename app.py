@@ -152,9 +152,9 @@ def get_db():
     return connect_to_db()
 
 #called automatically at end of each request :)
-@app.teardown_appcontext
-def close_db(error):
-    db_handler.close_connection()
+#@app.teardown_appcontext
+#def close_db(error):
+#    db_handler.close_connection()
 
 ## handling INSERT, UPDATE, or DELETE queries
 def CUD_query(query, db, cursor):
@@ -1371,47 +1371,43 @@ def subscription_success():
 
 @app.route('/subscription_cancel')
 def subscription_cancel():
-    return render_template('subscription_cancel.html')
+    return render_template('subscription_cancelled.html')
 
-
-@app.route('/update_subscription', methods=['GET','POST'])
+@app.route('/update_subscription', methods=['POST'])
 def update_subscription():
-    if 'user_email' in session:
-        user = get_user_by_email(session['user_email'])
+    if request.method == 'POST':
+        data = request.json  # Get JSON data from the request
+        session_id = data.get('sessionID')
+        user_email = data.get('user_email')
 
-        if request.method == 'POST':
-            new_subscription_price_id = request.form.get('subscription_price_id')
+        # Get the customer ID associated with the user's email
+        customer_id = get_customer_id_from_email(user_email)
 
-            # ## check if existing subscriber
-            # subscriber=False
-            # if user[3]=="":
-            #     subscriber=True
+        if customer_id:
+            try:
+                # Retrieve the Stripe session and check its payment status
+                session = stripe.checkout.Session.retrieve(session_id)
+                if session.payment_status == 'paid':
+                    # Determine the new subscription status based on the session
+                    subscription_price_id = session.display_items[0].custom.price
 
-            # Create a Stripe Checkout session
-            session = stripe.checkout.Session.create(
-            customer_email=user[0],
-            payment_method_types=['card'],
-            line_items=[
-                {
-                    'price': new_subscription_price_id,  # Replace with the appropriate price ID
-                    'quantity': 1,
-                },
-            ],
-            mode='subscription',
-            success_url=url_for('subscription_success', _external=True),  # Replace with your success URL
-            cancel_url=url_for('subscription_cancel', _external=True),    # Replace with your cancel URL
-            )
-            # if subscriber=True:
-            #     change_stripe_subscription(user[0],)
-            # Redirect the user to the Stripe Checkout session
-            return redirect(session.url)
+                    # Determine the new subscription status based on the subscription type
+                    if subscription_price_id  == PREMIUM_PRICE_ID:
+                        new_subscription_status = 'premium'
+                    elif subscription_price_id  == STANDARD_PRICE_ID:
+                        new_subscription_status = 'standard'
 
-        # Handle the GET request for rendering the update subscription form
-        return render_template('update_subscription.html', user=user)
+                    # Update the subscription status and customer ID in your database
+                    update_subscription_and_customer_id(customer_id, new_subscription_status)
 
-    flash('Please log in to update your subscription.')
-    return redirect(url_for('login'))
-
+                    # Return a success response
+                    return jsonify(success=True)
+                else:
+                    return jsonify(success=False, error='Payment not completed')
+            except stripe.error.StripeError as e:
+                return jsonify(success=False, error=str(e))
+        else:
+            return jsonify(success=False, error='User not found')
 
 
 @app.route('/pricing',methods=["GET","POST"])
