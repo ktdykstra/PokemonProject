@@ -1371,10 +1371,9 @@ def subscription_success():
 
 @app.route('/subscription_cancel')
 def subscription_cancel():
-    return render_template('subscription_cancel.html')
+    return render_template('subscription_cancelled.html').
 
-
-@app.route('/update_subscription', methods=['GET','POST'])
+@app.route('/update_subscription', methods=['POST'])
 def update_subscription():
     if 'user_email' in session:
         user = get_user_by_email(session['user_email'])
@@ -1382,37 +1381,29 @@ def update_subscription():
         if request.method == 'POST':
             new_subscription_price_id = request.form.get('subscription_price_id')
 
-            # ## check if existing subscriber
-            # subscriber=False
-            # if user[3]=="":
-            #     subscriber=True
-
             # Create a Stripe Checkout session
             session = stripe.checkout.Session.create(
-            customer_email=user[0],
-            payment_method_types=['card'],
-            line_items=[
-                {
-                    'price': new_subscription_price_id,  # Replace with the appropriate price ID
-                    'quantity': 1,
-                },
-            ],
-            mode='subscription',
-            success_url=url_for('subscription_success', _external=True),  # Replace with your success URL
-            cancel_url=url_for('subscription_cancel', _external=True),    # Replace with your cancel URL
+                customer_email=user[0],
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price': new_subscription_price_id,  # Replace with the appropriate price ID
+                        'quantity': 1,
+                    },
+                ],
+                mode='subscription',
+                success_url=url_for('subscription_success', _external=True),  # Replace with your success URL
+                cancel_url=url_for('subscription_cancel', _external=True),    # Replace with your cancel URL
             )
-            # if subscriber=True:
-            #     change_stripe_subscription(user[0],)
+
             # Redirect the user to the Stripe Checkout session
             return redirect(session.url)
 
         # Handle the GET request for rendering the update subscription form
-        return render_template('update_subscription.html', user=user)
+        return render_template('pricing.html', user=user)
 
     flash('Please log in to update your subscription.')
     return redirect(url_for('login'))
-
-
 
 @app.route('/pricing',methods=["GET","POST"])
 def pricing():

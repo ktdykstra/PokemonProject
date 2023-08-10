@@ -93,43 +93,37 @@ https://templatemo.com/tm-535-softy-pinko
 
             <div class="row">
                 <div class="col-lg-12">
-                    <form method="post" action="{{ url_for('update_subscription') }}">
                         <stripe-pricing-table pricing-table-id="prctbl_1NciHZDypgtvgAYhjZArg4yj"
-                        publishable-key="pk_test_51NchgQDypgtvgAYh43m3w8KWYAah51w7OvDgwvVmizsb4utvaPFgjUTSoYMlAg3zLc7VBlzgeJqXRIGFdpXsNppD00t6RgJjXM">
-                        </stripe-pricing-table>
-                        
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const form = document.getElementById('subscription-form');
-                                const priceIdInput = document.getElementById('subscription_price_id');
-                                const pricingTable = document.querySelector('stripe-pricing-table');
-                                
-                                pricingTable.addEventListener('pricing-table-selected', function(event) {
-                                    const selectedPriceId = event.detail.priceId;
-                                    priceIdInput.value = selectedPriceId;
-                                });
-                                
-                                form.addEventListener('submit', function(event) {
-                                    if (!priceIdInput.value) {
-                                        event.preventDefault();
-                                        alert('Please select a subscription plan.');
-                                    }
-                                });
-                            });
-                        </script>
-
-                        <input type="hidden" id="subscription_price_id" name="subscription_price_id" value="">
-
-                        <button class="main-button" type="submit">Subscribe Now</button>
-                    </form>
+                        publishable-key="pk_test_51NchgQDypgtvgAYh43m3w8KWYAah51w7OvDgwvVmizsb4utvaPFgjUTSoYMlAg3zLc7VBlzgeJqXRIGFdpXsNppD00t6RgJjXM"
+                        session-id="{{ session_id }}"></stripe-pricing-table>
                     
-                    <script>
-                        // Handle click event on the pricing table buttons
-                        document.addEventListener("pricingtable:clicked", function(event) {
-                            const selectedPriceId = event.detail.selectedPricingItemId;
-                            document.getElementById("subscription_price_id").value = selectedPriceId;
-                        });
-                    </script>
+                        <script>
+                            // JavaScript code to capture session ID and submit to your server
+                            var sessionID = document.querySelector('stripe-pricing-table').getAttribute('session-id');
+                            
+                            // Send session ID to your server using an HTTP request (e.g., Fetch or Axios)
+                            // You can include any additional user information needed for your database update
+                            fetch('/update_subscription', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ sessionID: sessionID, user_email: '{{ user_email }}' }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Redirect back to your page
+                                    window.location.href = '/subscription_success';
+                                } else {
+                                    console.error('Subscription failed');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                            </script>
+                            
                     <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
                 </div>
             </div>
