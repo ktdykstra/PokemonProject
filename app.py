@@ -314,41 +314,6 @@ def update_subscription_and_customer_id(stripe_customer_id, new_status):
 #         db.rollback()
 #         close_connection(db,cursor) # close db
 #         print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
-
-
-## allows someone to change their stripe subscription. Communicates with stripe, not the database
-def change_stripe_subscription(user_email, new_subscription_type):
-    try:
-        user = get_user_by_email(user_email)
-        if not user or not user[3]:
-            return False
-
-        # Set the Stripe API key
-        stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
-
-        # Get the customer from Stripe
-        customer = stripe.Customer.retrieve(user[3])
-
-        # Find the IDs of the old and new subscription plans
-        old_subscription_id = customer.subscriptions.data[0].id
-        if new_subscription_type == 'premium':
-            new_subscription_price_id = PREMIUM_PRICE_ID
-        elif new_subscription_type == 'standard':
-            new_subscription_price_id = STANDARD_PRICE_ID
-
-        # Update the subscription plan
-        customer.subscriptions.modify(
-            old_subscription_id,
-            items=[{
-                'id': customer.subscriptions.data[0].items.data[0].id,
-                'price': new_subscription_price_id,
-            }],
-        )
-
-        return
-    except stripe.error.StripeError:
-        print("Error in subscription adjustment for this subscriber in Stripe")
-        return
     
 
 ####################################################
@@ -376,6 +341,8 @@ def webhook():
         # Extract relevant information from the event
         subscription_id = event['data']['object']['subscription']
         customer_id = event['data']['object']['customer']
+        customer_email = event['data']['object']['customer_details']['email']
+        update_stripe_customer_id(customer_email, customer_id)
         subscription = stripe.Subscription.retrieve(subscription_id)
 
         # Determine the new subscription status based on the subscription type
@@ -441,6 +408,8 @@ def handle_checkout_session_async_payment_succeeded(event):
     subscription_id = event['data']['object']['subscription']
     customer_id = event['data']['object']['customer']
     subscription = stripe.Subscription.retrieve(subscription_id)
+    customer_email = event['data']['object']['customer_details']['email']
+    update_stripe_customer_id(customer_email, customer_id)
 
     # Determine the new subscription status based on the subscription type (replace with your logic)
     if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
@@ -458,6 +427,8 @@ def handle_checkout_session_completed(event):
     customer_id = event['data']['object']['customer']
     subscription_id = event['data']['object']['subscription']
     subscription = stripe.Subscription.retrieve(subscription_id)
+    customer_email = event['data']['object']['customer_details']['email']
+    update_stripe_customer_id(customer_email, customer_id)
 
     # Determine the new subscription status based on the subscription type
     if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
@@ -501,7 +472,36 @@ def handle_invoice_payment_succeeded(event):
 
 
 def handle_plan_updated(event):
-    # Handle plan.updated event
+    # try:
+    #     user = get_user_by_email(user_email)
+    #     if not user or not user[3]:
+    #         return False
+
+    #     # Set the Stripe API key
+    #     stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
+
+    #     # Get the customer from Stripe
+    #     customer = stripe.Customer.retrieve(user[3])
+
+    #     # Find the IDs of the old and new subscription plans
+    #     old_subscription_id = customer.subscriptions.data[0].id
+    #     if new_subscription_type == 'premium':
+    #         new_subscription_price_id = PREMIUM_PRICE_ID
+    #     elif new_subscription_type == 'standard':
+    #         new_subscription_price_id = STANDARD_PRICE_ID
+
+    #     # Update the subscription plan
+    #     customer.subscriptions.modify(
+    #         old_subscription_id,
+    #         items=[{
+    #             'id': customer.subscriptions.data[0].items.data[0].id,
+    #             'price': new_subscription_price_id,
+    #         }],
+    #     )
+    #     return
+    # except stripe.error.StripeError:
+    #     print("Error in subscription adjustment for this subscriber in Stripe")
+    #     return
     pass
 
 ####################################################
@@ -1326,6 +1326,31 @@ def villain_comp_link(comp_id):
 ############################################################
 # SUBSCRIPTION FUNCTIONALITY
 ############################################################
+
+## return a stripe customer id depending on whether existing or new subscriber
+def create_stripe_customer_and_store_id(user_email, subscription_price_id):
+    try:
+        # Check if the customer already exists in your application's database
+        existing_user = get_user_by_email(user_email)
+        if existing_user and existing_user[3]:
+            # If the customer already has a Stripe customer ID, return it
+            return existing_user[3]
+        
+        # Create a customer in Stripe
+        customer = stripe.Customer.create(
+            email=user_email,
+            source='tok_visa',  # Replace with the actual payment method details
+        )
+
+        # Store the customer ID in your application's database
+        # create_user(user_email, customer.id, subscription_price_id)  # Store customer ID along with other user data
+        return customer.id  # Return the Stripe customer ID
+    except stripe.error.StripeError as e:
+        # Handle any errors from Stripe
+        print(e)
+        return None
+
+
 @app.route('/subscription_success')
 def subscription_success():
     return render_template('subscription_success.html')
@@ -1343,10 +1368,10 @@ def update_subscription():
         if request.method == 'POST':
             new_subscription_price_id = request.form.get('subscription_price_id')
 
-            ## check if existing subscriber
-            subscriber=False
-            if user[3]=="":
-                subscriber=True
+            # ## check if existing subscriber
+            # subscriber=False
+            # if user[3]=="":
+            #     subscriber=True
 
             # Create a Stripe Checkout session
             session = stripe.checkout.Session.create(
