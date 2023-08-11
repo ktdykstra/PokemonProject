@@ -60,6 +60,14 @@ df1=None
 app = Flask(__name__)
 app.debug=True
 
+# @app.before_request
+# def redirect_to_www():
+#     # Check if the current request's host doesn't start with "www."
+#     if not request.url.startswith('https://www.'):
+#         # Build the URL with "www." and HTTPS, and redirect
+#         new_url = request.url.replace('https://', 'https://www.', 1)
+#         return redirect(new_url, code=301)  # 301 Permanent Redirect
+
 #initialize session
 app.config.from_object(__name__)
 
@@ -337,7 +345,7 @@ def update_subscription_and_customer_id(stripe_customer_id, new_status):
 def webhook():
     event = None
     payload = request.data
-    sig_header = request.headers['STRIPE_SIGNATURE']
+    sig_header = request.headers['stripe-signature'] # stripe-signature
 
     try:
         event = stripe.Webhook.construct_event(
