@@ -274,7 +274,7 @@ def get_customer_id_from_email(user_email):
         cursor.execute('SELECT stripe_customer_id FROM serapis_schema.serapis_users WHERE email = %s', (user_email,))
         result = cursor.fetchone()
         close_connection(db, cursor) # close db
-        print(f"Found stripe customer id as {result} for user: {user_email}")
+        print(f"Found stripe customer id as {result[0]} for user: {user_email}")
         return result[0]
     except Exception as e:
         close_connection(db, cursor)
@@ -352,6 +352,7 @@ def webhook():
 
     # Update subscription if stripe payment succeeds
     if event['type'] == 'invoice.payment_succeeded':
+        print("Event:", event["type"])
         # Extract relevant information from the event
         subscription_id = event['data']['object']['subscription']
         customer_id = event['data']['object']['customer']
@@ -370,6 +371,7 @@ def webhook():
 
     # If a user cancels
     elif event['type'] == 'subscription_schedule.canceled':
+        print("Event:", event["type"])
         subscription_schedule_id = event['data']['object']['id']
         customer_id = event['data']['object']['customer']
         
@@ -378,6 +380,7 @@ def webhook():
 
     #user deletes subscription
     elif event['type'] == 'customer.subscription.deleted':
+        print("Event:", event["type"])
         subscription_id = event['data']['object']['id']
         customer_id = event['data']['object']['customer']
         
@@ -385,26 +388,32 @@ def webhook():
         update_subscription_and_customer_id(customer_id, 'deleted')
 
     elif event['type'] == 'checkout.session.async_payment_succeeded':
+        print("Event:", event["type"])
         # Handle checkout.session.async_payment_succeeded event
         handle_checkout_session_async_payment_succeeded(event)
 
     elif event['type'] == 'checkout.session.completed':
+        print("Event:", event["type"])
         # Handle checkout.session.completed event
         handle_checkout_session_completed(event)
 
     elif event['type'] == 'customer.subscription.paused':
+        print("Event:", event["type"])
         # Handle customer.subscription.paused event
         handle_subscription_paused(event)
 
     elif event['type'] == 'customer.subscription.resumed':
+        print("Event:", event["type"])
         # Handle customer.subscription.resumed event
         handle_subscription_resumed(event)
 
     elif event['type'] == 'invoice.payment_succeeded':
+        print("Event:", event["type"])
         # Handle invoice.payment_succeeded event
         handle_invoice_payment_succeeded(event)
 
     elif event['type'] == 'plan.updated':
+        print("Event:", event["type"])
         # Handle plan.updated event
         handle_plan_updated(event)
 
@@ -423,6 +432,7 @@ def handle_checkout_session_async_payment_succeeded(event):
     customer_id = event['data']['object']['customer']
     subscription = stripe.Subscription.retrieve(subscription_id)
     customer_email = event['data']['object']['customer_details']['email']
+    print("Event:", event["type"])
     update_stripe_customer_id(customer_email, customer_id)
 
     # Determine the new subscription status based on the subscription type (replace with your logic)
@@ -442,6 +452,7 @@ def handle_checkout_session_completed(event):
     subscription_id = event['data']['object']['subscription']
     subscription = stripe.Subscription.retrieve(subscription_id)
     customer_email = event['data']['object']['customer_details']['email']
+    print("Event:", event["type"])
     update_stripe_customer_id(customer_email, customer_id)
 
     # Determine the new subscription status based on the subscription type
@@ -459,12 +470,14 @@ def handle_checkout_session_completed(event):
 def handle_subscription_paused(event):
     # Handle customer.subscription.paused event
     customer_id = event['data']['object']['customer']
+    print("Event:", event["type"])
     update_subscription_and_customer_id(customer_id, 'paused')
 
 
 def handle_subscription_resumed(event):
     # Handle customer.subscription.resumed event
     customer_id = event['data']['object']['customer']
+    print("Event:", event["type"])
     update_subscription_and_customer_id(customer_id, 'resumed')
 
 
@@ -473,6 +486,7 @@ def handle_invoice_payment_succeeded(event):
     customer_id = event['data']['object']['customer']
     subscription_id = event['data']['object']['subscription']
     subscription = stripe.Subscription.retrieve(subscription_id)
+    print("Event:", event["type"])
     
     # Determine the new subscription status based on the subscription type
     if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
@@ -773,6 +787,7 @@ def submit_form():
 ############################################################
 @app.route('/main')
 def index():
+    print(session['user_email'])
     #submitted = request.args.get('submitted')
     if 'user_email' in session:
         user = get_user_by_email(session['user_email'])
@@ -1393,6 +1408,7 @@ def update_subscription():
         data = request.json  # Get JSON data from the request
         session_id = data.get('sessionID')
         user_email = data.get('user_email')
+        print(data)
 
         # Get the customer ID associated with the user's email
         customer_id = get_customer_id_from_email(user_email)
@@ -1426,15 +1442,18 @@ def update_subscription():
 
 @app.route('/pricing', methods=["GET", "POST"])
 def pricing():
+    print(session)
     if 'user_email' in session:
-        user = get_user_by_email(session['user_email'])
+        user_email = session['user_email']
+        print("this is what katie tried: ")
+        print("this is what's happening") # debug
 
         if request.method == 'POST':
             selected_price_id = request.form.get('selected_price_id')  # Retrieve the selected price ID from the form
 
             # Create a Stripe Checkout session
             stripe_session = stripe.checkout.Session.create(
-                customer_email=user[0],  # Use the user's email
+                customer_email=user_email,  # Use the user's email
                 payment_method_types=['card'],
                 line_items=[
                     {
@@ -1452,10 +1471,10 @@ def pricing():
         # List of subscription plans and their price IDs
         subscription_plans = [
             {'name': 'premium', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'},
-            {'name': 'standard', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'}
+            {'name': 'standard', 'price_id': 'price_1NchuvDypgtvgAYhETrGiaoo'}
         ]
 
-        return render_template('stripe.html', user=user, subscription_plans=subscription_plans)
+        return render_template('stripe.html', user_email=user_email, session_id=session["access_token"], subscription_plans=subscription_plans)
 
     flash('Please log in to subscribe.')
     return redirect(url_for('login'))
