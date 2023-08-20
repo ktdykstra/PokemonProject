@@ -52,7 +52,7 @@ import stripe
 browser_type = "Unclear"
 df1=None
 stripe.api_key="sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN"
-endpoint_secret = 'whsec_8759ba8d433ed4026939d462faa19451fa6e83ac6a016c14f271a80259120607'
+endpoint_secret = 'whsec_BSivFJXl5DdP3TeRuBnDpym3emk088ye'
 app = Flask(__name__)
 app.debug=True
 
