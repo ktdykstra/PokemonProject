@@ -572,7 +572,7 @@ redis_client = redis.Redis.from_url(
 @app.before_request
 def check_authentication():
     # List of routes that do not require authentication
-    public_routes = ['/', 'login', 'privacy', 'authorized', 'ads.txt', 'pricing']
+    public_routes = ['/', 'login', 'privacy', 'authorized', 'ads.txt', 'pricing', 'success','cancel']
 
     # If the requested route is public, allow access without authentication
     if request.endpoint in public_routes or request.endpoint == '/':
