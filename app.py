@@ -550,7 +550,8 @@ app.config['CACHE_TYPE'] = 'redis'
 app.config['CACHE_REDIS_URL'] = os.environ.get('STACKHERO_REDIS_URL_CLEAR')
 cache = Cache(app)
 
-CORS(app)
+# reconfigured to accomodate webhooks
+CORS(app, resources={r"/webhook": {"origins": "*"}})
 
 # Set the REQUESTS_CA_BUNDLE environment variable to use certifi certificates
 os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
