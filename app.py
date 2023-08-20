@@ -569,19 +569,19 @@ redis_client = redis.Redis.from_url(
 # ROUTES FOR Google Login and Callback 
 ####################################################
 #Protect Pages from unauthenticated users
-@app.before_request
-def check_authentication():
-    # List of routes that do not require authentication
-    public_routes = ['/', 'login', 'privacy', 'authorized', 'ads.txt', 'pricing', 'success','cancel']
+# @app.before_request
+# def check_authentication():
+#     # List of routes that do not require authentication
+#     public_routes = ['/', 'login', 'privacy', 'authorized', 'ads.txt', 'pricing', 'success','cancel']
 
-    # If the requested route is public, allow access without authentication
-    if request.endpoint in public_routes or request.endpoint == '/':
-        return
+#     # If the requested route is public, allow access without authentication
+#     if request.endpoint in public_routes or request.endpoint == '/':
+#         return
 
-    # Check if the session identifier is present and the user is authenticated
-    if 'user_authenticated' not in session or not session['user_authenticated']:
-        # Redirect to the login page or display an access denied message
-        return redirect('/login')
+#     # Check if the session identifier is present and the user is authenticated
+#     if 'user_authenticated' not in session or not session['user_authenticated']:
+#         # Redirect to the login page or display an access denied message
+#         return redirect('/login')
 
 @app.route('/login')
 def login():
