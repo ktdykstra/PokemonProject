@@ -1,13 +1,81 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Checkout</title>
-  </head>
-  <body>
+<head>
+  <title>Checkout</title>
+  <style>
+    /* Center the subscription box on the screen */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    /* Styling for the subscription box */
+    .subscription-box {
+      border: 2px solid #8261ee; /* Purple border */
+      border-radius: 8px;
+      padding: 30px;
+      background-color: #f2f2fe; /* Faint purple shading */
+      box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 300px;
+      font-family: 'Raleway', sans-serif; /* Use Raleway font */
+      position: relative; /* For button positioning */
+    }
+
+    .price {
+      font-weight: bold;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .features {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .feature {
+      margin-bottom: 10px;
+      padding-left: 10px;
+      position: relative;
+      list-style-type: none;
+    }
+
+    .feature:before {
+      content: '\u2022';
+      position: absolute;
+      left: 0;
+      color: transparent; /* Hide the bullet point */
+    }
+
+    .subscribe-button {
+      margin-top: 20px; /* Space between features and button */
+      padding: 10px 20px;
+      background-color: green; /* Green button background */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%; /* Button takes full width of the box */
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="subscription-box">
+    <div class="price">$4.99/month</div>
+    <div class="features">
+      <div class="feature"> - Unlimited public and private replay analysis requests</div>
+      <div class="feature"> - Faster loading times through dedicated (secure) data storage</div>
+    </div>
     <form action="/checkout" method="POST">
       <!-- Note: If using PHP set the action to /create-checkout-session.php -->
-
-      <input type="hidden" name="priceId" value="price_1Nh1IwDypgtvgAYhmHypiWeT" />
-      <button type="submit">Checkout</button>
+      <input type="hidden" name="priceId" value="price_1NhNCaDypgtvgAYhRfdD9HLz" />
+      <button class="subscribe-button" type="submit">Subscribe</button>
     </form>
-  </body>
+  </div>
+</body>
 </html>
