@@ -1858,40 +1858,42 @@ def update_subscription():
 
 
 @app.route('/pricing', methods=["GET", "POST"])
-def pricing():
-    if 'user_email' in session:
-        user = get_user_by_email(session['user_email'])
+def subscriptions():
+    return render_template("pricing.html")
+# def pricing():
+#     if 'user_email' in session:
+#         user = get_user_by_email(session['user_email'])
 
-        if request.method == 'POST':
-            selected_price_id = request.form.get('selected_price_id')  # Retrieve the selected price ID from the form
+#         if request.method == 'POST':
+#             selected_price_id = request.form.get('selected_price_id')  # Retrieve the selected price ID from the form
 
-            # Create a Stripe Checkout session
-            stripe_session = stripe.checkout.Session.create(
-                customer_email=user[0],  # Use the user's email
-                payment_method_types=['card'],
-                line_items=[
-                    {
-                        'price': selected_price_id,  # Use the selected price ID
-                        'quantity': 1,
-                    },
-                ],
-                mode='subscription',
-                success_url=url_for('subscription_success', _external=True),
-                cancel_url=url_for('subscription_cancel', _external=True),
-            )
+#             # Create a Stripe Checkout session
+#             stripe_session = stripe.checkout.Session.create(
+#                 customer_email=user[0],  # Use the user's email
+#                 payment_method_types=['card'],
+#                 line_items=[
+#                     {
+#                         'price': selected_price_id,  # Use the selected price ID
+#                         'quantity': 1,
+#                     },
+#                 ],
+#                 mode='subscription',
+#                 success_url=url_for('subscription_success', _external=True),
+#                 cancel_url=url_for('subscription_cancel', _external=True),
+#             )
 
-            return redirect(stripe_session.url)  # Redirect the user to the Stripe Checkout session
+#             return redirect(stripe_session.url)  # Redirect the user to the Stripe Checkout session
 
-        # List of subscription plans and their price IDs
-        subscription_plans = [
-            {'name': 'premium', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'},
-            {'name': 'standard', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'}
-        ]
+#         # List of subscription plans and their price IDs
+#         subscription_plans = [
+#             {'name': 'premium', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'},
+#             {'name': 'standard', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'}
+#         ]
 
-        return render_template('stripe.html', user=user, subscription_plans=subscription_plans)
+#         return render_template('stripe.html', user=user, subscription_plans=subscription_plans)
 
-    flash('Please log in to subscribe.')
-    return redirect(url_for('login'))
+#     flash('Please log in to subscribe.')
+#     return redirect(url_for('login'))
 
 
 
