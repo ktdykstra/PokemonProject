@@ -195,10 +195,16 @@ def webhook():
       refund = event['data']['object']
     elif event['type'] == 'checkout.session.async_payment_failed':
       session = event['data']['object']
+
+
     elif event['type'] == 'checkout.session.async_payment_succeeded':
       session = event['data']['object']
+      handle_checkout_session_async_payment_succeeded(event)
+
     elif event['type'] == 'checkout.session.completed':
       session = event['data']['object']
+      handle_checkout_session_completed(event)
+
     elif event['type'] == 'checkout.session.expired':
       session = event['data']['object']
     elif event['type'] == 'coupon.created':
@@ -235,16 +241,28 @@ def webhook():
       source = event['data']['object']
     elif event['type'] == 'customer.subscription.created':
       subscription = event['data']['object']
+
+    # deleted subscription
     elif event['type'] == 'customer.subscription.deleted':
       subscription = event['data']['object']
+      subscription_id = event['data']['object']['id']
+      customer_id = event['data']['object']['customer']      
+      # Update the user's subscription status in the database to reflect subscription deletion
+      update_subscription_and_customer_id(customer_id, 'deleted')
+
     elif event['type'] == 'customer.subscription.paused':
       subscription = event['data']['object']
+      handle_subscription_paused(event)
+
     elif event['type'] == 'customer.subscription.pending_update_applied':
       subscription = event['data']['object']
     elif event['type'] == 'customer.subscription.pending_update_expired':
       subscription = event['data']['object']
+
     elif event['type'] == 'customer.subscription.resumed':
       subscription = event['data']['object']
+      handle_subscription_resumed(event)
+
     elif event['type'] == 'customer.subscription.trial_will_end':
       subscription = event['data']['object']
     elif event['type'] == 'customer.subscription.updated':
@@ -295,8 +313,12 @@ def webhook():
       invoice = event['data']['object']
     elif event['type'] == 'invoice.payment_failed':
       invoice = event['data']['object']
+
+    # successful payment
     elif event['type'] == 'invoice.payment_succeeded':
       invoice = event['data']['object']
+      handle_invoice_payment_succeeded(event)
+
     elif event['type'] == 'invoice.sent':
       invoice = event['data']['object']
     elif event['type'] == 'invoice.upcoming':
@@ -391,8 +413,11 @@ def webhook():
       plan = event['data']['object']
     elif event['type'] == 'plan.deleted':
       plan = event['data']['object']
+
     elif event['type'] == 'plan.updated':
       plan = event['data']['object']
+      handle_plan_updated(event)
+
     elif event['type'] == 'price.created':
       price = event['data']['object']
     elif event['type'] == 'price.deleted':
@@ -473,8 +498,15 @@ def webhook():
       transaction = event['data']['object']
     elif event['type'] == 'subscription_schedule.aborted':
       subscription_schedule = event['data']['object']
+
+    # subscription canceled
     elif event['type'] == 'subscription_schedule.canceled':
       subscription_schedule = event['data']['object']
+      subscription_schedule_id = event['data']['object']['id']
+      customer_id = event['data']['object']['customer']
+      # Update the user's subscription status in the database to reflect cancellation
+      update_subscription_and_customer_id(customer_id, 'canceled')
+
     elif event['type'] == 'subscription_schedule.completed':
       subscription_schedule = event['data']['object']
     elif event['type'] == 'subscription_schedule.created':
