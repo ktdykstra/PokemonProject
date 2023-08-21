@@ -90,7 +90,7 @@ stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1n
 endpoint_secret = 'whsec_AZE85BOzWncPR6OB62f447ZUQuVwl3BX'
 
 PREMIUM_PRICE_ID = 'price_1NchwKDypgtvgAYhILRJc3RP'
-STANDARD_PRICE_ID = 'price_1NchuvDypgtvgAYhETrGiaoo'
+STANDARD_PRICE_ID = 'price_1NhNCaDypgtvgAYhRfdD9HLz'
 
 Session(app)
 YOUR_DOMAIN = 'https://www.serapis.dev'
@@ -317,7 +317,10 @@ def webhook():
     # successful payment
     elif event['type'] == 'invoice.payment_succeeded':
       invoice = event['data']['object']
-      handle_invoice_payment_succeeded(event)
+      print(invoice)
+      temp_email=event["data"]["object"]["customer_email"]
+      print(temp_email)
+      increment_click_count(temp_email)
 
     elif event['type'] == 'invoice.sent':
       invoice = event['data']['object']
@@ -557,7 +560,7 @@ def webhook():
     else:
       print('Unhandled event type {}'.format(event['type']))
 
-    return jsonify(success=True)
+    return jsonify(success=True), print(event["data"])
 
 
 ####################################################
