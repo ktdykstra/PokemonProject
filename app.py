@@ -319,9 +319,9 @@ def webhook():
 
     # successful payment
     elif event['type'] == 'invoice.payment_succeeded':
-      invoice = event['data']['object']
-      customer_email=event["data"]["object"]["customer_email"]
-      print("need to update database")
+      # invoice = event['data']['object']
+      # customer_email=event["data"]["object"]["customer_email"]
+      # print("need to update database")
       handle_checkout_session_completed(event)
       # handle_invoice_payment_succeeded(event)
 
@@ -909,11 +909,11 @@ def handle_checkout_session_async_payment_succeeded(event):
 def handle_checkout_session_completed(event):
     # Handle checkout.session.completed event
     # Extract relevant information from the event
-    customer_id = event['data']['object']['customer']
+    # customer_id = event['data']['object']['customer']
     subscription_id = event['data']['object']['subscription']
     subscription = stripe.Subscription.retrieve(subscription_id)
     customer_email=event["data"]["object"]["customer_email"]
-    update_stripe_customer_id(customer_email, customer_id)
+    # update_stripe_customer_id(customer_email, customer_id)
 
     # Determine the new subscription status based on the subscription type
     if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
