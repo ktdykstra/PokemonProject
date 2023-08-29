@@ -139,6 +139,7 @@ def webhook():
         event = stripe.Webhook.construct_event(
             payload, sig_header, endpoint_secret
         )
+        print("event create")
     except ValueError as e:
         # Invalid payload
         raise e
@@ -203,6 +204,7 @@ def webhook():
 
     elif event['type'] == 'checkout.session.completed':
       session = event['data']['object']
+      print("checkout session completed")
       # handle_checkout_session_completed(event)
 
     elif event['type'] == 'checkout.session.expired':
@@ -248,11 +250,12 @@ def webhook():
       subscription_id = event['data']['object']['id']
       customer_id = event['data']['object']['customer']      
       # Update the user's subscription status in the database to reflect subscription deletion
-      update_subscription_and_customer_id(customer_id, 'deleted')
+      
+      # update_subscription_and_customer_id(customer_id, 'deleted')
 
     elif event['type'] == 'customer.subscription.paused':
       subscription = event['data']['object']
-      handle_subscription_paused(event)
+      # handle_subscription_paused(event)
 
     elif event['type'] == 'customer.subscription.pending_update_applied':
       subscription = event['data']['object']
@@ -261,7 +264,7 @@ def webhook():
 
     elif event['type'] == 'customer.subscription.resumed':
       subscription = event['data']['object']
-      handle_subscription_resumed(event)
+      # handle_subscription_resumed(event)
 
     elif event['type'] == 'customer.subscription.trial_will_end':
       subscription = event['data']['object']
@@ -318,7 +321,8 @@ def webhook():
     elif event['type'] == 'invoice.payment_succeeded':
       invoice = event['data']['object']
       customer_email=event["data"]["object"]["customer_email"]
-      handle_invoice_payment_succeeded(event)
+      print("need to update database")
+      # handle_invoice_payment_succeeded(event)
 
     elif event['type'] == 'invoice.sent':
       invoice = event['data']['object']
@@ -417,7 +421,7 @@ def webhook():
 
     elif event['type'] == 'plan.updated':
       plan = event['data']['object']
-      handle_plan_updated(event)
+      # handle_plan_updated(event)
 
     elif event['type'] == 'price.created':
       price = event['data']['object']
@@ -506,7 +510,7 @@ def webhook():
       subscription_schedule_id = event['data']['object']['id']
       customer_id = event['data']['object']['customer']
       # Update the user's subscription status in the database to reflect cancellation
-      update_subscription_and_customer_id(customer_id, 'canceled')
+      # update_subscription_and_customer_id(customer_id, 'canceled')
 
     elif event['type'] == 'subscription_schedule.completed':
       subscription_schedule = event['data']['object']
@@ -558,7 +562,7 @@ def webhook():
     else:
       print('Unhandled event type {}'.format(event['type']))
 
-    return jsonify(success=True), print(event["data"])
+    return jsonify(success=True), print("something happened")
 
 
 ####################################################
