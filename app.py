@@ -320,9 +320,10 @@ def webhook():
     # successful payment
     elif event['type'] == 'invoice.payment_succeeded':
       # invoice = event['data']['object']
-      # customer_email=event["data"]["object"]["customer_email"]
+      customer_email=event["data"]["object"]["customer_email"]
       # print("need to update database")
-      handle_checkout_session_completed(event)
+      new_subscription_status="testing"
+      update_subscription_status(customer_email, new_subscription_status)
       # handle_invoice_payment_succeeded(event)
 
     elif event['type'] == 'invoice.sent':
