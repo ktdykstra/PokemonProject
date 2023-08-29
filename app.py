@@ -199,11 +199,11 @@ def webhook():
 
     elif event['type'] == 'checkout.session.async_payment_succeeded':
       session = event['data']['object']
-      handle_checkout_session_async_payment_succeeded(event)
+      # handle_checkout_session_async_payment_succeeded(event)
 
     elif event['type'] == 'checkout.session.completed':
       session = event['data']['object']
-      handle_checkout_session_completed(event)
+      # handle_checkout_session_completed(event)
 
     elif event['type'] == 'checkout.session.expired':
       session = event['data']['object']
@@ -317,10 +317,8 @@ def webhook():
     # successful payment
     elif event['type'] == 'invoice.payment_succeeded':
       invoice = event['data']['object']
-      print(invoice)
-      temp_email=event["data"]["object"]["customer_email"]
-      print(temp_email)
-      increment_click_count(temp_email)
+      customer_email=event["data"]["object"]["customer_email"]
+      handle_invoice_payment_succeeded(event)
 
     elif event['type'] == 'invoice.sent':
       invoice = event['data']['object']
@@ -764,17 +762,17 @@ def new_customer_id(user_email, new_customer_id):
     return
 
 ## for updating subscriptions once stripe customer id exists
-def update_subscription_and_customer_id(stripe_customer_id, new_status):
+def update_subscription_and_customer_id(customer_email, new_status):
     db, cursor = get_db()
     try:
-        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE stripe_customer_id = %s', (new_status, stripe_customer_id))
+        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, customer_email))
         db.commit()
         close_connection(db,cursor) # close db
-        print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_id}')
+        print(f'Subscription status updated to {new_status} for user with email: {customer_email}')
     except Exception as e:
         db.rollback()
         close_connection(db,cursor) # close db
-        print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
+        print(f"Unable to update subscription status for email: {customer_email}. Error:",e)
     # # Update subscription status AND stripe customer id IFF stripe customer id is ""
     # if stripe_customer_id =="":
 
@@ -890,7 +888,7 @@ def handle_checkout_session_async_payment_succeeded(event):
     subscription_id = event['data']['object']['subscription']
     customer_id = event['data']['object']['customer']
     subscription = stripe.Subscription.retrieve(subscription_id)
-    customer_email = event['data']['object']['customer_details']['email']
+    customer_email=event["data"]["object"]["customer_email"]
     update_stripe_customer_id(customer_email, customer_id)
 
     # Determine the new subscription status based on the subscription type (replace with your logic)
@@ -900,7 +898,7 @@ def handle_checkout_session_async_payment_succeeded(event):
         new_subscription_status = 'standard'
 
     # Update the user's subscription status and customer ID in the database
-    update_subscription_and_customer_id(customer_id, new_subscription_status)
+    update_subscription_and_customer_id(customer_email, new_subscription_status)
 
 
 def handle_checkout_session_completed(event):
@@ -909,7 +907,7 @@ def handle_checkout_session_completed(event):
     customer_id = event['data']['object']['customer']
     subscription_id = event['data']['object']['subscription']
     subscription = stripe.Subscription.retrieve(subscription_id)
-    customer_email = event['data']['object']['customer_details']['email']
+    customer_email=event["data"]["object"]["customer_email"]
     update_stripe_customer_id(customer_email, customer_id)
 
     # Determine the new subscription status based on the subscription type
@@ -921,36 +919,38 @@ def handle_checkout_session_completed(event):
         new_subscription_status = 'free'  # Or handle other subscription cases
 
     # Update the subscription status and customer ID in your database
-    update_subscription_and_customer_id(customer_id, new_subscription_status)
+    update_subscription_and_customer_id(customer_email, new_subscription_status)
 
 
 def handle_subscription_paused(event):
     # Handle customer.subscription.paused event
     customer_id = event['data']['object']['customer']
-    update_subscription_and_customer_id(customer_id, 'paused')
+    customer_email=event["data"]["object"]["customer_email"]
+    update_subscription_and_customer_id(customer_email, 'paused')
 
 
 def handle_subscription_resumed(event):
     # Handle customer.subscription.resumed event
     customer_id = event['data']['object']['customer']
-    update_subscription_and_customer_id(customer_id, 'resumed')
+    customer_email=event["data"]["object"]["customer_email"]
+    update_subscription_and_customer_id(customer_email, 'resumed')
 
 
 def handle_invoice_payment_succeeded(event):
     # Handle invoice.payment_succeeded event
     customer_id = event['data']['object']['customer']
-    subscription_id = event['data']['object']['subscription']
-    subscription = stripe.Subscription.retrieve(subscription_id)
+    customer_email=event["data"]["object"]["customer_email"]
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
     
     # Determine the new subscription status based on the subscription type
-    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+    if price_id == PREMIUM_PRICE_ID:
         new_subscription_status = 'premium'
-    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+    if price_id == STANDARD_PRICE_ID:
         new_subscription_status = 'standard'
     else:
         new_subscription_status = 'free'  # Or handle other subscription cases
     
-    update_subscription_and_customer_id(customer_id, new_subscription_status)
+    update_subscription_and_customer_id(customer_email, new_subscription_status)
 
 
 def handle_plan_updated(event):
@@ -1880,7 +1880,7 @@ def update_subscription():
                         new_subscription_status = 'standard'
 
                     # Update the subscription status and customer ID in your database
-                    update_subscription_and_customer_id(customer_id, new_subscription_status)
+                    update_subscription_and_customer_id(customer_email, new_subscription_status)
 
                     # Return a success response
                     return jsonify(success=True)
