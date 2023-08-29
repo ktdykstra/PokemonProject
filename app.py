@@ -322,6 +322,7 @@ def webhook():
       invoice = event['data']['object']
       customer_email=event["data"]["object"]["customer_email"]
       print("need to update database")
+      handle_checkout_session_completed(event)
       # handle_invoice_payment_succeeded(event)
 
     elif event['type'] == 'invoice.sent':
@@ -765,18 +766,18 @@ def new_customer_id(user_email, new_customer_id):
         print(f"Unable to create stripe customer ID for customer: {user_email}. Error:",e)
     return
 
-## for updating subscriptions once stripe customer id exists
-def update_subscription_and_customer_id(customer_email, new_status):
+## update subscription status
+def update_subscription_status(user_email, new_status):
     db, cursor = get_db()
     try:
-        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, customer_email))
+        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, user_email))
         db.commit()
         close_connection(db,cursor) # close db
-        print(f'Subscription status updated to {new_status} for user with email: {customer_email}')
+        print(f'Subscription status updated to {new_status} for user: {user_email}')
     except Exception as e:
         db.rollback()
         close_connection(db,cursor) # close db
-        print(f"Unable to update subscription status for email: {customer_email}. Error:",e)
+        print(f"Unable to update subscription status for user: {user_email}. Error:",e)
     # # Update subscription status AND stripe customer id IFF stripe customer id is ""
     # if stripe_customer_id =="":
 
@@ -902,7 +903,7 @@ def handle_checkout_session_async_payment_succeeded(event):
         new_subscription_status = 'standard'
 
     # Update the user's subscription status and customer ID in the database
-    update_subscription_and_customer_id(customer_email, new_subscription_status)
+    update_subscription_status(customer_email, new_subscription_status)
 
 
 def handle_checkout_session_completed(event):
@@ -923,21 +924,21 @@ def handle_checkout_session_completed(event):
         new_subscription_status = 'free'  # Or handle other subscription cases
 
     # Update the subscription status and customer ID in your database
-    update_subscription_and_customer_id(customer_email, new_subscription_status)
+    update_subscription_status(customer_email, new_subscription_status)
 
 
 def handle_subscription_paused(event):
     # Handle customer.subscription.paused event
     customer_id = event['data']['object']['customer']
     customer_email=event["data"]["object"]["customer_email"]
-    update_subscription_and_customer_id(customer_email, 'paused')
+    update_subscription_status(customer_email, 'paused')
 
 
 def handle_subscription_resumed(event):
     # Handle customer.subscription.resumed event
     customer_id = event['data']['object']['customer']
     customer_email=event["data"]["object"]["customer_email"]
-    update_subscription_and_customer_id(customer_email, 'resumed')
+    update_subscription_status(customer_email, 'resumed')
 
 
 def handle_invoice_payment_succeeded(event):
@@ -954,7 +955,7 @@ def handle_invoice_payment_succeeded(event):
     else:
         new_subscription_status = 'free'  # Or handle other subscription cases
     
-    update_subscription_and_customer_id(customer_email, new_subscription_status)
+    update_subscription_status(customer_email, new_subscription_status)
 
 
 def handle_plan_updated(event):
