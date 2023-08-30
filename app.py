@@ -325,6 +325,11 @@ def webhook():
       # print("need to update database")
       # new_subscription_status="testing"
       # update_subscription_status(customer_email, new_subscription_status)
+      customer_email=event["data"]["object"]["customer_email"]
+      price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+      print(price_id)
+      print(STANDARD_PRICE_ID)
+      print(customer_email)
       handle_invoice_payment_succeeded(event)
 
     elif event['type'] == 'invoice.sent':
@@ -948,7 +953,9 @@ def handle_invoice_payment_succeeded(event):
     customer_id = event['data']['object']['customer']
     customer_email=event["data"]["object"]["customer_email"]
     price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
-    
+    print(price_id)
+    print(STANDARD_PRICE_ID)
+    print(customer_email)
     # Determine the new subscription status based on the subscription type
     if price_id == PREMIUM_PRICE_ID:
         new_subscription_status = 'premium'
