@@ -112,6 +112,7 @@ def create_checkout_session():
                 # For metered billing, do not pass quantity
                 'quantity': 1
             }],
+            customer_email=session['user_email'],
             success_url=YOUR_DOMAIN + '/success.html',
             cancel_url=YOUR_DOMAIN + '/cancel.html',
             automatic_tax={'enabled': True},
@@ -889,43 +890,33 @@ def update_subscription_status(user_email, new_status):
 # ## FXNS TO HANDLE WEBHOOK EVENT TYPES
 
 def handle_checkout_session_async_payment_succeeded(event):
-    # Handle checkout.session.async_payment_succeeded event
-    # Extract relevant information from the event
-    subscription_id = event['data']['object']['subscription']
     customer_id = event['data']['object']['customer']
-    subscription = stripe.Subscription.retrieve(subscription_id)
     customer_email=event["data"]["object"]["customer_email"]
-    update_stripe_customer_id(customer_email, customer_id)
-
-    # Determine the new subscription status based on the subscription type (replace with your logic)
-    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
-            new_subscription_status = 'premium'
-    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+    
+    # Determine the new subscription status based on the subscription type
+    if price_id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    if price_id == STANDARD_PRICE_ID:
         new_subscription_status = 'standard'
-
-    # Update the user's subscription status and customer ID in the database
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
     update_subscription_status(customer_email, new_subscription_status)
 
 
 def handle_checkout_session_completed(event):
-    # Handle checkout.session.completed event
-    # Extract relevant information from the event
-    # customer_id = event['data']['object']['customer']
-    subscription = event['data']['object']['lines']['data'][0]['price']['id'] # extracting subscription from invoice
-    print(subscription)
-    print(STANDARD_PRICE_ID)
-    customer_email=event["data"]["object"]["customer_email"] # extracting email
-    # update_stripe_customer_id(customer_email, customer_id)
-
+    # Handle invoice.payment_succeeded event
+    customer_id = event['data']['object']['customer']
+    customer_email=event["data"]["object"]["customer_email"]
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+    
     # Determine the new subscription status based on the subscription type
-    if subscription == PREMIUM_PRICE_ID:
+    if price_id == PREMIUM_PRICE_ID:
         new_subscription_status = 'premium'
-    elif subscription == STANDARD_PRICE_ID:
+    if price_id == STANDARD_PRICE_ID:
         new_subscription_status = 'standard'
     else:
         new_subscription_status = 'free'  # Or handle other subscription cases
-
-    # Update the subscription status and customer ID in your database
     update_subscription_status(customer_email, new_subscription_status)
 
 
@@ -937,10 +928,19 @@ def handle_subscription_paused(event):
 
 
 def handle_subscription_resumed(event):
-    # Handle customer.subscription.resumed event
+    # Handle invoice.payment_succeeded event
     customer_id = event['data']['object']['customer']
     customer_email=event["data"]["object"]["customer_email"]
-    update_subscription_status(customer_email, 'resumed')
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+    
+    # Determine the new subscription status based on the subscription type
+    if price_id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    if price_id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
+    update_subscription_status(customer_email, new_subscription_status)
 
 
 def handle_invoice_payment_succeeded(event):
@@ -960,37 +960,19 @@ def handle_invoice_payment_succeeded(event):
 
 
 def handle_plan_updated(event):
-    # try:
-    #     user = get_user_by_email(user_email)
-    #     if not user or not user[3]:
-    #         return False
-
-    #     # Set the Stripe API key
-    #     stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
-
-    #     # Get the customer from Stripe
-    #     customer = stripe.Customer.retrieve(user[3])
-
-    #     # Find the IDs of the old and new subscription plans
-    #     old_subscription_id = customer.subscriptions.data[0].id
-    #     if new_subscription_type == 'premium':
-    #         new_subscription_price_id = PREMIUM_PRICE_ID
-    #     elif new_subscription_type == 'standard':
-    #         new_subscription_price_id = STANDARD_PRICE_ID
-
-    #     # Update the subscription plan
-    #     customer.subscriptions.modify(
-    #         old_subscription_id,
-    #         items=[{
-    #             'id': customer.subscriptions.data[0].items.data[0].id,
-    #             'price': new_subscription_price_id,
-    #         }],
-    #     )
-    #     return
-    # except stripe.error.StripeError:
-    #     print("Error in subscription adjustment for this subscriber in Stripe")
-    #     return
-    pass
+       # Handle invoice.payment_succeeded event
+    customer_id = event['data']['object']['customer']
+    customer_email=event["data"]["object"]["customer_email"]
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+    
+    # Determine the new subscription status based on the subscription type
+    if price_id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    if price_id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
+    update_subscription_status(customer_email, new_subscription_status)
 
 ####################################################
 # ROUTES FOR Google Login and Callback 
