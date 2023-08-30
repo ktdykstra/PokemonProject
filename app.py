@@ -320,11 +320,11 @@ def webhook():
     # successful payment
     elif event['type'] == 'invoice.payment_succeeded':
       # invoice = event['data']['object']
-      customer_email=event["data"]["object"]["customer_email"]
+      # customer_email=event["data"]["object"]["customer_email"]
       # print("need to update database")
-      new_subscription_status="testing"
-      update_subscription_status(customer_email, new_subscription_status)
-      # handle_invoice_payment_succeeded(event)
+      # new_subscription_status="testing"
+      # update_subscription_status(customer_email, new_subscription_status)
+      handle_invoice_payment_succeeded(event)
 
     elif event['type'] == 'invoice.sent':
       invoice = event['data']['object']
@@ -911,15 +911,16 @@ def handle_checkout_session_completed(event):
     # Handle checkout.session.completed event
     # Extract relevant information from the event
     # customer_id = event['data']['object']['customer']
-    subscription_id = event['data']['object']['subscription']
-    subscription = stripe.Subscription.retrieve(subscription_id)
-    customer_email=event["data"]["object"]["customer_email"]
+    subscription = event['data']['object']['lines']['data'][0]['price']['id'] # extracting subscription from invoice
+    print(subscription)
+    print(STANDARD_PRICE_ID)
+    customer_email=event["data"]["object"]["customer_email"] # extracting email
     # update_stripe_customer_id(customer_email, customer_id)
 
     # Determine the new subscription status based on the subscription type
-    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+    if subscription == PREMIUM_PRICE_ID:
         new_subscription_status = 'premium'
-    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+    elif subscription == STANDARD_PRICE_ID:
         new_subscription_status = 'standard'
     else:
         new_subscription_status = 'free'  # Or handle other subscription cases
@@ -955,7 +956,6 @@ def handle_invoice_payment_succeeded(event):
         new_subscription_status = 'standard'
     else:
         new_subscription_status = 'free'  # Or handle other subscription cases
-    
     update_subscription_status(customer_email, new_subscription_status)
 
 
