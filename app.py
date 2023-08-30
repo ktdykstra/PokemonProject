@@ -90,7 +90,7 @@ stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1n
 endpoint_secret = 'whsec_AZE85BOzWncPR6OB62f447ZUQuVwl3BX'
 
 PREMIUM_PRICE_ID = 'price_1NchwKDypgtvgAYhILRJc3RP'
-STANDARD_PRICE_ID = 'price_1NhNCaDypgtvgAYhRfdD9HLz'
+STANDARD_PRICE_ID = 'price_1NkeMUDypgtvgAYhm4NEpXAI'
 
 Session(app)
 YOUR_DOMAIN = 'https://www.serapis.dev'

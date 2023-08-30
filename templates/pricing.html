@@ -31,6 +31,12 @@
       margin-bottom: 20px;
     }
 
+    .subscription-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
     .features {
       margin-top: 20px;
       text-align: left;
@@ -66,10 +72,13 @@
 </head>
 <body>
   <div class="subscription-box">
+    <div class="subscription-title">Standard Subscription</div>
+    <div class="most-popular">(Most Popular!)</div>
     <div class="price">$4.99/month</div>
     <div class="features">
-      <div class="feature"> - Unlimited public and private replay analysis requests</div>
-      <div class="feature"> - Faster loading times through dedicated (secure) data storage</div>
+      <div class="feature"> - Save hours of work through unlimited replay analysis requests</div>
+      <div class="feature"> - Faster loading times through dedicated data storage</div>
+      <div class="feature"> - *Coming Soon!* Offline data access for customized calculations and analysis</div>
     </div>
     <form action="/checkout" method="POST">
       <!-- Note: If using PHP set the action to /create-checkout-session.php -->
@@ -79,3 +88,4 @@
   </div>
 </body>
 </html>
+
