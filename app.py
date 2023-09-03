@@ -1278,6 +1278,12 @@ def get_data():
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.get("https://www.google.com/")
 
+        ## paywall
+        user_email=session['user_email']
+        temp_user=get_user_by_email(user_email)
+        if temp_user[2] > 4:
+           return render_template("pricing.html")
+
         ## INCREMENT CLICK COUNT IN DB FOR USER
         increment_click_count(session['user_email'])
 
@@ -1491,6 +1497,12 @@ def get_data_private():
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.get("https://www.google.com/")
 
+        ## paywall
+        user_email=session['user_email']
+        temp_user=get_user_by_email(user_email)
+        if temp_user[2] > 4:
+           return render_template("pricing.html")
+        
         ## INCREMENT CLICK COUNT IN DB FOR USER
         increment_click_count(session['user_email'])
 
