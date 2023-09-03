@@ -1264,185 +1264,178 @@ def ads():
 @app.route("/get_data", methods=['GET','POST'])
 @cache.cached(timeout=60)
 def get_data():
-        global driver
-        #global df1
-        
-        service = Service(ChromeDriverManager().install())
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--no-sandbox")
+  global driver
+  #global df1
 
-        # download and use the latest ChromeDriver automatically using
-        # Set up ChromeOptions for headless mode
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.get("https://www.google.com/")
+  # set up webdriver in headless mode
+  service = Service(ChromeDriverManager().install())
+  chrome_options = Options()
+  chrome_options.add_argument("--headless")
+  chrome_options.add_argument("--disable-dev-shm-usage")
+  chrome_options.add_argument("--no-sandbox")
 
-        ## paywall
-        user_email=session['user_email']
-        temp_user=get_user_by_email(user_email)
-        if temp_user[2] > 4:
-           return render_template("pricing.html")
+  # download and use the latest ChromeDriver automatically using
+  # Set up ChromeOptions for headless mode
+  driver = webdriver.Chrome(service=service, options=chrome_options)
+  driver.get("https://www.google.com/")
 
-        ## INCREMENT CLICK COUNT IN DB FOR USER
-        increment_click_count(session['user_email'])
+  ## paywall
+  user_email=session['user_email']
+  temp_user=get_user_by_email(user_email)
+  if temp_user[2] > 4:
+     driver.quit()
+     return render_template("pricing.html")
 
-        #print("DRIVER:", driver)
-        if request.method == 'POST':
-            # METERED PAYWALL LOGIC
-            if 'user_email' in session:
-                user = get_user_by_email(session['user_email'])
-                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
-                    username = request.form.get('username')
-                    gametype = request.form.get('gametype')
+  #print("DRIVER:", driver)
+  if request.method == 'POST':
+    # METERED PAYWALL LOGIC
+    # if 'user_email' in session:
+    # user = get_user_by_email(session['user_email'])
+    # if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
+    username = request.form.get('username')
+    gametype = request.form.get('gametype')
 
-                    #UPDATE USERNAME IN SESSION
-                    session['showdown_username'] = username
+    # #UPDATE USERNAME IN SESSION
+    # session['showdown_username'] = username
 
-                    if driver is not None:
-                        ## run the data gathering. all_matches == False 
-                        df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
-                        time.sleep(2)
+    if driver is not None:
+      ## run the data gathering. all_matches == False 
+      df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
+      time.sleep(2)
 
-                        #update value of df1 in cache
-                        set_user_df1(df1)
+      ## INCREMENT CLICK COUNT IN DB FOR USER
+      increment_click_count(user_email)
 
-                        #print(output)
-                        # hero individual plot
-                        hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
-                        villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
-                        
-                        #df with num_wins, num_games, win_rate
-                        overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
-                        num_games = str(df2.loc[0, 'num_games'])
-                        num_wins = str(df2.loc[0, 'num_wins'])
-                        win_rate = str(df2.loc[0, 'win_rate'])
+      #update value of df1 in cache
+      set_user_df1(df1)
 
-                        #dfs with individual hero pokemon winrates and elo scores
-                        df_hero_indiv = df_hero_indiv.reset_index()
-                        df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
-                        df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
-                        # df_hero_indiv.to_csv("ind_stats.csv")
-                        df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
-                        df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
-                        
-                        #dfs with individual villain pokemon loss rates and elo scores
-                        df_villain_indiv = df_villain_indiv.reset_index()
-                        df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
-                        df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        # df_hero_indiv.to_csv("ind_stats.csv")
-                        df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
-                        
-                        #dfs with hero pairs, games and win rates breakdown 
-                        df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
-                        df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
-                        df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
-                        heroPairStats = df3.head(5).to_html(index=False)
-                        
-                        ## villain pair stats
-                        df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
-                        df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        villainPairStats = df4.head(5).to_html(index=False)
-                        
-                        ## hero comp stats
-                        df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
-                        df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
-                        df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
-                        df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
-                        sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+      #print(output)
+      # hero individual plot
+      hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
+      villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
 
-                        ## hero comp stats
-                        df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
-                        df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
-                        sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
+      #df with num_wins, num_games, win_rate
+      overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
+      num_games = str(df2.loc[0, 'num_games'])
+      num_wins = str(df2.loc[0, 'num_wins'])
+      win_rate = str(df2.loc[0, 'win_rate'])
 
-                        # Define the CSS style for the table
-                        table_style = """
-                        <style>
-                            table {
-                                border-collapse: collapse;
-                                width: 100%;
-                                max-width: 800px;
-                                margin: auto;
-                                margin-bottom: 1em;
-                            }
-                            
-                            th {
-                                font-weight: bold;
-                                text-align: left;
-                                color: white;
-                                background-color: #9d5bd9;
-                                padding: 0.5em;
-                            }
-                            
-                            tr:hover {
-                                background-color: #a759d13f;
-                            }
-                            
-                            td, th {
-                                border: 1px solid #ddd;
-                                padding: 0.5em;
-                                text-align: left;
-                            }
-                            
-                            @media (max-width: 768px) {
-                                table {
-                                    font-size: 0.8em;
-                                }
-                                
-                                th, td {
-                                    padding: 0.25em;
-                                }
-                            }
-                        </style>
-                        """
+      #dfs with individual hero pokemon winrates and elo scores
+      df_hero_indiv = df_hero_indiv.reset_index()
+      df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
+      df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
+      # df_hero_indiv.to_csv("ind_stats.csv")
+      df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
+      df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+      hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
 
-                        driver.quit()
-                        
-                        # katies original html creation
-                        output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
-                                            "<br><br>" +
-                                            hero_indiv_stats + 
-                                            "<br><br>" +
-                                            hero_plotly+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
-                                            "<br><br>" +
-                                            villain_indiv_stats + 
-                                            "<br><br>" +
-                                            villain_plotly+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
-                                            "<br><br>" +
-                                            sixTeamHeroStats+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
-                                            "<br><br>" +
-                                            sixTeamVillainStats)
+      #dfs with individual villain pokemon loss rates and elo scores
+      df_villain_indiv = df_villain_indiv.reset_index()
+      df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
+      df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+      # df_hero_indiv.to_csv("ind_stats.csv")
+      df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
+      df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+      villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
 
-                        return render_template('resultsPrivateAndPublic.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
-                
-                    else:
-                        return 'Pop-up window not opened yet!'
-                else:
-                    flash('Please subscribe to access more content.')
-                    return redirect(url_for('pricing'))  # Redirect to the subscription page
-            else:
-                flash('Please log in to access content.')
-                return redirect(url_for('login'))  # Redirect to the login page
-        else:
-            print("did not retrieve input")
-            return render_template('index.html')
+      #dfs with hero pairs, games and win rates breakdown 
+      df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
+      df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
+      df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+      df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
+      heroPairStats = df3.head(5).to_html(index=False)
+
+      ## villain pair stats
+      df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
+      df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+      df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+      df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
+      villainPairStats = df4.head(5).to_html(index=False)
+
+      ## hero comp stats
+      df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
+      df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
+      df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+      df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
+      df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
+      sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+
+      ## hero comp stats
+      df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
+      df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+      df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+      df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
+      df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
+      sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
+
+      # Define the CSS style for the table
+      table_style = """
+        <style>
+        table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 800px;
+        margin: auto;
+        margin-bottom: 1em;
+        }
+
+        th {
+        font-weight: bold;
+        text-align: left;
+        color: white;
+        background-color: #9d5bd9;
+        padding: 0.5em;
+        }
+
+        tr:hover {
+        background-color: #a759d13f;
+        }
+
+        td, th {
+        border: 1px solid #ddd;
+        padding: 0.5em;
+        text-align: left;
+        }
+
+        @media (max-width: 768px) {
+        table {
+        font-size: 0.8em;
+        }
+
+        th, td {
+        padding: 0.25em;
+        }
+        }
+        </style>
+      """
+
+      driver.quit()
+
+      # katies original html creation
+      output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
+        "<br><br>" +
+        hero_indiv_stats + 
+        "<br><br>" +
+        hero_plotly+ 
+        "<br><br>" +
+        "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
+        "<br><br>" +
+        villain_indiv_stats + 
+        "<br><br>" +
+        villain_plotly+ 
+        "<br><br>" +
+        "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
+        "<br><br>" +
+        sixTeamHeroStats+ 
+        "<br><br>" +
+        "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
+        "<br><br>" +
+        sixTeamVillainStats)
+      return render_template('resultsPrivateAndPublic.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+    else:
+      driver.quit()
+      print("did not retrieve input")
+      return render_template('index.html')
 
 ############################################################
 # LOGIN TO PS! WITH SELENIUM
@@ -1472,6 +1465,7 @@ def login_showdown(username, password, driver):
     button = driver.find_element(By.XPATH, "//button[@type='submit']")
     button.click()
     time.sleep(2)
+    driver.teardown=False ## crucial for making sure the driver doesn't auto quit after function
     
     return driver
 
@@ -1483,194 +1477,189 @@ def login_showdown(username, password, driver):
 @app.route("/get_data_private", methods=['GET','POST'])
 @cache.cached(timeout=60)
 def get_data_private():
-        global driver
-        #global df1
+  global driver
+  #global df1
 
-        # Set up the Chrome WebDriver in headless mode
-        service = Service(ChromeDriverManager().install())
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--no-sandbox")
+  # Set up the Chrome WebDriver in headless mode
+  service = Service(ChromeDriverManager().install())
+  chrome_options = Options()
+  chrome_options.add_argument("--headless")
+  chrome_options.add_argument("--disable-dev-shm-usage")
+  chrome_options.add_argument("--no-sandbox")
 
-        # download and use the latest ChromeDriver automatically using
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.get("https://www.google.com/")
+  # download and use the latest ChromeDriver automatically using
+  driver = webdriver.Chrome(service=service, options=chrome_options)
+  driver.get("https://www.google.com/")
 
-        ## paywall
-        user_email=session['user_email']
-        temp_user=get_user_by_email(user_email)
-        if temp_user[2] > 4:
-           return render_template("pricing.html")
-        
-        ## INCREMENT CLICK COUNT IN DB FOR USER
-        increment_click_count(session['user_email'])
+  ## paywall
+  user_email=session['user_email']
+  temp_user=get_user_by_email(user_email)
+  if temp_user[2] > 4:
+     driver.quit()
+     return render_template("pricing.html")
 
-        if request.method == 'POST':
+  if request.method == 'POST':
+      # # METERED PAYWALL LOGIC
+      # if 'user_email' in session:
+      #     user = get_user_by_email(session['user_email'])
+      #     if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
 
-            # METERED PAYWALL LOGIC
-            if 'user_email' in session:
-                user = get_user_by_email(session['user_email'])
-                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
+      username_private = request.form.get('usernamePrivate')
+      password = request.form.get('showdown_pw')
+      gametype = request.form.get('gametype')
+      driver=login_showdown(username_private, password, driver)            
+      # time.sleep(3)
+      print("DRIVER:", driver)
+      print("User:", username_private)
+      print("pass:", password)
 
-                    username_private = request.form.get('usernamePrivate')
-                    password = request.form.get('showdown_pw')
-                    gametype = request.form.get('gametype')
-                    driver=login_showdown(username_private, password, driver)            
-                    # time.sleep(3)
-                    print("DRIVER:", driver)
-                    print("User:", username_private)
-                    print("pass:", password)
+      #UPDATE USERNAME IN SESSION
+      # session['showdown_username'] = username_private
 
-                    #UPDATE USERNAME IN SESSION
-                    session['showdown_username'] = username_private
+      if driver is not None:
+          ## run the data gathering
+          df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
+          time.sleep(2)
 
-                    if driver is not None:
-                        ## run the data gathering
-                        df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
-                        time.sleep(2)
+          ## INCREMENT CLICK COUNT IN DB FOR USER
+          increment_click_count(user_email)
 
-                        #update value of df1 in cache
-                        set_user_df1(df1)
+          #update value of df1 in cache
+          set_user_df1(df1)
 
-                        
+          #print(output)
+          # hero individual plot
+          hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
+          villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
+          
+          #df with num_wins, num_games, win_rate
+          overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
+          num_games = str(df2.loc[0, 'num_games'])
+          num_wins = str(df2.loc[0, 'num_wins'])
+          win_rate = str(df2.loc[0, 'win_rate'])
+          
+          #dfs with individual hero pokemon winrates and elo scores
+          df_hero_indiv = df_hero_indiv.reset_index()
+          df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
+          df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
+          # df_hero_indiv.to_csv("ind_stats.csv")
+          df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
+          df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+          hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
+          
+          #dfs with individual villain pokemon loss rates and elo scores
+          df_villain_indiv = df_villain_indiv.reset_index()
+          df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
+          df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+          # df_hero_indiv.to_csv("ind_stats.csv")
+          df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
+          df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+          villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
+          
+          #dfs with hero pairs, games and win rates breakdown 
+          df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
+          df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
+          df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+          df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
+          heroPairStats = df3.head(5).to_html(index=False)
+          
+          ## villain pair stats
+          df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
+          df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+          df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+          df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
+          villainPairStats = df4.head(5).to_html(index=False)
+          
+          ## hero comp stats
+          df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
+          df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
+          df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+          df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
+          df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
+          sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
 
-                        #print(output)
-                        # hero individual plot
-                        hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
-                        villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
-                        
-                        #df with num_wins, num_games, win_rate
-                        overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
-                        num_games = str(df2.loc[0, 'num_games'])
-                        num_wins = str(df2.loc[0, 'num_wins'])
-                        win_rate = str(df2.loc[0, 'win_rate'])
-                        
-                        #dfs with individual hero pokemon winrates and elo scores
-                        df_hero_indiv = df_hero_indiv.reset_index()
-                        df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
-                        df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
-                        # df_hero_indiv.to_csv("ind_stats.csv")
-                        df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
-                        df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
-                        
-                        #dfs with individual villain pokemon loss rates and elo scores
-                        df_villain_indiv = df_villain_indiv.reset_index()
-                        df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
-                        df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        # df_hero_indiv.to_csv("ind_stats.csv")
-                        df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
-                        
-                        #dfs with hero pairs, games and win rates breakdown 
-                        df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
-                        df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
-                        df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
-                        heroPairStats = df3.head(5).to_html(index=False)
-                        
-                        ## villain pair stats
-                        df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
-                        df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        villainPairStats = df4.head(5).to_html(index=False)
-                        
-                        ## hero comp stats
-                        df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
-                        df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
-                        df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
-                        df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
-                        sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+          ## hero comp stats
+          df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
+          df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+          df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+          df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
+          df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
+          sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
 
-                        ## hero comp stats
-                        df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
-                        df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
-                        sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
+          # Define the CSS style for the table
+          table_style = """
+          <style>
+              table {
+                  border-collapse: collapse;
+                  width: 100%;
+                  max-width: 800px;
+                  margin: auto;
+                  margin-bottom: 1em;
+              }
+              
+              th {
+                  font-weight: bold;
+                  text-align: left;
+                  color: white;
+                  background-color: #9d5bd9;
+                  padding: 0.5em;
+              }
+              
+              tr:hover {
+                  background-color: #a759d13f;
+              }
+              
+              td, th {
+                  border: 1px solid #ddd;
+                  padding: 0.5em;
+                  text-align: left;
+              }
+              
+              @media (max-width: 768px) {
+                  table {
+                      font-size: 0.8em;
+                  }
+                  
+                  th, td {
+                      padding: 0.25em;
+                  }
+              }
+          </style>
+          """
 
-                        # Define the CSS style for the table
-                        table_style = """
-                        <style>
-                            table {
-                                border-collapse: collapse;
-                                width: 100%;
-                                max-width: 800px;
-                                margin: auto;
-                                margin-bottom: 1em;
-                            }
-                            
-                            th {
-                                font-weight: bold;
-                                text-align: left;
-                                color: white;
-                                background-color: #9d5bd9;
-                                padding: 0.5em;
-                            }
-                            
-                            tr:hover {
-                                background-color: #a759d13f;
-                            }
-                            
-                            td, th {
-                                border: 1px solid #ddd;
-                                padding: 0.5em;
-                                text-align: left;
-                            }
-                            
-                            @media (max-width: 768px) {
-                                table {
-                                    font-size: 0.8em;
-                                }
-                                
-                                th, td {
-                                    padding: 0.25em;
-                                }
-                            }
-                        </style>
-                        """
+          driver.quit()
+          
+          # katies original html creation
+          output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
+                              "<br><br>" +
+                              hero_indiv_stats + 
+                              "<br><br>" +
+                              hero_plotly+ 
+                              "<br><br>" +
+                              "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
+                              "<br><br>" +
+                              villain_indiv_stats + 
+                              "<br><br>" +
+                              villain_plotly+ 
+                              "<br><br>" +
+                              "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
+                              "<br><br>" +
+                              sixTeamHeroStats+ 
+                              "<br><br>" +
+                              "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
+                              "<br><br>" +
+                              sixTeamVillainStats)
 
-                        driver.quit()
-                        
-                        # katies original html creation
-                        output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
-                                            "<br><br>" +
-                                            hero_indiv_stats + 
-                                            "<br><br>" +
-                                            hero_plotly+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
-                                            "<br><br>" +
-                                            villain_indiv_stats + 
-                                            "<br><br>" +
-                                            villain_plotly+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
-                                            "<br><br>" +
-                                            sixTeamHeroStats+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
-                                            "<br><br>" +
-                                            sixTeamVillainStats)
-
-                        return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
-                
-                    else:
-                        return 'Pop-up window not opened yet!'
-                else:
-                    flash('Please subscribe to access more content.')
-                    return redirect(url_for('pricing'))  # Redirect to the subscription page
-            else:
-                flash('Please log in to access content.')
-                return redirect(url_for('login'))  # Redirect to the login page
-        else:
-            print("did not retrieve input")
-            return render_template('index.html')
+          return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+      else:
+        driver.quit()
+        print("did not retrieve input")
+        return render_template('index.html')
+      #         else:
+      #             return 'Pop-up window not opened yet!'
+      # else:
+      #     flash('Please log in to access content.')
+      #     return redirect(url_for('login'))  # Redirect to the login page
 
 
 
