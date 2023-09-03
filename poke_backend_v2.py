@@ -100,9 +100,10 @@ def contains_chrome(input_string):
     else:
         return input_string
     
+## splitting into
+# gather_private_matches(username, game_type, driver)
 
 # ## Gather matches via the API. DOUBLE CHECK THAT NOT DOUBLE COUNTING MATCHES
-
 def gather_matches(username, game_type, driver, all_matches):
     
     # ## Get first page

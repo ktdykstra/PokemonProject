@@ -74,6 +74,9 @@ warnings.filterwarnings('ignore')
 
 def gather_matches(username, game_type):
     
+    ## are there matches test case
+    no_pages=True
+
     ## Get first page
     
     match_page=1

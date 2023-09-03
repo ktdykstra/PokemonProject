@@ -1,9 +1,10 @@
 # IMPORT DB functionality from database.py
 from database import connect_to_db, close_connection, DatabaseHandler
 import psycopg2
+import os
 
 DATABASE_URL=os.environ.get('DATABASE_URL')
-
+print(DATABASE_URL)
 # db_handler = DatabaseHandler()
 
 def get_db():
@@ -30,7 +31,7 @@ def CUD_query(query, db, cursor):
 ####################################################
 
 # view all data in user table
-def view_user_data():
+def view_user_data(): # works
     db, cursor = get_db() # open db
     try:
         cursor.execute("SELECT * FROM serapis_schema.serapis_users;")
@@ -70,7 +71,7 @@ def create_user(user_email, subscription_status='free', click_count=0, stripe_cu
     return
 
 ## get individual user info filtering by email
-def get_user_by_email(user_email):
+def get_user_by_email(user_email): # works
     db, cursor = get_db()
     try:
         cursor.execute('SELECT * FROM serapis_schema.serapis_users WHERE email = %s', (user_email,))
@@ -141,17 +142,17 @@ def get_subscription_status(user_email):
     return 'free'
 
 
-def update_subscription_status(stripe_customer_id, new_status):
-    db, cursor = get_db()
-    try:
-        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE stripe_customer_id = %s', (new_status, stripe_customer_id))
-        db.commit()
-        close_connection(db,cursor) # close db
-        print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_id}')
-    except Exception as e:
-        db.rollback()
-        close_connection(db,cursor) # close db
-        print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
+# def update_subscription_status(stripe_customer_id, new_status):
+#     db, cursor = get_db()
+#     try:
+#         cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE stripe_customer_id = %s', (new_status, stripe_customer_id))
+#         db.commit()
+#         close_connection(db,cursor) # close db
+#         print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_id}')
+#     except Exception as e:
+#         db.rollback()
+#         close_connection(db,cursor) # close db
+#         print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
 
 # Update subscription status and customer ID in your database
 def update_subscription_and_customer_id(stripe_customer_id, new_subscription_status):
@@ -216,8 +217,16 @@ def get_customer_id_from_email(user_email):
         print(f"Unable to get stripe customer id for user: {user_email}. Error:",e)
         return
 ###### TESTING #####
+
+view_user_data()
+x=get_user_by_email("rowananalytics2@gmail.com")
+
 x=get_user_by_email("ngk22@gmail.com")
 x[3]
+new_status="changed_again"
+update_subscription_status(x[0], new_status)
+get_user_by_email("rowananalytics2@gmail.com")
+view_user_data()
 
 update_subscription_status()
 for row in result:

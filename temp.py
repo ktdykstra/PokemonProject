@@ -4,7 +4,7 @@ Spyder Editor
 
 This is a temporary script file.
 """
-
+print("th")
 import pandas as pd
 import numpy as np
 import poke_backend_v2 as sdg
@@ -17,9 +17,91 @@ from selenium import webdriver
 import requests
 from requests.adapters import BaseAdapter
 from requests.sessions import Session
+from selenium import webdriver
+import base64
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+import json
+from flask_oauthlib.client import OAuth
+import time
 
-username = "Broskander"
-gametype = "gen9vgc2023series1"
+username = "DaFinisher"
+print(username)
+game_type = "gen9vgc2023regulationd"
+password="Serapisiscool2"
+global driver
+global df1
+
+service = Service(ChromeDriverManager().install())
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--no-sandbox")
+driver = webdriver.Chrome()
+driver.get("https://www.google.com/")
+############################################################
+# LOGIN TO PS! WITH SELENIUM
+############################################################
+def login_showdown(username, password, driver):
+    # global driver
+    # Navigate to the login page
+    login_url = "https://play.pokemonshowdown.com/"
+    driver.get(login_url)
+
+    # Wait for the login page to load
+    time.sleep(2)  # Adjust the wait time as needed
+
+    # Submit the login form
+    login_button = driver.find_element(By.NAME, "login")
+    login_button.click()
+
+    # Find the username and password input fields and fill them out
+    username_field = driver.find_element(By.NAME, "username")
+    username_field.send_keys(username)
+    button = driver.find_element(By.XPATH, "//button[@type='submit']")
+    button.click()
+    # time.sleep(2) 
+    wait = WebDriverWait(driver, 10)
+    pw_field = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "textbox")))
+    pw_field.send_keys(password)
+    button = driver.find_element(By.XPATH, "//button[@type='submit']")
+    button.click()
+    time.sleep(2)
+    driver.teardown=False
+
+    return driver
+driver=login_showdown(username, password, driver)
+df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, game_type, driver, True)
+df1
+driver.quit()
+match_page=1000
+pub_api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page)
+pub_api_url
+driver.get(pub_api_url)
+temp1=pd.DataFrame()
+temp2=pd.DataFrame({1,2,3})
+temp3=pd.concat([temp1,temp2])
+temp3
+json_element = driver.find_element(by="tag name", value='pre')
+json_text_pub = "1231"
+try:
+    base_db = pd.read_json(json_text_pub)
+except:
+    print("sorrrrry")
+type(json_text_pub)
+# download and use the latest ChromeDriver automatically using
+# Set up ChromeOptions for headless mode
+driver = webdriver.Chrome(service=service, options=chrome_options)
+driver.get("https://www.google.com/")
+df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
+df1
+
+
 api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + gametype + "&page=" + str(match_page)
 driver = webdriver.Chrome()
 # driver.quit()

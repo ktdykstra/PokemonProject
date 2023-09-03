@@ -87,12 +87,490 @@ app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
 
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
-endpoint_secret = 'whsec_y8g6j902YUMrBD7HoeETzGHeF39prUqs'
+endpoint_secret = 'whsec_AZE85BOzWncPR6OB62f447ZUQuVwl3BX'
 
 PREMIUM_PRICE_ID = 'price_1NchwKDypgtvgAYhILRJc3RP'
-STANDARD_PRICE_ID = 'price_1NchuvDypgtvgAYhETrGiaoo'
+STANDARD_PRICE_ID = 'price_1NkeMUDypgtvgAYhm4NEpXAI'
 
 Session(app)
+YOUR_DOMAIN = 'https://www.serapis.dev'
+
+####################################################
+# STRIPE ROUND 2 ATTEMPT
+####################################################
+
+@app.route('/checkout', methods=['POST',"GET"])
+def create_checkout_session():
+    try:
+        # price_id = '{{PRICE_ID}}'
+        price_id = request.form.get('priceId')
+        print(price_id)
+        checkout_session = stripe.checkout.Session.create(
+            mode='subscription',
+            line_items=[{
+                'price': price_id,
+                # For metered billing, do not pass quantity
+                'quantity': 1
+            }],
+            customer_email=session['user_email'],
+            success_url=YOUR_DOMAIN + '/success.html',
+            cancel_url=YOUR_DOMAIN + '/cancel.html',
+            automatic_tax={'enabled': True},
+        )
+    except Exception as e:
+        return str(e)
+
+    return redirect(checkout_session.url, code=303)
+
+@app.route('/success.html')
+def success():
+    return render_template("success.html")
+
+@app.route('/cancel.html')
+def cancel():
+    return render_template("cancel.html")
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    event = None
+    payload = request.data
+    sig_header = request.headers['STRIPE_SIGNATURE']
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+        print("event create")
+    except ValueError as e:
+        # Invalid payload
+        raise e
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        raise e
+
+    # Handle the event
+    if event['type'] == 'account.updated':
+      account = event['data']['object']
+    elif event['type'] == 'account.external_account.created':
+      external_account = event['data']['object']
+    elif event['type'] == 'account.external_account.deleted':
+      external_account = event['data']['object']
+    elif event['type'] == 'account.external_account.updated':
+      external_account = event['data']['object']
+    elif event['type'] == 'balance.available':
+      balance = event['data']['object']
+    elif event['type'] == 'billing_portal.configuration.created':
+      configuration = event['data']['object']
+    elif event['type'] == 'billing_portal.configuration.updated':
+      configuration = event['data']['object']
+    elif event['type'] == 'billing_portal.session.created':
+      session = event['data']['object']
+    elif event['type'] == 'capability.updated':
+      capability = event['data']['object']
+    elif event['type'] == 'cash_balance.funds_available':
+      cash_balance = event['data']['object']
+    elif event['type'] == 'charge.captured':
+      charge = event['data']['object']
+    elif event['type'] == 'charge.expired':
+      charge = event['data']['object']
+    elif event['type'] == 'charge.failed':
+      charge = event['data']['object']
+    elif event['type'] == 'charge.pending':
+      charge = event['data']['object']
+    elif event['type'] == 'charge.refunded':
+      charge = event['data']['object']
+    elif event['type'] == 'charge.succeeded':
+      charge = event['data']['object']
+    elif event['type'] == 'charge.updated':
+      charge = event['data']['object']
+    elif event['type'] == 'charge.dispute.closed':
+      dispute = event['data']['object']
+    elif event['type'] == 'charge.dispute.created':
+      dispute = event['data']['object']
+    elif event['type'] == 'charge.dispute.funds_reinstated':
+      dispute = event['data']['object']
+    elif event['type'] == 'charge.dispute.funds_withdrawn':
+      dispute = event['data']['object']
+    elif event['type'] == 'charge.dispute.updated':
+      dispute = event['data']['object']
+    elif event['type'] == 'charge.refund.updated':
+      refund = event['data']['object']
+    elif event['type'] == 'checkout.session.async_payment_failed':
+      session = event['data']['object']
+
+
+    elif event['type'] == 'checkout.session.async_payment_succeeded':
+      session = event['data']['object']
+      # handle_checkout_session_async_payment_succeeded(event)
+
+    elif event['type'] == 'checkout.session.completed':
+      session = event['data']['object']
+      print("checkout session completed")
+      # handle_checkout_session_completed(event)
+
+    elif event['type'] == 'checkout.session.expired':
+      session = event['data']['object']
+    elif event['type'] == 'coupon.created':
+      coupon = event['data']['object']
+    elif event['type'] == 'coupon.deleted':
+      coupon = event['data']['object']
+    elif event['type'] == 'coupon.updated':
+      coupon = event['data']['object']
+    elif event['type'] == 'credit_note.created':
+      credit_note = event['data']['object']
+    elif event['type'] == 'credit_note.updated':
+      credit_note = event['data']['object']
+    elif event['type'] == 'credit_note.voided':
+      credit_note = event['data']['object']
+    elif event['type'] == 'customer.created':
+      customer = event['data']['object']
+    elif event['type'] == 'customer.deleted':
+      customer = event['data']['object']
+    elif event['type'] == 'customer.updated':
+      customer = event['data']['object']
+    elif event['type'] == 'customer.discount.created':
+      discount = event['data']['object']
+    elif event['type'] == 'customer.discount.deleted':
+      discount = event['data']['object']
+    elif event['type'] == 'customer.discount.updated':
+      discount = event['data']['object']
+    elif event['type'] == 'customer.source.created':
+      source = event['data']['object']
+    elif event['type'] == 'customer.source.deleted':
+      source = event['data']['object']
+    elif event['type'] == 'customer.source.expiring':
+      source = event['data']['object']
+    elif event['type'] == 'customer.source.updated':
+      source = event['data']['object']
+    elif event['type'] == 'customer.subscription.created':
+      subscription = event['data']['object']
+
+    # deleted subscription
+    elif event['type'] == 'customer.subscription.deleted':
+      subscription = event['data']['object']
+      subscription_id = event['data']['object']['id']
+      customer_id = event['data']['object']['customer']      
+      # Update the user's subscription status in the database to reflect subscription deletion
+      
+      # update_subscription_and_customer_id(customer_id, 'deleted')
+
+    elif event['type'] == 'customer.subscription.paused':
+      subscription = event['data']['object']
+      # handle_subscription_paused(event)
+
+    elif event['type'] == 'customer.subscription.pending_update_applied':
+      subscription = event['data']['object']
+    elif event['type'] == 'customer.subscription.pending_update_expired':
+      subscription = event['data']['object']
+
+    elif event['type'] == 'customer.subscription.resumed':
+      subscription = event['data']['object']
+      # handle_subscription_resumed(event)
+
+    elif event['type'] == 'customer.subscription.trial_will_end':
+      subscription = event['data']['object']
+    elif event['type'] == 'customer.subscription.updated':
+      subscription = event['data']['object']
+    elif event['type'] == 'customer.tax_id.created':
+      tax_id = event['data']['object']
+    elif event['type'] == 'customer.tax_id.deleted':
+      tax_id = event['data']['object']
+    elif event['type'] == 'customer.tax_id.updated':
+      tax_id = event['data']['object']
+    elif event['type'] == 'customer_cash_balance_transaction.created':
+      customer_cash_balance_transaction = event['data']['object']
+    elif event['type'] == 'file.created':
+      file = event['data']['object']
+    elif event['type'] == 'financial_connections.account.created':
+      account = event['data']['object']
+    elif event['type'] == 'financial_connections.account.deactivated':
+      account = event['data']['object']
+    elif event['type'] == 'financial_connections.account.disconnected':
+      account = event['data']['object']
+    elif event['type'] == 'financial_connections.account.reactivated':
+      account = event['data']['object']
+    elif event['type'] == 'financial_connections.account.refreshed_balance':
+      account = event['data']['object']
+    elif event['type'] == 'identity.verification_session.canceled':
+      verification_session = event['data']['object']
+    elif event['type'] == 'identity.verification_session.created':
+      verification_session = event['data']['object']
+    elif event['type'] == 'identity.verification_session.processing':
+      verification_session = event['data']['object']
+    elif event['type'] == 'identity.verification_session.requires_input':
+      verification_session = event['data']['object']
+    elif event['type'] == 'identity.verification_session.verified':
+      verification_session = event['data']['object']
+    elif event['type'] == 'invoice.created':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.deleted':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.finalization_failed':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.finalized':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.marked_uncollectible':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.paid':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.payment_action_required':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.payment_failed':
+      invoice = event['data']['object']
+
+    # successful payment
+    elif event['type'] == 'invoice.payment_succeeded':
+      # invoice = event['data']['object']
+      # customer_email=event["data"]["object"]["customer_email"]
+      # print("need to update database")
+      # new_subscription_status="testing"
+      # update_subscription_status(customer_email, new_subscription_status)
+      customer_email=event["data"]["object"]["customer_email"]
+      price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+      print(price_id)
+      print(STANDARD_PRICE_ID)
+      print(customer_email)
+      handle_invoice_payment_succeeded(event)
+
+    elif event['type'] == 'invoice.sent':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.upcoming':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.updated':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoice.voided':
+      invoice = event['data']['object']
+    elif event['type'] == 'invoiceitem.created':
+      invoiceitem = event['data']['object']
+    elif event['type'] == 'invoiceitem.deleted':
+      invoiceitem = event['data']['object']
+    elif event['type'] == 'invoiceitem.updated':
+      invoiceitem = event['data']['object']
+    elif event['type'] == 'issuing_authorization.created':
+      issuing_authorization = event['data']['object']
+    elif event['type'] == 'issuing_authorization.updated':
+      issuing_authorization = event['data']['object']
+    elif event['type'] == 'issuing_card.created':
+      issuing_card = event['data']['object']
+    elif event['type'] == 'issuing_card.updated':
+      issuing_card = event['data']['object']
+    elif event['type'] == 'issuing_cardholder.created':
+      issuing_cardholder = event['data']['object']
+    elif event['type'] == 'issuing_cardholder.updated':
+      issuing_cardholder = event['data']['object']
+    elif event['type'] == 'issuing_dispute.closed':
+      issuing_dispute = event['data']['object']
+    elif event['type'] == 'issuing_dispute.created':
+      issuing_dispute = event['data']['object']
+    elif event['type'] == 'issuing_dispute.funds_reinstated':
+      issuing_dispute = event['data']['object']
+    elif event['type'] == 'issuing_dispute.submitted':
+      issuing_dispute = event['data']['object']
+    elif event['type'] == 'issuing_dispute.updated':
+      issuing_dispute = event['data']['object']
+    elif event['type'] == 'issuing_transaction.created':
+      issuing_transaction = event['data']['object']
+    elif event['type'] == 'issuing_transaction.updated':
+      issuing_transaction = event['data']['object']
+    elif event['type'] == 'mandate.updated':
+      mandate = event['data']['object']
+    elif event['type'] == 'order.created':
+      order = event['data']['object']
+    elif event['type'] == 'payment_intent.amount_capturable_updated':
+      payment_intent = event['data']['object']
+    elif event['type'] == 'payment_intent.canceled':
+      payment_intent = event['data']['object']
+    elif event['type'] == 'payment_intent.created':
+      payment_intent = event['data']['object']
+    elif event['type'] == 'payment_intent.partially_funded':
+      payment_intent = event['data']['object']
+    elif event['type'] == 'payment_intent.payment_failed':
+      payment_intent = event['data']['object']
+    elif event['type'] == 'payment_intent.processing':
+      payment_intent = event['data']['object']
+    elif event['type'] == 'payment_intent.requires_action':
+      payment_intent = event['data']['object']
+    elif event['type'] == 'payment_intent.succeeded':
+      payment_intent = event['data']['object']
+    elif event['type'] == 'payment_link.created':
+      payment_link = event['data']['object']
+    elif event['type'] == 'payment_link.updated':
+      payment_link = event['data']['object']
+    elif event['type'] == 'payment_method.attached':
+      payment_method = event['data']['object']
+    elif event['type'] == 'payment_method.automatically_updated':
+      payment_method = event['data']['object']
+    elif event['type'] == 'payment_method.detached':
+      payment_method = event['data']['object']
+    elif event['type'] == 'payment_method.updated':
+      payment_method = event['data']['object']
+    elif event['type'] == 'payout.canceled':
+      payout = event['data']['object']
+    elif event['type'] == 'payout.created':
+      payout = event['data']['object']
+    elif event['type'] == 'payout.failed':
+      payout = event['data']['object']
+    elif event['type'] == 'payout.paid':
+      payout = event['data']['object']
+    elif event['type'] == 'payout.reconciliation_completed':
+      payout = event['data']['object']
+    elif event['type'] == 'payout.updated':
+      payout = event['data']['object']
+    elif event['type'] == 'person.created':
+      person = event['data']['object']
+    elif event['type'] == 'person.deleted':
+      person = event['data']['object']
+    elif event['type'] == 'person.updated':
+      person = event['data']['object']
+    elif event['type'] == 'plan.created':
+      plan = event['data']['object']
+    elif event['type'] == 'plan.deleted':
+      plan = event['data']['object']
+
+    elif event['type'] == 'plan.updated':
+      plan = event['data']['object']
+      # handle_plan_updated(event)
+
+    elif event['type'] == 'price.created':
+      price = event['data']['object']
+    elif event['type'] == 'price.deleted':
+      price = event['data']['object']
+    elif event['type'] == 'price.updated':
+      price = event['data']['object']
+    elif event['type'] == 'product.created':
+      product = event['data']['object']
+    elif event['type'] == 'product.deleted':
+      product = event['data']['object']
+    elif event['type'] == 'product.updated':
+      product = event['data']['object']
+    elif event['type'] == 'promotion_code.created':
+      promotion_code = event['data']['object']
+    elif event['type'] == 'promotion_code.updated':
+      promotion_code = event['data']['object']
+    elif event['type'] == 'quote.accepted':
+      quote = event['data']['object']
+    elif event['type'] == 'quote.canceled':
+      quote = event['data']['object']
+    elif event['type'] == 'quote.created':
+      quote = event['data']['object']
+    elif event['type'] == 'quote.finalized':
+      quote = event['data']['object']
+    elif event['type'] == 'radar.early_fraud_warning.created':
+      early_fraud_warning = event['data']['object']
+    elif event['type'] == 'radar.early_fraud_warning.updated':
+      early_fraud_warning = event['data']['object']
+    elif event['type'] == 'recipient.created':
+      recipient = event['data']['object']
+    elif event['type'] == 'recipient.deleted':
+      recipient = event['data']['object']
+    elif event['type'] == 'recipient.updated':
+      recipient = event['data']['object']
+    elif event['type'] == 'refund.created':
+      refund = event['data']['object']
+    elif event['type'] == 'refund.updated':
+      refund = event['data']['object']
+    elif event['type'] == 'reporting.report_run.failed':
+      report_run = event['data']['object']
+    elif event['type'] == 'reporting.report_run.succeeded':
+      report_run = event['data']['object']
+    elif event['type'] == 'review.closed':
+      review = event['data']['object']
+    elif event['type'] == 'review.opened':
+      review = event['data']['object']
+    elif event['type'] == 'setup_intent.canceled':
+      setup_intent = event['data']['object']
+    elif event['type'] == 'setup_intent.created':
+      setup_intent = event['data']['object']
+    elif event['type'] == 'setup_intent.requires_action':
+      setup_intent = event['data']['object']
+    elif event['type'] == 'setup_intent.setup_failed':
+      setup_intent = event['data']['object']
+    elif event['type'] == 'setup_intent.succeeded':
+      setup_intent = event['data']['object']
+    elif event['type'] == 'sigma.scheduled_query_run.created':
+      scheduled_query_run = event['data']['object']
+    elif event['type'] == 'sku.created':
+      sku = event['data']['object']
+    elif event['type'] == 'sku.deleted':
+      sku = event['data']['object']
+    elif event['type'] == 'sku.updated':
+      sku = event['data']['object']
+    elif event['type'] == 'source.canceled':
+      source = event['data']['object']
+    elif event['type'] == 'source.chargeable':
+      source = event['data']['object']
+    elif event['type'] == 'source.failed':
+      source = event['data']['object']
+    elif event['type'] == 'source.mandate_notification':
+      source = event['data']['object']
+    elif event['type'] == 'source.refund_attributes_required':
+      source = event['data']['object']
+    elif event['type'] == 'source.transaction.created':
+      transaction = event['data']['object']
+    elif event['type'] == 'source.transaction.updated':
+      transaction = event['data']['object']
+    elif event['type'] == 'subscription_schedule.aborted':
+      subscription_schedule = event['data']['object']
+
+    # subscription canceled
+    elif event['type'] == 'subscription_schedule.canceled':
+      subscription_schedule = event['data']['object']
+      subscription_schedule_id = event['data']['object']['id']
+      customer_id = event['data']['object']['customer']
+      # Update the user's subscription status in the database to reflect cancellation
+      # update_subscription_and_customer_id(customer_id, 'canceled')
+
+    elif event['type'] == 'subscription_schedule.completed':
+      subscription_schedule = event['data']['object']
+    elif event['type'] == 'subscription_schedule.created':
+      subscription_schedule = event['data']['object']
+    elif event['type'] == 'subscription_schedule.expiring':
+      subscription_schedule = event['data']['object']
+    elif event['type'] == 'subscription_schedule.released':
+      subscription_schedule = event['data']['object']
+    elif event['type'] == 'subscription_schedule.updated':
+      subscription_schedule = event['data']['object']
+    elif event['type'] == 'tax.settings.updated':
+      settings = event['data']['object']
+    elif event['type'] == 'tax_rate.created':
+      tax_rate = event['data']['object']
+    elif event['type'] == 'tax_rate.updated':
+      tax_rate = event['data']['object']
+    elif event['type'] == 'terminal.reader.action_failed':
+      reader = event['data']['object']
+    elif event['type'] == 'terminal.reader.action_succeeded':
+      reader = event['data']['object']
+    elif event['type'] == 'test_helpers.test_clock.advancing':
+      test_clock = event['data']['object']
+    elif event['type'] == 'test_helpers.test_clock.created':
+      test_clock = event['data']['object']
+    elif event['type'] == 'test_helpers.test_clock.deleted':
+      test_clock = event['data']['object']
+    elif event['type'] == 'test_helpers.test_clock.internal_failure':
+      test_clock = event['data']['object']
+    elif event['type'] == 'test_helpers.test_clock.ready':
+      test_clock = event['data']['object']
+    elif event['type'] == 'topup.canceled':
+      topup = event['data']['object']
+    elif event['type'] == 'topup.created':
+      topup = event['data']['object']
+    elif event['type'] == 'topup.failed':
+      topup = event['data']['object']
+    elif event['type'] == 'topup.reversed':
+      topup = event['data']['object']
+    elif event['type'] == 'topup.succeeded':
+      topup = event['data']['object']
+    elif event['type'] == 'transfer.created':
+      transfer = event['data']['object']
+    elif event['type'] == 'transfer.reversed':
+      transfer = event['data']['object']
+    elif event['type'] == 'transfer.updated':
+      transfer = event['data']['object']
+    # ... handle other event types
+    else:
+      print('Unhandled event type {}'.format(event['type']))
+
+    return jsonify(success=True), print("something happened")
 
 
 ####################################################
@@ -295,18 +773,18 @@ def new_customer_id(user_email, new_customer_id):
         print(f"Unable to create stripe customer ID for customer: {user_email}. Error:",e)
     return
 
-## for updating subscriptions once stripe customer id exists
-def update_subscription_and_customer_id(stripe_customer_id, new_status):
+## update subscription status
+def update_subscription_status(user_email, new_status):
     db, cursor = get_db()
     try:
-        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE stripe_customer_id = %s', (new_status, stripe_customer_id))
+        cursor.execute('UPDATE serapis_schema.serapis_users SET subscription_status = %s WHERE email = %s', (new_status, user_email))
         db.commit()
         close_connection(db,cursor) # close db
-        print(f'Subscription status updated to {new_status} for user with stripe id: {stripe_customer_id}')
+        print(f'Subscription status updated to {new_status} for user: {user_email}')
     except Exception as e:
         db.rollback()
         close_connection(db,cursor) # close db
-        print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
+        print(f"Unable to update subscription status for user: {user_email}. Error:",e)
     # # Update subscription status AND stripe customer id IFF stripe customer id is ""
     # if stripe_customer_id =="":
 
@@ -330,211 +808,196 @@ def update_subscription_and_customer_id(stripe_customer_id, new_status):
 #         print(f"Unable to update subscription status for stripe customer: {stripe_customer_id}. Error:",e)
     
 
-####################################################
-# STRIPE WEBHOOK LISTENERS
-####################################################
-@app.route('/stripe/webhook', methods=['POST'])
-def webhook():
-    event = None
-    payload = request.data
-    sig_header = request.headers['STRIPE_SIGNATURE']
+# ####################################################
+# # STRIPE WEBHOOK LISTENERS
+# ####################################################
+# @app.route('/stripe/webhook', methods=['POST'])
+# def webhook():
+#     event = None
+#     payload = request.data
+#     sig_header = request.headers['STRIPE_SIGNATURE']
 
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
-    except ValueError as e:
-        # Invalid payload
-        raise e
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        raise e
+#     try:
+#         event = stripe.Webhook.construct_event(
+#             payload, sig_header, endpoint_secret
+#         )
+#     except ValueError as e:
+#         # Invalid payload
+#         raise e
+#     except stripe.error.SignatureVerificationError as e:
+#         # Invalid signature
+#         raise e
 
-    # Update subscription if stripe payment succeeds
-    if event['type'] == 'invoice.payment_succeeded':
-        # Extract relevant information from the event
-        subscription_id = event['data']['object']['subscription']
-        customer_id = event['data']['object']['customer']
-        customer_email = event['data']['object']['customer_details']['email']
-        update_stripe_customer_id(customer_email, customer_id)
-        subscription = stripe.Subscription.retrieve(subscription_id)
+#     # Update subscription if stripe payment succeeds
+#     if event['type'] == 'invoice.payment_succeeded':
+#         # Extract relevant information from the event
+#         subscription_id = event['data']['object']['subscription']
+#         customer_id = event['data']['object']['customer']
+#         customer_email = event['data']['object']['customer_details']['email']
+#         update_stripe_customer_id(customer_email, customer_id)
+#         subscription = stripe.Subscription.retrieve(subscription_id)
 
-        # Determine the new subscription status based on the subscription type
-        if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
-            new_subscription_status = 'premium'
-        elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
-            new_subscription_status = 'standard'
+#         # Determine the new subscription status based on the subscription type
+#         if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+#             new_subscription_status = 'premium'
+#         elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+#             new_subscription_status = 'standard'
 
-        # Update the user's subscription status in the database
-        update_subscription_and_customer_id(customer_id, new_subscription_status)
+#         # Update the user's subscription status in the database
+#         update_subscription_and_customer_id(customer_id, new_subscription_status)
 
-    # If a user cancels
-    elif event['type'] == 'subscription_schedule.canceled':
-        subscription_schedule_id = event['data']['object']['id']
-        customer_id = event['data']['object']['customer']
+#     # If a user cancels
+#     elif event['type'] == 'subscription_schedule.canceled':
+#         subscription_schedule_id = event['data']['object']['id']
+#         customer_id = event['data']['object']['customer']
         
-        # Update the user's subscription status in the database to reflect cancellation
-        update_subscription_and_customer_id(customer_id, 'canceled')
+#         # Update the user's subscription status in the database to reflect cancellation
+#         update_subscription_and_customer_id(customer_id, 'canceled')
 
-    #user deletes subscription
-    elif event['type'] == 'customer.subscription.deleted':
-        subscription_id = event['data']['object']['id']
-        customer_id = event['data']['object']['customer']
+#     #user deletes subscription
+#     elif event['type'] == 'customer.subscription.deleted':
+#         subscription_id = event['data']['object']['id']
+#         customer_id = event['data']['object']['customer']
         
-        # Update the user's subscription status in the database to reflect subscription deletion
-        update_subscription_and_customer_id(customer_id, 'deleted')
+#         # Update the user's subscription status in the database to reflect subscription deletion
+#         update_subscription_and_customer_id(customer_id, 'deleted')
 
-    elif event['type'] == 'checkout.session.async_payment_succeeded':
-        # Handle checkout.session.async_payment_succeeded event
-        handle_checkout_session_async_payment_succeeded(event)
+#     elif event['type'] == 'checkout.session.async_payment_succeeded':
+#         # Handle checkout.session.async_payment_succeeded event
+#         handle_checkout_session_async_payment_succeeded(event)
 
-    elif event['type'] == 'checkout.session.completed':
-        # Handle checkout.session.completed event
-        handle_checkout_session_completed(event)
+#     elif event['type'] == 'checkout.session.completed':
+#         # Handle checkout.session.completed event
+#         handle_checkout_session_completed(event)
 
-    elif event['type'] == 'customer.subscription.paused':
-        # Handle customer.subscription.paused event
-        handle_subscription_paused(event)
+#     elif event['type'] == 'customer.subscription.paused':
+#         # Handle customer.subscription.paused event
+#         handle_subscription_paused(event)
 
-    elif event['type'] == 'customer.subscription.resumed':
-        # Handle customer.subscription.resumed event
-        handle_subscription_resumed(event)
+#     elif event['type'] == 'customer.subscription.resumed':
+#         # Handle customer.subscription.resumed event
+#         handle_subscription_resumed(event)
 
-    elif event['type'] == 'invoice.payment_succeeded':
-        # Handle invoice.payment_succeeded event
-        handle_invoice_payment_succeeded(event)
+#     elif event['type'] == 'invoice.payment_succeeded':
+#         # Handle invoice.payment_succeeded event
+#         handle_invoice_payment_succeeded(event)
 
-    elif event['type'] == 'plan.updated':
-        # Handle plan.updated event
-        handle_plan_updated(event)
+#     elif event['type'] == 'plan.updated':
+#         # Handle plan.updated event
+#         handle_plan_updated(event)
 
-    # ... handle other event types
-    else:
-      print('Unhandled event type {}'.format(event['type']))
+#     # ... handle other event types
+#     else:
+#       print('Unhandled event type {}'.format(event['type']))
 
-    return jsonify(success=True)
+#     return jsonify(success=True)
 
-## FXNS TO HANDLE WEBHOOK EVENT TYPES
+# ## FXNS TO HANDLE WEBHOOK EVENT TYPES
 
 def handle_checkout_session_async_payment_succeeded(event):
-    # Handle checkout.session.async_payment_succeeded event
-    # Extract relevant information from the event
-    subscription_id = event['data']['object']['subscription']
     customer_id = event['data']['object']['customer']
-    subscription = stripe.Subscription.retrieve(subscription_id)
-    customer_email = event['data']['object']['customer_details']['email']
-    update_stripe_customer_id(customer_email, customer_id)
-
-    # Determine the new subscription status based on the subscription type (replace with your logic)
-    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
-            new_subscription_status = 'premium'
-    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
-        new_subscription_status = 'standard'
-
-    # Update the user's subscription status and customer ID in the database
-    update_subscription_and_customer_id(customer_id, new_subscription_status)
-
-
-def handle_checkout_session_completed(event):
-    # Handle checkout.session.completed event
-    # Extract relevant information from the event
-    customer_id = event['data']['object']['customer']
-    subscription_id = event['data']['object']['subscription']
-    subscription = stripe.Subscription.retrieve(subscription_id)
-    customer_email = event['data']['object']['customer_details']['email']
-    update_stripe_customer_id(customer_email, customer_id)
-
+    customer_email=event["data"]["object"]["customer_email"]
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+    
     # Determine the new subscription status based on the subscription type
-    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+    if price_id == PREMIUM_PRICE_ID:
         new_subscription_status = 'premium'
-    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+    if price_id == STANDARD_PRICE_ID:
         new_subscription_status = 'standard'
     else:
         new_subscription_status = 'free'  # Or handle other subscription cases
+    update_subscription_status(customer_email, new_subscription_status)
 
-    # Update the subscription status and customer ID in your database
-    update_subscription_and_customer_id(customer_id, new_subscription_status)
+
+def handle_checkout_session_completed(event):
+    # Handle invoice.payment_succeeded event
+    customer_id = event['data']['object']['customer']
+    customer_email=event["data"]["object"]["customer_email"]
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+    
+    # Determine the new subscription status based on the subscription type
+    if price_id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    if price_id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
+    update_subscription_status(customer_email, new_subscription_status)
 
 
 def handle_subscription_paused(event):
     # Handle customer.subscription.paused event
     customer_id = event['data']['object']['customer']
-    update_subscription_and_customer_id(customer_id, 'paused')
+    customer_email=event["data"]["object"]["customer_email"]
+    update_subscription_status(customer_email, 'paused')
 
 
 def handle_subscription_resumed(event):
-    # Handle customer.subscription.resumed event
+    # Handle invoice.payment_succeeded event
     customer_id = event['data']['object']['customer']
-    update_subscription_and_customer_id(customer_id, 'resumed')
+    customer_email=event["data"]["object"]["customer_email"]
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+    
+    # Determine the new subscription status based on the subscription type
+    if price_id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    if price_id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
+    update_subscription_status(customer_email, new_subscription_status)
 
 
 def handle_invoice_payment_succeeded(event):
     # Handle invoice.payment_succeeded event
     customer_id = event['data']['object']['customer']
-    subscription_id = event['data']['object']['subscription']
-    subscription = stripe.Subscription.retrieve(subscription_id)
-    
+    customer_email=event["data"]["object"]["customer_email"]
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+    print(price_id)
+    print(STANDARD_PRICE_ID)
+    print(customer_email)
     # Determine the new subscription status based on the subscription type
-    if subscription.items.data[0].price.id == PREMIUM_PRICE_ID:
+    if price_id == PREMIUM_PRICE_ID:
         new_subscription_status = 'premium'
-    elif subscription.items.data[0].price.id == STANDARD_PRICE_ID:
+    if price_id == STANDARD_PRICE_ID:
         new_subscription_status = 'standard'
     else:
         new_subscription_status = 'free'  # Or handle other subscription cases
-    
-    update_subscription_and_customer_id(customer_id, new_subscription_status)
+    update_subscription_status(customer_email, new_subscription_status)
 
 
 def handle_plan_updated(event):
-    # try:
-    #     user = get_user_by_email(user_email)
-    #     if not user or not user[3]:
-    #         return False
-
-    #     # Set the Stripe API key
-    #     stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
-
-    #     # Get the customer from Stripe
-    #     customer = stripe.Customer.retrieve(user[3])
-
-    #     # Find the IDs of the old and new subscription plans
-    #     old_subscription_id = customer.subscriptions.data[0].id
-    #     if new_subscription_type == 'premium':
-    #         new_subscription_price_id = PREMIUM_PRICE_ID
-    #     elif new_subscription_type == 'standard':
-    #         new_subscription_price_id = STANDARD_PRICE_ID
-
-    #     # Update the subscription plan
-    #     customer.subscriptions.modify(
-    #         old_subscription_id,
-    #         items=[{
-    #             'id': customer.subscriptions.data[0].items.data[0].id,
-    #             'price': new_subscription_price_id,
-    #         }],
-    #     )
-    #     return
-    # except stripe.error.StripeError:
-    #     print("Error in subscription adjustment for this subscriber in Stripe")
-    #     return
-    pass
+       # Handle invoice.payment_succeeded event
+    customer_id = event['data']['object']['customer']
+    customer_email=event["data"]["object"]["customer_email"]
+    price_id = event["data"]["object"]["lines"]["data"][0]["plan"]["id"]
+    
+    # Determine the new subscription status based on the subscription type
+    if price_id == PREMIUM_PRICE_ID:
+        new_subscription_status = 'premium'
+    if price_id == STANDARD_PRICE_ID:
+        new_subscription_status = 'standard'
+    else:
+        new_subscription_status = 'free'  # Or handle other subscription cases
+    update_subscription_status(customer_email, new_subscription_status)
 
 ####################################################
 # ROUTES FOR Google Login and Callback 
 ####################################################
 #Protect Pages from unauthenticated users
-@app.before_request
-def check_authentication():
-    # List of routes that do not require authentication
-    public_routes = ['/', 'login', 'privacy', 'authorized', 'ads.txt', 'pricing']
+# @app.before_request
+# def check_authentication():
+#     # List of routes that do not require authentication
+#     public_routes = ['/', 'login', 'privacy', 'authorized', 'ads.txt', 'pricing']
 
-    # If the requested route is public, allow access without authentication
-    if request.endpoint in public_routes or request.endpoint == '/':
-        return
+#     # If the requested route is public, allow access without authentication
+#     if request.endpoint in public_routes or request.endpoint == '/':
+#         return
 
-    # Check if the session identifier is present and the user is authenticated
-    if 'user_authenticated' not in session or not session['user_authenticated']:
-        # Redirect to the login page or display an access denied message
-        return redirect('/login')
+#     # Check if the session identifier is present and the user is authenticated
+#     if 'user_authenticated' not in session or not session['user_authenticated']:
+#         # Redirect to the login page or display an access denied message
+#         return redirect('/login')
 
 @app.route('/login')
 def login():
@@ -801,179 +1264,178 @@ def ads():
 @app.route("/get_data", methods=['GET','POST'])
 @cache.cached(timeout=60)
 def get_data():
-        global driver
-        #global df1
-        
-        service = Service(ChromeDriverManager().install())
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--no-sandbox")
+  global driver
+  #global df1
 
-        # download and use the latest ChromeDriver automatically using
-        # Set up ChromeOptions for headless mode
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.get("https://www.google.com/")
+  # set up webdriver in headless mode
+  service = Service(ChromeDriverManager().install())
+  chrome_options = Options()
+  chrome_options.add_argument("--headless")
+  chrome_options.add_argument("--disable-dev-shm-usage")
+  chrome_options.add_argument("--no-sandbox")
 
-        ## INCREMENT CLICK COUNT IN DB FOR USER
-        increment_click_count(session['user_email'])
+  # download and use the latest ChromeDriver automatically using
+  # Set up ChromeOptions for headless mode
+  driver = webdriver.Chrome(service=service, options=chrome_options)
+  driver.get("https://www.google.com/")
 
-        #print("DRIVER:", driver)
-        if request.method == 'POST':
-            # METERED PAYWALL LOGIC
-            if 'user_email' in session:
-                user = get_user_by_email(session['user_email'])
-                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
-                    username = request.form.get('username')
-                    gametype = request.form.get('gametype')
+  ## paywall
+  user_email=session['user_email']
+  temp_user=get_user_by_email(user_email)
+  if temp_user[2] > 4:
+     driver.quit()
+     return render_template("pricing.html")
 
-                    #UPDATE USERNAME IN SESSION
-                    session['showdown_username'] = username
+  #print("DRIVER:", driver)
+  if request.method == 'POST':
+    # METERED PAYWALL LOGIC
+    # if 'user_email' in session:
+    # user = get_user_by_email(session['user_email'])
+    # if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
+    username = request.form.get('username')
+    gametype = request.form.get('gametype')
 
-                    if driver is not None:
-                        ## run the data gathering. all_matches == False 
-                        df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
-                        time.sleep(2)
+    # #UPDATE USERNAME IN SESSION
+    # session['showdown_username'] = username
 
-                        #update value of df1 in cache
-                        set_user_df1(df1)
+    if driver is not None:
+      ## run the data gathering. all_matches == False 
+      df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
+      time.sleep(2)
 
-                        #print(output)
-                        # hero individual plot
-                        hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
-                        villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
-                        
-                        #df with num_wins, num_games, win_rate
-                        overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
-                        num_games = str(df2.loc[0, 'num_games'])
-                        num_wins = str(df2.loc[0, 'num_wins'])
-                        win_rate = str(df2.loc[0, 'win_rate'])
+      ## INCREMENT CLICK COUNT IN DB FOR USER
+      increment_click_count(user_email)
 
-                        #dfs with individual hero pokemon winrates and elo scores
-                        df_hero_indiv = df_hero_indiv.reset_index()
-                        df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
-                        df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
-                        # df_hero_indiv.to_csv("ind_stats.csv")
-                        df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
-                        df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
-                        
-                        #dfs with individual villain pokemon loss rates and elo scores
-                        df_villain_indiv = df_villain_indiv.reset_index()
-                        df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
-                        df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        # df_hero_indiv.to_csv("ind_stats.csv")
-                        df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
-                        
-                        #dfs with hero pairs, games and win rates breakdown 
-                        df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
-                        df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
-                        df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
-                        heroPairStats = df3.head(5).to_html(index=False)
-                        
-                        ## villain pair stats
-                        df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
-                        df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        villainPairStats = df4.head(5).to_html(index=False)
-                        
-                        ## hero comp stats
-                        df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
-                        df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
-                        df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
-                        df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
-                        sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+      #update value of df1 in cache
+      set_user_df1(df1)
 
-                        ## hero comp stats
-                        df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
-                        df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
-                        sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
+      #print(output)
+      # hero individual plot
+      hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
+      villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
 
-                        # Define the CSS style for the table
-                        table_style = """
-                        <style>
-                            table {
-                                border-collapse: collapse;
-                                width: 100%;
-                                max-width: 800px;
-                                margin: auto;
-                                margin-bottom: 1em;
-                            }
-                            
-                            th {
-                                font-weight: bold;
-                                text-align: left;
-                                color: white;
-                                background-color: #9d5bd9;
-                                padding: 0.5em;
-                            }
-                            
-                            tr:hover {
-                                background-color: #a759d13f;
-                            }
-                            
-                            td, th {
-                                border: 1px solid #ddd;
-                                padding: 0.5em;
-                                text-align: left;
-                            }
-                            
-                            @media (max-width: 768px) {
-                                table {
-                                    font-size: 0.8em;
-                                }
-                                
-                                th, td {
-                                    padding: 0.25em;
-                                }
-                            }
-                        </style>
-                        """
+      #df with num_wins, num_games, win_rate
+      overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
+      num_games = str(df2.loc[0, 'num_games'])
+      num_wins = str(df2.loc[0, 'num_wins'])
+      win_rate = str(df2.loc[0, 'win_rate'])
 
-                        driver.quit()
-                        
-                        # katies original html creation
-                        output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
-                                            "<br><br>" +
-                                            hero_indiv_stats + 
-                                            "<br><br>" +
-                                            hero_plotly+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
-                                            "<br><br>" +
-                                            villain_indiv_stats + 
-                                            "<br><br>" +
-                                            villain_plotly+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
-                                            "<br><br>" +
-                                            sixTeamHeroStats+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
-                                            "<br><br>" +
-                                            sixTeamVillainStats)
+      #dfs with individual hero pokemon winrates and elo scores
+      df_hero_indiv = df_hero_indiv.reset_index()
+      df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
+      df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
+      # df_hero_indiv.to_csv("ind_stats.csv")
+      df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
+      df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+      hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
 
-                        return render_template('resultsPrivateAndPublic.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
-                
-                    else:
-                        return 'Pop-up window not opened yet!'
-                else:
-                    flash('Please subscribe to access more content.')
-                    return redirect(url_for('pricing'))  # Redirect to the subscription page
-            else:
-                flash('Please log in to access content.')
-                return redirect(url_for('login'))  # Redirect to the login page
-        else:
-            print("did not retrieve input")
-            return render_template('index.html')
+      #dfs with individual villain pokemon loss rates and elo scores
+      df_villain_indiv = df_villain_indiv.reset_index()
+      df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
+      df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+      # df_hero_indiv.to_csv("ind_stats.csv")
+      df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
+      df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+      villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
+
+      #dfs with hero pairs, games and win rates breakdown 
+      df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
+      df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
+      df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+      df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
+      heroPairStats = df3.head(5).to_html(index=False)
+
+      ## villain pair stats
+      df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
+      df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+      df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+      df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
+      villainPairStats = df4.head(5).to_html(index=False)
+
+      ## hero comp stats
+      df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
+      df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
+      df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+      df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
+      df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
+      sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+
+      ## hero comp stats
+      df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
+      df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+      df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+      df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
+      df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
+      sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
+
+      # Define the CSS style for the table
+      table_style = """
+        <style>
+        table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 800px;
+        margin: auto;
+        margin-bottom: 1em;
+        }
+
+        th {
+        font-weight: bold;
+        text-align: left;
+        color: white;
+        background-color: #9d5bd9;
+        padding: 0.5em;
+        }
+
+        tr:hover {
+        background-color: #a759d13f;
+        }
+
+        td, th {
+        border: 1px solid #ddd;
+        padding: 0.5em;
+        text-align: left;
+        }
+
+        @media (max-width: 768px) {
+        table {
+        font-size: 0.8em;
+        }
+
+        th, td {
+        padding: 0.25em;
+        }
+        }
+        </style>
+      """
+
+      driver.quit()
+
+      # katies original html creation
+      output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
+        "<br><br>" +
+        hero_indiv_stats + 
+        "<br><br>" +
+        hero_plotly+ 
+        "<br><br>" +
+        "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
+        "<br><br>" +
+        villain_indiv_stats + 
+        "<br><br>" +
+        villain_plotly+ 
+        "<br><br>" +
+        "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
+        "<br><br>" +
+        sixTeamHeroStats+ 
+        "<br><br>" +
+        "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
+        "<br><br>" +
+        sixTeamVillainStats)
+      return render_template('resultsPrivateAndPublic.html', username = username, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+    else:
+      driver.quit()
+      print("did not retrieve input")
+      return render_template('index.html')
 
 ############################################################
 # LOGIN TO PS! WITH SELENIUM
@@ -1003,6 +1465,7 @@ def login_showdown(username, password, driver):
     button = driver.find_element(By.XPATH, "//button[@type='submit']")
     button.click()
     time.sleep(2)
+    driver.teardown=False ## crucial for making sure the driver doesn't auto quit after function
     
     return driver
 
@@ -1014,188 +1477,189 @@ def login_showdown(username, password, driver):
 @app.route("/get_data_private", methods=['GET','POST'])
 @cache.cached(timeout=60)
 def get_data_private():
-        global driver
-        #global df1
+  global driver
+  #global df1
 
-        # Set up the Chrome WebDriver in headless mode
-        service = Service(ChromeDriverManager().install())
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--no-sandbox")
+  # Set up the Chrome WebDriver in headless mode
+  service = Service(ChromeDriverManager().install())
+  chrome_options = Options()
+  chrome_options.add_argument("--headless")
+  chrome_options.add_argument("--disable-dev-shm-usage")
+  chrome_options.add_argument("--no-sandbox")
 
-        # download and use the latest ChromeDriver automatically using
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.get("https://www.google.com/")
+  # download and use the latest ChromeDriver automatically using
+  driver = webdriver.Chrome(service=service, options=chrome_options)
+  driver.get("https://www.google.com/")
 
-        ## INCREMENT CLICK COUNT IN DB FOR USER
-        increment_click_count(session['user_email'])
+  ## paywall
+  user_email=session['user_email']
+  temp_user=get_user_by_email(user_email)
+  if temp_user[2] > 4:
+     driver.quit()
+     return render_template("pricing.html")
 
-        if request.method == 'POST':
+  if request.method == 'POST':
+      # # METERED PAYWALL LOGIC
+      # if 'user_email' in session:
+      #     user = get_user_by_email(session['user_email'])
+      #     if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
 
-            # METERED PAYWALL LOGIC
-            if 'user_email' in session:
-                user = get_user_by_email(session['user_email'])
-                if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
+      username_private = request.form.get('usernamePrivate')
+      password = request.form.get('showdown_pw')
+      gametype = request.form.get('gametype')
+      driver=login_showdown(username_private, password, driver)            
+      # time.sleep(3)
+      print("DRIVER:", driver)
+      print("User:", username_private)
+      print("pass:", password)
 
-                    username_private = request.form.get('usernamePrivate')
-                    password = request.form.get('showdown_pw')
-                    gametype = request.form.get('gametype')
-                    driver=login_showdown(username_private, password, driver)            
-                    # time.sleep(3)
-                    print("DRIVER:", driver)
-                    print("User:", username_private)
-                    print("pass:", password)
+      #UPDATE USERNAME IN SESSION
+      # session['showdown_username'] = username_private
 
-                    #UPDATE USERNAME IN SESSION
-                    session['showdown_username'] = username_private
+      if driver is not None:
+          ## run the data gathering
+          df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
+          time.sleep(2)
 
-                    if driver is not None:
-                        ## run the data gathering
-                        df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
-                        time.sleep(2)
+          ## INCREMENT CLICK COUNT IN DB FOR USER
+          increment_click_count(user_email)
 
-                        #update value of df1 in cache
-                        set_user_df1(df1)
+          #update value of df1 in cache
+          set_user_df1(df1)
 
-                        
+          #print(output)
+          # hero individual plot
+          hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
+          villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
+          
+          #df with num_wins, num_games, win_rate
+          overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
+          num_games = str(df2.loc[0, 'num_games'])
+          num_wins = str(df2.loc[0, 'num_wins'])
+          win_rate = str(df2.loc[0, 'win_rate'])
+          
+          #dfs with individual hero pokemon winrates and elo scores
+          df_hero_indiv = df_hero_indiv.reset_index()
+          df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
+          df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
+          # df_hero_indiv.to_csv("ind_stats.csv")
+          df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
+          df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+          hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
+          
+          #dfs with individual villain pokemon loss rates and elo scores
+          df_villain_indiv = df_villain_indiv.reset_index()
+          df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
+          df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+          # df_hero_indiv.to_csv("ind_stats.csv")
+          df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
+          df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+          villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
+          
+          #dfs with hero pairs, games and win rates breakdown 
+          df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
+          df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
+          df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+          df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
+          heroPairStats = df3.head(5).to_html(index=False)
+          
+          ## villain pair stats
+          df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
+          df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+          df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+          df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
+          villainPairStats = df4.head(5).to_html(index=False)
+          
+          ## hero comp stats
+          df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
+          df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
+          df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+          df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
+          df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
+          sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
 
-                        #print(output)
-                        # hero individual plot
-                        hero_plotly = pyo.plot(sdg.get_individual_plot(df_hero_indiv), output_type="div")
-                        villain_plotly = pyo.plot(sdg.get_villain_indiv_plot(df_villain_indiv), output_type="div")
-                        
-                        #df with num_wins, num_games, win_rate
-                        overallStats = df2.to_html(index=False, classes='table table-responsive table-hover')
-                        num_games = str(df2.loc[0, 'num_games'])
-                        num_wins = str(df2.loc[0, 'num_wins'])
-                        win_rate = str(df2.loc[0, 'win_rate'])
-                        
-                        #dfs with individual hero pokemon winrates and elo scores
-                        df_hero_indiv = df_hero_indiv.reset_index()
-                        df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
-                        df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
-                        # df_hero_indiv.to_csv("ind_stats.csv")
-                        df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
-                        df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        hero_indiv_stats = df_hero_indiv.head(5).to_html(index=False)
-                        
-                        #dfs with individual villain pokemon loss rates and elo scores
-                        df_villain_indiv = df_villain_indiv.reset_index()
-                        df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
-                        df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        # df_hero_indiv.to_csv("ind_stats.csv")
-                        df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        villain_indiv_stats = df_villain_indiv.head(5).to_html(index=False)
-                        
-                        #dfs with hero pairs, games and win rates breakdown 
-                        df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
-                        df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
-                        df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
-                        heroPairStats = df3.head(5).to_html(index=False)
-                        
-                        ## villain pair stats
-                        df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
-                        df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        villainPairStats = df4.head(5).to_html(index=False)
-                        
-                        ## hero comp stats
-                        df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
-                        df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
-                        df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-                        df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
-                        df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
-                        sixTeamHeroStats = df5.head(5).to_html(index=False, escape=False)
+          ## hero comp stats
+          df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
+          df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+          df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+          df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
+          df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
+          sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
 
-                        ## hero comp stats
-                        df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
-                        df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-                        df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-                        df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
-                        df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
-                        sixTeamVillainStats = df6.head(5).to_html(index=False, escape=False)
+          # Define the CSS style for the table
+          table_style = """
+          <style>
+              table {
+                  border-collapse: collapse;
+                  width: 100%;
+                  max-width: 800px;
+                  margin: auto;
+                  margin-bottom: 1em;
+              }
+              
+              th {
+                  font-weight: bold;
+                  text-align: left;
+                  color: white;
+                  background-color: #9d5bd9;
+                  padding: 0.5em;
+              }
+              
+              tr:hover {
+                  background-color: #a759d13f;
+              }
+              
+              td, th {
+                  border: 1px solid #ddd;
+                  padding: 0.5em;
+                  text-align: left;
+              }
+              
+              @media (max-width: 768px) {
+                  table {
+                      font-size: 0.8em;
+                  }
+                  
+                  th, td {
+                      padding: 0.25em;
+                  }
+              }
+          </style>
+          """
 
-                        # Define the CSS style for the table
-                        table_style = """
-                        <style>
-                            table {
-                                border-collapse: collapse;
-                                width: 100%;
-                                max-width: 800px;
-                                margin: auto;
-                                margin-bottom: 1em;
-                            }
-                            
-                            th {
-                                font-weight: bold;
-                                text-align: left;
-                                color: white;
-                                background-color: #9d5bd9;
-                                padding: 0.5em;
-                            }
-                            
-                            tr:hover {
-                                background-color: #a759d13f;
-                            }
-                            
-                            td, th {
-                                border: 1px solid #ddd;
-                                padding: 0.5em;
-                                text-align: left;
-                            }
-                            
-                            @media (max-width: 768px) {
-                                table {
-                                    font-size: 0.8em;
-                                }
-                                
-                                th, td {
-                                    padding: 0.25em;
-                                }
-                            }
-                        </style>
-                        """
+          driver.quit()
+          
+          # katies original html creation
+          output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
+                              "<br><br>" +
+                              hero_indiv_stats + 
+                              "<br><br>" +
+                              hero_plotly+ 
+                              "<br><br>" +
+                              "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
+                              "<br><br>" +
+                              villain_indiv_stats + 
+                              "<br><br>" +
+                              villain_plotly+ 
+                              "<br><br>" +
+                              "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
+                              "<br><br>" +
+                              sixTeamHeroStats+ 
+                              "<br><br>" +
+                              "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
+                              "<br><br>" +
+                              sixTeamVillainStats)
 
-                        driver.quit()
-                        
-                        # katies original html creation
-                        output_html = Markup(table_style +"<h1 style='text-align: center;'>Top 5 Hero Pokemon</h1>" +
-                                            "<br><br>" +
-                                            hero_indiv_stats + 
-                                            "<br><br>" +
-                                            hero_plotly+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Villain Pokemon</h1>" +
-                                            "<br><br>" +
-                                            villain_indiv_stats + 
-                                            "<br><br>" +
-                                            villain_plotly+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Hero Comps</h1>"+
-                                            "<br><br>" +
-                                            sixTeamHeroStats+ 
-                                            "<br><br>" +
-                                            "<h1 style='text-align: center;'>Top 5 Villain Comps</h1>"+
-                                            "<br><br>" +
-                                            sixTeamVillainStats)
-
-                        return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
-                
-                    else:
-                        return 'Pop-up window not opened yet!'
-                else:
-                    flash('Please subscribe to access more content.')
-                    return redirect(url_for('pricing'))  # Redirect to the subscription page
-            else:
-                flash('Please log in to access content.')
-                return redirect(url_for('login'))  # Redirect to the login page
-        else:
-            print("did not retrieve input")
-            return render_template('index.html')
+          return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+      else:
+        driver.quit()
+        print("did not retrieve input")
+        return render_template('index.html')
+      #         else:
+      #             return 'Pop-up window not opened yet!'
+      # else:
+      #     flash('Please log in to access content.')
+      #     return redirect(url_for('login'))  # Redirect to the login page
 
 
 
@@ -1412,7 +1876,7 @@ def update_subscription():
                         new_subscription_status = 'standard'
 
                     # Update the subscription status and customer ID in your database
-                    update_subscription_and_customer_id(customer_id, new_subscription_status)
+                    update_subscription_and_customer_id(customer_email, new_subscription_status)
 
                     # Return a success response
                     return jsonify(success=True)
@@ -1425,40 +1889,42 @@ def update_subscription():
 
 
 @app.route('/pricing', methods=["GET", "POST"])
-def pricing():
-    if 'user_email' in session:
-        user = get_user_by_email(session['user_email'])
+def subscriptions():
+    return render_template("pricing.html")
+# def pricing():
+#     if 'user_email' in session:
+#         user = get_user_by_email(session['user_email'])
 
-        if request.method == 'POST':
-            selected_price_id = request.form.get('selected_price_id')  # Retrieve the selected price ID from the form
+#         if request.method == 'POST':
+#             selected_price_id = request.form.get('selected_price_id')  # Retrieve the selected price ID from the form
 
-            # Create a Stripe Checkout session
-            stripe_session = stripe.checkout.Session.create(
-                customer_email=user[0],  # Use the user's email
-                payment_method_types=['card'],
-                line_items=[
-                    {
-                        'price': selected_price_id,  # Use the selected price ID
-                        'quantity': 1,
-                    },
-                ],
-                mode='subscription',
-                success_url=url_for('subscription_success', _external=True),
-                cancel_url=url_for('subscription_cancel', _external=True),
-            )
+#             # Create a Stripe Checkout session
+#             stripe_session = stripe.checkout.Session.create(
+#                 customer_email=user[0],  # Use the user's email
+#                 payment_method_types=['card'],
+#                 line_items=[
+#                     {
+#                         'price': selected_price_id,  # Use the selected price ID
+#                         'quantity': 1,
+#                     },
+#                 ],
+#                 mode='subscription',
+#                 success_url=url_for('subscription_success', _external=True),
+#                 cancel_url=url_for('subscription_cancel', _external=True),
+#             )
 
-            return redirect(stripe_session.url)  # Redirect the user to the Stripe Checkout session
+#             return redirect(stripe_session.url)  # Redirect the user to the Stripe Checkout session
 
-        # List of subscription plans and their price IDs
-        subscription_plans = [
-            {'name': 'premium', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'},
-            {'name': 'standard', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'}
-        ]
+#         # List of subscription plans and their price IDs
+#         subscription_plans = [
+#             {'name': 'premium', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'},
+#             {'name': 'standard', 'price_id': 'price_1NchwKDypgtvgAYhILRJc3RP'}
+#         ]
 
-        return render_template('stripe.html', user=user, subscription_plans=subscription_plans)
+#         return render_template('stripe.html', user=user, subscription_plans=subscription_plans)
 
-    flash('Please log in to subscribe.')
-    return redirect(url_for('login'))
+#     flash('Please log in to subscribe.')
+#     return redirect(url_for('login'))
 
 
 
