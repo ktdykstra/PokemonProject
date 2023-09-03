@@ -1296,7 +1296,7 @@ def get_data():
     gametype = request.form.get('gametype')
 
     # #UPDATE USERNAME IN SESSION
-    # session['showdown_username'] = username
+    session['showdown_username'] = username
 
     if driver is not None:
       ## run the data gathering. all_matches == False 
@@ -1514,7 +1514,7 @@ def get_data_private():
       print("pass:", password)
 
       #UPDATE USERNAME IN SESSION
-      # session['showdown_username'] = username_private
+      session['showdown_username'] = username_private
 
       if driver is not None:
           ## run the data gathering
