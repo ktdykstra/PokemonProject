@@ -49,7 +49,9 @@ driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://www.google.com/")
 driver=login_showdown(username, password, driver)
 df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, game_type, driver, True)
-df6
+df_hero_indiv
+pd.set_option('display.max_rows', None)
+df1.iloc[9].hero_comp_six
 x=sdg.gather_matches(username,game_type,driver,True)
 x.iloc[11].body_logs
 df1
