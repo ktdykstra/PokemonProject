@@ -1220,14 +1220,14 @@ def get_individual_plot(individual_result):
     )
     
     # Calculate the weighted win rate (Games Won / Games Played2) and add it as a line plot on the second y-axis
-    weighted_win_rate = df["Weighted Win Rate"]
+    weighted_win_rate = df["Raw Win Rate"]
     fig.add_trace(
         go.Scatter(
             x=df["Hero Pokemon"],
             y=weighted_win_rate,
             mode="lines+markers",
             line=dict(color="#FF0000"),  # You can specify the color you want for the line plot
-            name="Weighted Win Rate",
+            name="Raw Win Rate",
             yaxis="y2",  # Specify the second y-axis for this trace
         )
     )
@@ -1236,9 +1236,9 @@ def get_individual_plot(individual_result):
     fig.update_layout(
         barmode="stack",  # Set barmode to "stack" for stacked bar plots
         yaxis=dict(title="Games Used", side="left"),  # Update the y-axis title as needed
-        yaxis2=dict(title="Weighted Win Rate %", overlaying="y", side="right"),
+        yaxis2=dict(title="Raw Win Rate %", overlaying="y", side="right"),
         showlegend=True,
-        title=dict(text="Weighted Win Rate of Individual Pokemon (Used in Matches)",x=0.5),
+        title=dict(text="Raw Win Rate of Individual Pokemon (Used in Matches)",x=0.5),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         xaxis_tickangle=-90, 
@@ -1304,14 +1304,14 @@ def get_villain_indiv_plot(individual_result):
     )
     
     # Calculate the weighted win rate (Games Won / Games Played2) and add it as a line plot on the second y-axis
-    weighted_win_rate = df["Weighted Loss Rate"]
+    weighted_win_rate = df["Raw Loss Rate"]
     fig.add_trace(
         go.Scatter(
             x=df["Villain Pokemon"],
             y=weighted_win_rate,
             mode="lines+markers",
             line=dict(color="#FF0000"),  # You can specify the color you want for the line plot
-            name="Weighted Loss Rate",
+            name="Raw Loss Rate",
             yaxis="y2",  # Specify the second y-axis for this trace
         )
     )
@@ -1320,9 +1320,9 @@ def get_villain_indiv_plot(individual_result):
     fig.update_layout(
         barmode="stack",  # Set barmode to "stack" for stacked bar plots
         yaxis=dict(title="Games Used", side="left"),  # Update the y-axis title as needed
-        yaxis2=dict(title="Weighted Loss Rate %", overlaying="y", side="right"),
+        yaxis2=dict(title="Raw Loss Rate %", overlaying="y", side="right"),
         showlegend=True,
-        title=dict(text="Weighted Loss Rate Against Individual Pokemon (Used in Matches)",x=0.5),
+        title=dict(text="Raw Loss Rate Against Individual Pokemon (Used in Matches)",x=0.5),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         xaxis_tickangle=-90, 
