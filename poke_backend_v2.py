@@ -210,14 +210,15 @@ def gather_matches(username, game_type, driver, all_matches):
     base_db.rename(columns={"id":"match_id"},inplace=True)
     base_db=base_db.apply(remove_exclamation,axis=1)
     
-    ## Add logs and turns to metadata df
+    # Add logs and turns to metadata df
 
-    body_logs, head_logs, tail_logs, turns, turn_count = get_logs(base_db, driver)
+    body_logs, head_logs, tail_logs, turns, turn_count, forfeit = get_logs(base_db, driver)
     base_db["body_logs"]=body_logs
     base_db["head_logs"]=head_logs
     base_db["tail_logs"]=tail_logs
     base_db["turn_logs"]=turns
     base_db["turn_count"]=turn_count
+    base_db["forfeit"]=forfeit
     
     # Get a hero/villian designator
 
@@ -238,6 +239,7 @@ def get_logs(df, driver):
     tail_logs=[]
     turns=[]
     turn_count=[]
+    forfeit=[]
 
     ## Access single game log
     
@@ -270,58 +272,66 @@ def get_logs(df, driver):
         #     .to_frame('para_str').sort_index()
         # LOG.head()
 
-        ## Get head and tail meta data, as well as body log
-        
-        head_pat=r"\|turn\|1"
-        pat_a = LOG.line_str.str.match(head_pat)
-        line_a = LOG.loc[pat_a].index[0]-1
-        HEAD_LOG=LOG.loc[:line_a]
-        
+        # get tail log
         tail_pat=r"\|win\|"
         pat_a = LOG.line_str.str.match(tail_pat)
         line_b = LOG.loc[pat_a].index[0]
         TAIL_LOG=LOG.loc[line_b:]
 
-        BODY_LOG=LOG[line_a+1:line_b]
-       
+        ## Get head and body log
+        head_pat=r"\|turn\|1"
+        pat_a = LOG.line_str.str.match(head_pat)
+
+        ## check to see if turn 1 exists
+        if pat_a.unique().shape[0] == 2: # turns exist
+            line_a = LOG.loc[pat_a].index[0]-1
+            HEAD_LOG=LOG.loc[:line_a]
+            BODY_LOG=LOG[line_a+1:line_b]
+
+            ## Identify where turns begin
+            turn_pat=r"\|turn\|[1-99]"
+            turn_lines = BODY_LOG.line_str.str.match(turn_pat, case=False) # Returns a truth vector
+            BODY_LOG.loc[turn_lines]
+            BODY_LOG.loc[turn_lines, 'turn_number'] = [i+1 for i in range(BODY_LOG.loc[turn_lines].shape[0])]
+            
+            ## Forward fill turn numbers for every line
+            BODY_LOG.loc[turn_lines]
+            BODY_LOG.turn_number = BODY_LOG.turn_number.ffill()
+            BODY_LOG.head()
+
+            ## Change turns to int and save turns for looping
+            BODY_LOG.turn_number = BODY_LOG.turn_number.astype("int")
+            body_logs.append(BODY_LOG)
+
+            ## Split turns into separate dataframes into "turns" df
+            turn_name=[]
+            turn_text=[]
+            number_turns=BODY_LOG.turn_number.unique()
+            turn_count.append(len(number_turns))
+            for x in number_turns:
+                temp_name="turn_" + str(x)
+                turn_name.append(temp_name)
+                temp_df=BODY_LOG[BODY_LOG.turn_number==x]
+                turn_text.append(temp_df)
+            turns_df=pd.DataFrame(list(zip(turn_name, turn_text)),columns=["turn_name","turn_df"])
+            turns.append(turns_df)
+            forfeit.append(0)
+        else:
+            print("There's no turn ")
+            HEAD_LOG=LOG[:line_b]
+            BODY_LOG=LOG[:line_b]
+            BODY_LOG["turn_number"]=0
+            BODY_LOG.turn_number = BODY_LOG.turn_number.astype("int")
+            body_logs.append(BODY_LOG)
+            turns.append(None)
+            turn_count.append(0)
+            forfeit.append(1)
+
         head_logs.append(HEAD_LOG)
         tail_logs.append(TAIL_LOG)
-        
-        ## Identify where turns begin
-        
-        
-        turn_pat=r"\|turn\|[1-99]"
-        turn_lines = BODY_LOG.line_str.str.match(turn_pat, case=False) # Returns a truth vector
-        BODY_LOG.loc[turn_lines]
-        BODY_LOG.loc[turn_lines, 'turn_number'] = [i+1 for i in range(BODY_LOG.loc[turn_lines].shape[0])]
-        
-        ## Forward fill turn numbers for every line
-
-        BODY_LOG.loc[turn_lines]
-        BODY_LOG.turn_number = BODY_LOG.turn_number.ffill()
-        BODY_LOG.head()
-
-        ## Change turns to int and save turns for looping
-
-        BODY_LOG.turn_number = BODY_LOG.turn_number.astype("int")
-        body_logs.append(BODY_LOG)
-
-        ## Split turns into separate dataframes into "turns" df
-        
-        turn_name=[]
-        turn_text=[]
-        number_turns=BODY_LOG.turn_number.unique()
-        turn_count.append(len(number_turns))
-        for x in number_turns:
-            temp_name="turn_" + str(x)
-            turn_name.append(temp_name)
-            temp_df=BODY_LOG[BODY_LOG.turn_number==x]
-            turn_text.append(temp_df)
-        turns_df=pd.DataFrame(list(zip(turn_name, turn_text)),columns=["turn_name","turn_df"])
-        turns.append(turns_df)
     
     print("Finished chunking match log.")
-    return body_logs, head_logs, tail_logs, turns, turn_count
+    return body_logs, head_logs, tail_logs, turns, turn_count, forfeit
 
 
 # In[18]:
@@ -613,32 +623,34 @@ def scorecards(db):
     aggregate_scorecards=[]
     
     for x in range(db.shape[0]):
-        
-        target_match=db.iloc[x]
-        target_turns=target_match.turn_logs.turn_df
-        #sample_turn=target_turns.iloc[1].line_str
-        old_turn=generate_turn_df(target_match)
-        turn_number=1
-        new_turn=populate_fresh_scorecard(target_match, old_turn, turn_number)
-#         #display(new_turn)
-        
+        print(x)
         match_scorecards=[]
-        
-        for i in range(target_match.turn_count):
-            
-            sample_turn=target_turns.iloc[i].line_str
-#             print(sample_turn)
-#             #display(new_turn)
-            new_turn=check_changes(sample_turn, new_turn, target_match, turn_number)
-            
-            new_turn.loc[new_turn["current_field"]==1,"ends_field"]=1
-            new_turn.loc[(new_turn["begins_field"]==1) & (new_turn["ends_field"]==1),"full_turn"]=1
-            
-            old_turn=new_turn
-#             display(new_turn)
-            match_scorecards.append(new_turn)
-            turn_number=turn_number+1
+        target_match=db.iloc[x]
+        if target_match.forfeit==1:
+            match_scorecards.append(generate_turn_df(target_match))
+        else:
+            target_turns=target_match.turn_logs.turn_df
+            #sample_turn=target_turns.iloc[1].line_str
+            old_turn=generate_turn_df(target_match)
+            turn_number=1
             new_turn=populate_fresh_scorecard(target_match, old_turn, turn_number)
+    #         #display(new_turn)
+            
+            for i in range(target_match.turn_count):
+                
+                sample_turn=target_turns.iloc[i].line_str
+    #             print(sample_turn)
+    #             #display(new_turn)
+                new_turn=check_changes(sample_turn, new_turn, target_match, turn_number)
+                
+                new_turn.loc[new_turn["current_field"]==1,"ends_field"]=1
+                new_turn.loc[(new_turn["begins_field"]==1) & (new_turn["ends_field"]==1),"full_turn"]=1
+                
+                old_turn=new_turn
+    #             display(new_turn)
+                match_scorecards.append(new_turn)
+                turn_number=turn_number+1
+                new_turn=populate_fresh_scorecard(target_match, old_turn, turn_number)
         
         combined_turns_scorecard=pd.concat(match_scorecards)
         product=create_match_scorecard(combined_turns_scorecard)
