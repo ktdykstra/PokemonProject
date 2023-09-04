@@ -434,6 +434,8 @@ def find_winner(target):
 def clip_pokemon(poke):
     if poke[-2:]=="-M" or poke[-2:]=="-F":
         poke=poke[:-2]
+    if poke=="Urshifu-*":
+        poke= "Urshifu"
     return poke
 clip_pokemon("Indeedee-F")
 
