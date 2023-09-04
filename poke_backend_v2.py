@@ -1096,7 +1096,8 @@ def get_metrics(sample_username, sample_game_type, driver, all_matches):
 
 ## calculate elo score
 def get_elo(elo_scale, elo_benchmark, win_series, total_match_series):
-    elo_score = (win_series + elo_scale * elo_benchmark)/(total_match_series + elo_scale)*100
+    # elo_score = (win_series + elo_scale * elo_benchmark)/(total_match_series + elo_scale)*100
+    elo_score=(win_series/total_match_series)*100
     return elo_score
 
 
