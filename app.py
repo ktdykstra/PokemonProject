@@ -1323,48 +1323,48 @@ def get_data():
       #dfs with individual hero pokemon winrates and elo scores
       df_hero_indiv = df_hero_indiv.reset_index()
       df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
-      df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
+      df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Win Rate"]
       # df_hero_indiv.to_csv("ind_stats.csv")
-      df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
-      df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+      df_hero_indiv["Win Rate"]=df_hero_indiv["Win Rate"].apply(lambda x: x+"%")
+      df_hero_indiv.sort_values(by="Win Rate",ascending=False,inplace=True)
       hero_indiv_stats = df_hero_indiv.to_html(index=False)
 
       #dfs with individual villain pokemon loss rates and elo scores
       df_villain_indiv = df_villain_indiv.reset_index()
       df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
-      df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+      df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Loss Rate"]
       # df_hero_indiv.to_csv("ind_stats.csv")
-      df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
-      df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+      df_villain_indiv["Loss Rate"]=df_villain_indiv["Loss Rate"].apply(lambda x: x+"%")
+      df_villain_indiv.sort_values(by="Loss Rate",ascending=False,inplace=True)
       villain_indiv_stats = df_villain_indiv.to_html(index=False)
 
       #dfs with hero pairs, games and win rates breakdown 
       df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
-      df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
-      df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-      df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
+      df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Win Rate"]
+      df3.sort_values(by="Win Rate",ascending=False,inplace=True)
+      df3["Win Rate"]=df3["Win Rate"].apply(lambda x: x+"%")
       heroPairStats = df3.to_html(index=False)
 
       ## villain pair stats
       df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
-      df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-      df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-      df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
+      df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Loss Rate"]
+      df4.sort_values(by="Loss Rate",ascending=False,inplace=True)
+      df4["Loss Rate"]=df4["Loss Rate"].apply(lambda x: x+"%")
       villainPairStats = df4.to_html(index=False)
 
       ## hero comp stats
       df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
-      df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
-      df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-      df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
+      df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Win Rate"]
+      df5.sort_values(by="Win Rate",ascending=False,inplace=True)
+      df5["Win Rate"]=df5["Win Rate"].apply(lambda x: x+"%")
       df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
       sixTeamHeroStats = df5.to_html(index=False, escape=False)
 
       ## hero comp stats
       df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
-      df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-      df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-      df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
+      df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Loss Rate"]
+      df6.sort_values(by="Loss Rate",ascending=False,inplace=True)
+      df6["Loss Rate"]=df6["Loss Rate"].apply(lambda x: x+"%")
       df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
       sixTeamVillainStats = df6.to_html(index=False, escape=False)
 
@@ -1541,48 +1541,48 @@ def get_data_private():
           #dfs with individual hero pokemon winrates and elo scores
           df_hero_indiv = df_hero_indiv.reset_index()
           df_hero_indiv=df_hero_indiv.loc[:,["hero_pokemon","win_conditional","used_total","elo_score"]]
-          df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Weighted Win Rate"]
+          df_hero_indiv.columns=['Hero Pokemon', "Games Won", "Games Played", "Win Rate"]
           # df_hero_indiv.to_csv("ind_stats.csv")
-          df_hero_indiv["Weighted Win Rate"]=df_hero_indiv["Weighted Win Rate"].apply(lambda x: x+"%")
-          df_hero_indiv.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
+          df_hero_indiv["Win Rate"]=df_hero_indiv["Win Rate"].apply(lambda x: x+"%")
+          df_hero_indiv.sort_values(by="Win Rate",ascending=False,inplace=True)
           hero_indiv_stats = df_hero_indiv.to_html(index=False)
           
           #dfs with individual villain pokemon loss rates and elo scores
           df_villain_indiv = df_villain_indiv.reset_index()
           df_villain_indiv=df_villain_indiv.loc[:,["villain_pokemon","loss_conditional","used_total","elo_score"]]
-          df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
+          df_villain_indiv.columns=['Villain Pokemon', "Games Lost Against", "Games Played Against", "Loss Rate"]
           # df_hero_indiv.to_csv("ind_stats.csv")
-          df_villain_indiv["Weighted Loss Rate"]=df_villain_indiv["Weighted Loss Rate"].apply(lambda x: x+"%")
-          df_villain_indiv.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
+          df_villain_indiv["Loss Rate"]=df_villain_indiv["Loss Rate"].apply(lambda x: x+"%")
+          df_villain_indiv.sort_values(by="Loss Rate",ascending=False,inplace=True)
           villain_indiv_stats = df_villain_indiv.to_html(index=False)
           
           #dfs with hero pairs, games and win rates breakdown 
           df3=df3.loc[:,["hero_one","hero_two","num_wins","num_games","elo_rate"]]
-          df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Weighted Win Rate"]
-          df3.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-          df3["Weighted Win Rate"]=df3["Weighted Win Rate"].apply(lambda x: x+"%")
+          df3.columns = ['Hero Lead 1', 'Hero Lead 2', "Games Won", "Games Played", "Win Rate"]
+          df3.sort_values(by="Win Rate",ascending=False,inplace=True)
+          df3["Win Rate"]=df3["Win Rate"].apply(lambda x: x+"%")
           heroPairStats = df3.to_html(index=False)
           
           ## villain pair stats
           df4=df4.loc[:,["villain_one","villain_two","num_losses","num_games","elo_rate"]]
-          df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-          df4.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-          df4["Weighted Loss Rate"]=df4["Weighted Loss Rate"].apply(lambda x: x+"%")
+          df4.columns = ['Villain Lead 1', 'Villain Lead 2', "Games Lost Against", "Games Played Against", "Loss Rate"]
+          df4.sort_values(by="Loss Rate",ascending=False,inplace=True)
+          df4["Loss Rate"]=df4["Loss Rate"].apply(lambda x: x+"%")
           villainPairStats = df4.to_html(index=False)
           
           ## hero comp stats
           df5=df5.loc[:,["hero_comp_fused","hero_comp_six","num_wins","num_games","elo_score"]]
-          df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Weighted Win Rate"]
-          df5.sort_values(by="Weighted Win Rate",ascending=False,inplace=True)
-          df5["Weighted Win Rate"]=df5["Weighted Win Rate"].apply(lambda x: x+"%")
+          df5.columns = ["Hero Comp ID",'Hero Comp', 'Games Won', "Games Played", "Win Rate"]
+          df5.sort_values(by="Win Rate",ascending=False,inplace=True)
+          df5["Win Rate"]=df5["Win Rate"].apply(lambda x: x+"%")
           df5["Hero Comp ID"] = df5["Hero Comp ID"].apply(lambda x: f"<a href='/hero_comp_data/{x}'>Comp-Internal Data Link</a>") # trying
           sixTeamHeroStats = df5.to_html(index=False, escape=False)
 
           ## hero comp stats
           df6=df6.loc[:,["villain_comp_fused","villain_comp_six","num_losses","num_games","elo_score"]]
-          df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Weighted Loss Rate"]
-          df6.sort_values(by="Weighted Loss Rate",ascending=False,inplace=True)
-          df6["Weighted Loss Rate"]=df6["Weighted Loss Rate"].apply(lambda x: x+"%")
+          df6.columns = ["Villain Comp ID", "Villain Comp","Games Lost Against", "Games Played Against", "Loss Rate"]
+          df6.sort_values(by="Loss Rate",ascending=False,inplace=True)
+          df6["Loss Rate"]=df6["Loss Rate"].apply(lambda x: x+"%")
           df6["Villain Comp ID"] = df6["Villain Comp ID"].apply(lambda x: f"<a href='/villain_comp_data/{x}'>Comp-Internal Data Link</a>")
           sixTeamVillainStats = df6.to_html(index=False, escape=False)
 
