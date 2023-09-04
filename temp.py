@@ -7,6 +7,8 @@ This is a temporary script file.
 print("th")
 import pandas as pd
 import numpy as np
+import importlib
+importlib.reload(sdg)
 import poke_backend_v2 as sdg
 import plotly.express as px
 import plotly.graph_objects as go
@@ -37,13 +39,77 @@ password="Serapisiscool2"
 global driver
 global df1
 
-service = Service(ChromeDriverManager().install())
+# service = Service(ChromeDriverManager().install())
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
-driver = webdriver.Chrome()
+driver.quit()
+driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://www.google.com/")
+driver=login_showdown(username, password, driver)
+df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, game_type, driver, True)
+df_hero_indiv
+pd.set_option('display.max_rows', None)
+df1.iloc[9].hero_comp_six
+x=sdg.gather_matches(username,game_type,driver,True)
+x.iloc[11].body_logs
+df1
+base_url="https://replay.pokemonshowdown.com"
+prob_match=x.iloc[11].match_id
+print("thi")
+x.iloc[11].match_id
+
+prob_url=base_url+"/"+prob_match+"pw"+".json"
+prob_url
+driver.get(prob_url)
+json_element = driver.find_element(by="tag name", value='pre')
+json_text = json_element.text
+json_file=json.loads(json_text)
+log=json_file["log"]
+LOG = pd.DataFrame(log.split("\n"),columns=["line_str"])
+LOG
+LOG.index.name = 'line_num'
+LOG.line_str = LOG.line_str.str.replace(r'\n', ' ', regex=True).str.strip()
+LOG
+LOG.iloc[40]
+head_pat=r"\|turn\|1"
+pat_a = LOG.line_str.str.match(head_pat)
+## check to see if turn 1 exists
+if pat_a.unique().shape[0] == 1:
+    print("There's no turn ")
+else:
+    print("there is a turn")
+line_a = LOG.loc[pat_a].index[0]-1
+line_a
+prob_match
+x.iloc[3].match_id
+x.shape
+for i in range(df.shape[0]):
+    print(i)
+    ## Identify match
+    match_id=df.iloc[i].match_id
+    if df.iloc[i].match_type=="private":
+        match_url=base_url + "/" + match_id + "pw"+".json"
+    else:
+        match_url=base_url + "/" + match_id +".json"
+    print("made_url")
+    driver.get(match_url)
+    json_element = driver.find_element(by="tag name", value='pre')
+    json_text = json_element.text
+    json_file=json.loads(json_text)
+    log=json_file["log"]
+
+    LOG = pd.DataFrame(log.split("\n"),columns=["line_str"])
+    LOG.index.name = 'line_num'
+    LOG.line_str = LOG.line_str.str.replace(r'\n', ' ', regex=True).str.strip()
+
+    head_pat=r"\|turn\|1"
+    pat_a = LOG.line_str.str.match(head_pat)
+    line_a = LOG.loc[pat_a].index[0]-1
+    print(match_id,line_a)
+
+df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, game_type, driver, True)
 ############################################################
 # LOGIN TO PS! WITH SELENIUM
 ############################################################
@@ -75,8 +141,7 @@ def login_showdown(username, password, driver):
     driver.teardown=False
 
     return driver
-driver=login_showdown(username, password, driver)
-df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, game_type, driver, True)
+
 df1
 driver.quit()
 match_page=1000

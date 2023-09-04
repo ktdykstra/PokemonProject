@@ -141,7 +141,7 @@ def get_logs(df):
     print("Chunking match log...")
 
     for i in df.match_id:
-        
+        print(i)
         ## Identify match
         
         match_id=i
@@ -159,7 +159,7 @@ def get_logs(df):
         # LOG.head()
 
         ## Get head and tail meta data, as well as body log
-
+        print(LOG.line_str)
         head_pat=r"\|turn\|1"
         pat_a = LOG.line_str.str.match(head_pat)
         line_a = LOG.loc[pat_a].index[0]-1

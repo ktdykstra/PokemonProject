@@ -1458,7 +1458,7 @@ def login_showdown(username, password, driver):
     username_field.send_keys(username)
     button = driver.find_element(By.XPATH, "//button[@type='submit']")
     button.click()
-    # time.sleep(2) 
+    time.sleep(2) 
     wait = WebDriverWait(driver, 10)
     pw_field = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "textbox")))
     pw_field.send_keys(password)
@@ -1481,14 +1481,14 @@ def get_data_private():
   #global df1
 
   # Set up the Chrome WebDriver in headless mode
-  service = Service(ChromeDriverManager().install())
+  # service = Service(ChromeDriverManager().install())
   chrome_options = Options()
   chrome_options.add_argument("--headless")
   chrome_options.add_argument("--disable-dev-shm-usage")
   chrome_options.add_argument("--no-sandbox")
 
   # download and use the latest ChromeDriver automatically using
-  driver = webdriver.Chrome(service=service, options=chrome_options)
+  driver = webdriver.Chrome(options=chrome_options) #service=service, options=chrome_options
   driver.get("https://www.google.com/")
 
   ## paywall
@@ -1508,7 +1508,7 @@ def get_data_private():
       password = request.form.get('showdown_pw')
       gametype = request.form.get('gametype')
       driver=login_showdown(username_private, password, driver)            
-      # time.sleep(3)
+      time.sleep(2)
       print("DRIVER:", driver)
       print("User:", username_private)
       print("pass:", password)
