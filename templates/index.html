@@ -242,8 +242,12 @@ https://templatemo.com/tm-535-softy-pinko
             </div>
         </section>
         <!-- ***** Username Public End ***** -->
-
-
+    
+    <!--LOADING SCREEN-->
+    <div id="loading-indicator" style="display: none;">
+        <!-- Add your loading animation or spinner here -->
+        Loading...
+    </div>
 
     <!-- Display Overall Stats-->
 
@@ -316,6 +320,55 @@ https://templatemo.com/tm-535-softy-pinko
 
     <!--Script for tinted button-->
     <!-- <script src="/static/assets/js/screenOverlay.js"></script>-->
+
+    <!--JS FOR THREADING-->
+    <script>
+        const form = document.getElementById('usernamePrivate');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const resultDiv = document.getElementById('result');
+    
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the form submission
+    
+            // Hide the form and show the loading indicator
+            form.style.display = 'none';
+            loadingIndicator.style.display = 'block';
+    
+            // Start the long-running task in a separate thread (using fetch or another method)
+            fetch('/start_task', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    const jobId = data.job_id;
+    
+                    // Periodically check the task status
+                    const interval = setInterval(() => {
+                        fetch(`/check_task_status/${jobId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const taskStatus = data.status;
+    
+                                if (taskStatus === 'completed') {
+                                    clearInterval(interval);
+                                    loadingIndicator.style.display = 'none';
+    
+                                    // Fetch the rendered template and display it
+                                    fetch('/get_result_template')
+                                        .then(response => response.text())
+                                        .then(template => {
+                                            resultDiv.innerHTML = template;
+                                        });
+                                } else if (taskStatus === 'failed') {
+                                    clearInterval(interval);
+                                    loadingIndicator.style.display = 'none';
+                                    resultDiv.textContent = 'An error occurred during the task.';
+                                }
+                            });
+                    }, 1000); // Poll every 1 second
+                });
+        });
+    </script>
+    
+    
 
     <!-- jQuery -->
     <script src="/static/assets/js/jquery-2.1.0.min.js"></script>

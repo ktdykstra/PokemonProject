@@ -47,6 +47,7 @@ from stripe.error import SignatureVerificationError
 from database import connect_to_db, close_connection, DatabaseHandler
 import psycopg2
 
+import threading
 
 #for testing:
 #sample_username="Broskander" 
@@ -91,6 +92,10 @@ endpoint_secret = 'whsec_AZE85BOzWncPR6OB62f447ZUQuVwl3BX'
 
 PREMIUM_PRICE_ID = 'price_1NchwKDypgtvgAYhILRJc3RP'
 STANDARD_PRICE_ID = 'price_1NkeMUDypgtvgAYhm4NEpXAI'
+
+# Global variables to store the task result and status
+task_result = None
+task_status = "not started"
 
 Session(app)
 YOUR_DOMAIN = 'https://www.serapis.dev'
@@ -1478,6 +1483,9 @@ def login_showdown(username, password, driver):
 @cache.cached(timeout=60)
 def get_data_private():
   global driver
+
+  global task_result
+  global task_status
   #global df1
 
   # Set up the Chrome WebDriver in headless mode
@@ -1649,10 +1657,13 @@ def get_data_private():
                               "<h1 style='text-align: center;'>Ranked Villain Comps</h1>"+
                               "<br><br>" +
                               sixTeamVillainStats)
-
+          task_result = render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+          task_status = "completed"
           return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
       else:
         driver.quit()
+        task_result = render_template('index.html')
+        task_status = "failed"
         print("did not retrieve input")
         return render_template('index.html')
       #         else:
@@ -1661,8 +1672,42 @@ def get_data_private():
       #     flash('Please log in to access content.')
       #     return redirect(url_for('login'))  # Redirect to the login page
 
+############################################################
+# CHECKING THREADING STATUS
+############################################################
+@app.route('/start_task', methods=['POST'])
+def start_task():
+    global task_result
+    global task_status
+
+    # Reset the task result and status
+    task_result = None
+    task_status = "in progress"
+
+    # Start the long-running task in a separate thread
+    task_thread = threading.Thread(target=get_data_private)
+    task_thread.start()
+
+    return jsonify({"message": "Task started"})
+
+@app.route('/check_task_status', methods=['GET'])
+def check_task_status():
+    global task_result
+    global task_status
+
+    return jsonify({"status": task_status, "result": task_result})
+
+@app.route('/get_result_template', methods=['GET'])
+def get_result_template():
+    global task_result
+
+    if task_result:
+        return task_result
+    else:
+        return "Result not available"
 
 
+############################################################
 @app.route('/ip')
 def ip():
     hostname = socket.gethostname()    
