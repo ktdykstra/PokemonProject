@@ -323,22 +323,56 @@ https://templatemo.com/tm-535-softy-pinko
 
     <!--JS FOR THREADING-->
     <script>
-        const form = document.getElementById('usernamePrivate');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const resultDiv = document.getElementById('result');
-    
-        form.addEventListener('submit', (event) => {
-            event.preventDefault(); // Prevent the form submission
-    
-            // Hide the form and show the loading indicator
-            form.style.display = 'none';
-            loadingIndicator.style.display = 'block';
-    
-            // Submit the form to initiate the long-running task
-            // The task will be initiated on the server side
-            // No need for additional JavaScript to start the task
-            form.submit();
+        // Function to check the task status
+        // Function to check the task status
+function checkTaskStatus() {
+        fetch('/get_task_status', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            const taskStatus = data.status;
+            const loadingScreen = document.getElementById('loading-screen');
+            const resultDiv = document.getElementById('result');
+
+            if (taskStatus === 'completed') {
+                // Hide the loading screen
+                loadingScreen.style.display = 'none';
+
+                // Fetch the actual results and display them
+                fetch('/get_actual_results', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'text/html',
+                    },
+                })
+                .then(response => response.text())
+                .then(result => {
+                    // Display the results in the resultDiv
+                    resultDiv.innerHTML = result;
+                })
+                .catch(error => {
+                    console.error('Error fetching actual results:', error);
+                });
+            } else if (taskStatus === 'failed') {
+                // Handle task failure if needed
+                loadingScreen.innerHTML = 'Task failed. Please try again.';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching task status:', error);
         });
+    }
+
+    // Call the checkTaskStatus function periodically (e.g., every few seconds)
+    setInterval(checkTaskStatus, 3000); // Check every 3 seconds
+
+    // No need to add an event listener for form submission in this case
+
+  
     </script>
     
     
