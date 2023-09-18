@@ -50,7 +50,7 @@ import psycopg2
 # functionality for redis background process
 import rq
 from rq import Queue, get_current_job
-from worker import redis_conn
+from worker import redis_conn, high_priority_queue 
 from rq.job import Job
 
 
@@ -83,9 +83,6 @@ app.config['SESSION_USE_SIGNER'] = True
 # Create a Redis connection using redis.StrictRedis
 #redis_connection = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, ssl=True)
 ## END -- moved redis stuff to worker file
-
-#set up redis queue for background processing
-q = Queue(connection=redis_conn)
 
 # Set the Redis connection object as SESSION_REDIS
 app.config['SESSION_REDIS'] = redis_conn
@@ -1524,10 +1521,10 @@ def enqueue_long_task():
         return render_template('index.html')
   
   # Enqueue the task
-  q.enqueue(get_data_private, args=(username_private, gametype))
+  high_priority_queue.enqueue(get_data_private, args=(username_private, gametype))
   
   # Retrieve the job ID
-  job = q.enqueue(get_data_private, args=(username_private, gametype))
+  job = high_priority_queue.enqueue(get_data_private, args=(username_private, gametype))
   session['job_id'] = job.id  # Store the job ID in the user's session
 
 
