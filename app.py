@@ -48,6 +48,7 @@ from database import connect_to_db, close_connection, DatabaseHandler
 import psycopg2
 
 # functionality for redis background process
+import rq
 from rq import Queue, get_current_job
 from worker import redis_conn
 from rq.job import Job
