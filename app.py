@@ -1535,7 +1535,7 @@ def enqueue_long_task():
 # CHECKING IF JOB COMPLETED IN QUEUE
 def task_is_completed(job_id):
     try:
-        job = Job.fetch(job_id, connection=Queue(connection=redis_conn))
+        job = Job.fetch(job_id, connection=redis_conn)
         return job.get_status() == 'finished'
     except Exception as e:
         # Handle any exceptions that may occur (e.g., job not found)
@@ -1549,7 +1549,7 @@ def check_task_status():
 
     if job_id:
         try:
-            job = Job.fetch(job_id, connection=Queue(connection=redis_conn))
+            job = Job.fetch(job_id, connection=redis_conn)
             if job.get_status() == 'finished':
                 # Task is completed, retrieve the data and render the results template
                 data = session.get('task_data')
