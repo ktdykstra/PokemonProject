@@ -1,16 +1,20 @@
-# listen to queued tasks and process them as they are received
+# worker.py
+
+import rq
 import os
+from redis import Redis
+#from app import get_data_private # Import your long-running task function
 
-import redis
-from rq import Worker, Queue, Connection
 
-listen = ['high', 'default', 'low']
+# Get the Redis URL from environment variables
+redis_url = os.environ.get('STACKHERO_REDIS_URL_TLS') or 'redis://localhost:6379/0'
 
-redis_url = os.getenv('SESSION_REDIS', 'redis://localhost:6379')
 
-conn = redis.from_url(redis_url)
+# Create a Redis connection 
+redis_conn = Redis.from_url(redis_url, ssl=True)
 
-if __name__ == '__main__':
-    with Connection(conn):
-        worker = Worker(map(Queue, listen))
-        worker.work()
+# Create an RQ worker
+worker = rq.Worker([rq.Queue("default")], connection=redis_conn)
+
+if __name__ == "__main__":
+    worker.work()

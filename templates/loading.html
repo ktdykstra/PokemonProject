@@ -1,0 +1,80 @@
+<!-- loading.html -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link href="https://fonts.googleapis.com/css?family=Raleway:100,300,400,500,700,900" rel="stylesheet">
+    
+        <title>Serapis</title>
+        <link rel="icon" type="image/png" href="/static/assets/images/snake black v3.png">
+    
+        <!--
+    SOFTY PINKO
+    https://templatemo.com/tm-535-softy-pinko
+    -->
+    
+        <!-- Additional CSS Files -->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/bootstrap.min.css') }}">
+    
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/font-awesome.css') }}">
+    
+        <link rel="stylesheet" type="text/css"
+            href="{{ url_for('static', filename='assets/css/templatemo-softy-pinko.css') }}">
+    
+            <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-REK63QPEPV"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+    
+        gtag('config', 'G-REK63QPEPV');
+        </script>
+    </head>
+<body>
+    <h1>Loading...</h1>
+    <div id="loading-indicator"></div>
+
+    <script>
+        // Function to handle task status updates
+        function handleTaskStatus(data) {
+            if (data.status === 'completed') {
+                clearInterval(interval);  // Stop checking when task is completed
+                // Redirect or update the UI with the results
+                //window.location.href = '/results';  // Adjust the URL as needed
+            } else if (data.status === 'in_progress') {
+                // Handle the in-progress state (e.g., show a loading message)
+                console.log('Task is in progress...');
+            }
+        }
+    
+        // Use JavaScript to periodically check the status of the task
+        const interval = setInterval(() => {
+            fetch('/check_task_status')  // Implement this route to check task status
+                .then(response => response.json())
+                .then(data => {
+                    handleTaskStatus(data);
+                })
+                .catch(error => {
+                    // Handle errors from the fetch request (e.g., network issues)
+                    console.error('Error checking task status:', error);
+                });
+        }, 5000);  // Check every 5 seconds (adjust as needed)
+    
+        // Initial check when the page loads
+        fetch('/check_task_status')  // Implement this route to check task status
+            .then(response => response.json())
+            .then(data => {
+                handleTaskStatus(data);
+            })
+            .catch(error => {
+                // Handle errors from the fetch request (e.g., network issues)
+                console.error('Error checking task status:', error);
+            });
+    </script>
+</body>
+    
+</html>

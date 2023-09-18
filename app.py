@@ -47,7 +47,11 @@ from stripe.error import SignatureVerificationError
 from database import connect_to_db, close_connection, DatabaseHandler
 import psycopg2
 
-import threading
+# functionality for redis background process
+from rq import Queue, get_current_job
+from worker import redis_conn
+from rq.job import Job
+
 
 #for testing:
 #sample_username="Broskander" 
@@ -69,16 +73,21 @@ app.config['SESSION_TYPE'] = 'redis'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
 
+## START -- moved redis stuff to worker file
 # The Redis connection details
-redis_host = 'qoxjxb.stackhero-network.com'
-redis_port = '6380'
-redis_password = '2SSlD7FN0buUpMoGeb4iR2eKf8vJ87GDm67hq6LEiQK6IloP3X01WFbCTfhiU0h8'
+#redis_host = 'qoxjxb.stackhero-network.com'
+#redis_port = '6380'
+#redis_password = '2SSlD7FN0buUpMoGeb4iR2eKf8vJ87GDm67hq6LEiQK6IloP3X01WFbCTfhiU0h8'
 
 # Create a Redis connection using redis.StrictRedis
-redis_connection = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, ssl=True)
+#redis_connection = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, ssl=True)
+## END -- moved redis stuff to worker file
+
+#set up redis queue for background processing
+q = Queue(connection=redis_conn)
 
 # Set the Redis connection object as SESSION_REDIS
-app.config['SESSION_REDIS'] = redis_connection
+app.config['SESSION_REDIS'] = redis_conn
 
 #DB URL
 app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL')
@@ -1473,19 +1482,16 @@ def login_showdown(username, password, driver):
     driver.teardown=False ## crucial for making sure the driver doesn't auto quit after function
     
     return driver
-
 ############################################################
 #
-# RETRIVE PUBLIC AND PRIVATE MATCHES
+# METHODS FOR RUNNING BACKGROUND TASKS ON REDIS QUEUE
 #
 ############################################################
-@app.route("/get_data_private", methods=['GET','POST'])
-@cache.cached(timeout=60)
-def get_data_private():
+@app.route("/enqueue_long_task", methods=['POST'])
+def enqueue_long_task():
+  # Get data or parameters needed get_data_private
   global driver
 
-  global task_result
-  global task_status
   #global df1
 
   # Set up the Chrome WebDriver in headless mode
@@ -1499,19 +1505,7 @@ def get_data_private():
   driver = webdriver.Chrome(options=chrome_options) #service=service, options=chrome_options
   driver.get("https://www.google.com/")
 
-  ## paywall
-  user_email=session['user_email']
-  temp_user=get_user_by_email(user_email)
-  if temp_user[2] > 4:
-     driver.quit()
-     return render_template("pricing.html")
-
   if request.method == 'POST':
-      # # METERED PAYWALL LOGIC
-      # if 'user_email' in session:
-      #     user = get_user_by_email(session['user_email'])
-      #     if user[1] == 'premium' or user[1] == 'standard' or user[2] < 6:
-
       username_private = request.form.get('usernamePrivate')
       password = request.form.get('showdown_pw')
       gametype = request.form.get('gametype')
@@ -1523,7 +1517,67 @@ def get_data_private():
 
       #UPDATE USERNAME IN SESSION
       session['showdown_username'] = username_private
+  else:
+        driver.quit()
+        print("did not retrieve input or enqueue task")
+        return render_template('index.html')
+  
+  # Enqueue the task
+  q.enqueue(get_data_private, args=(username_private, gametype))
+  
+  # Retrieve the job ID
+  job = q.enqueue(get_data_private, args=(username_private, gametype))
+  session['job_id'] = job.id  # Store the job ID in the user's session
 
+
+  # Return a response to the user indicating that the task has been queued
+  print("Task enqueued")
+  return render_template("loading.html")
+
+# CHECKING IF JOB COMPLETED IN QUEUE
+def task_is_completed(job_id):
+    try:
+        job = Job.fetch(job_id, connection=Queue(connection=redis_conn))
+        return job.get_status() == 'finished'
+    except Exception as e:
+        # Handle any exceptions that may occur (e.g., job not found)
+        return False
+
+# CHECKING JOB STATUS
+@app.route("/check_task_status", methods=['GET'])
+def check_task_status():
+    # Get the job ID from the user session 
+    job_id = session.get('job_id')  
+
+    if job_id:
+        try:
+            job = Job.fetch(job_id, connection=Queue(connection=redis_conn))
+            if job.get_status() == 'finished':
+                # Task is completed, retrieve the data and render the results template
+                data = session.get('task_data')
+                if data:
+                    return render_template('resultsPrivateAndPublic.html', **data)
+     
+        except NoSuchJobError:
+            pass  # Handle the case where the job is not found
+    return jsonify({"status": "in_progress"})
+
+
+############################################################
+#
+# RETRIVE PUBLIC AND PRIVATE MATCHES
+#
+############################################################
+@app.route("/get_data_private", methods=['GET','POST'])
+@cache.cached(timeout=60)
+def get_data_private(username_private, gametype):
+      ## paywall
+      user_email=session['user_email']
+      temp_user=get_user_by_email(user_email)
+      if temp_user[2] > 4:
+        driver.quit()
+        return render_template("pricing.html")
+      
       if driver is not None:
           
           ## run the data gathering
@@ -1658,13 +1712,19 @@ def get_data_private():
                               "<h1 style='text-align: center;'>Ranked Villain Comps</h1>"+
                               "<br><br>" +
                               sixTeamVillainStats)
-          task_result = render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
-          task_status = "completed"
-          return redirect("/loading")
+          
+          #return render_template('resultsPrivateAndPublic.html', username = username_private, num_games=num_games, win_rate=win_rate, num_wins=num_wins, result = output_html)
+          data = {
+                      'username_private': username_private,
+                      'num_games': num_games,
+                      'win_rate': win_rate,
+                      'num_wins': num_wins,
+                      'result': output_html  # You can include any additional data here
+                  }
+          session['task_data'] = data
+          return data
       else:
         driver.quit()
-        task_result = render_template('index.html')
-        task_status = "failed"
         print("did not retrieve input")
         return render_template('index.html')
       #         else:
@@ -1672,37 +1732,6 @@ def get_data_private():
       # else:
       #     flash('Please log in to access content.')
       #     return redirect(url_for('login'))  # Redirect to the login page
-
-@app.route("/loading", methods=['GET'])
-def loading_page():
-    return render_template('loading.html')
-
-# Flask route to fetch and return actual results
-@app.route("/get_actual_results", methods=['GET'])
-def get_actual_results():
-    # Generate and return the actual results here
-    # ...
-    if task_result:
-       return task_result
-############################################################
-# CHECKING THREADING STATUS
-############################################################
-
-@app.route('/check_task_status', methods=['GET'])
-def check_task_status():
-    global task_result
-    global task_status
-
-    return jsonify({"status": task_status, "result": task_result})
-
-@app.route('/get_result_template', methods=['GET'])
-def get_result_template():
-    global task_result
-
-    if task_result:
-        return task_result
-    else:
-        return "Result not available"
 
 
 ############################################################
