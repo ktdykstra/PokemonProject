@@ -1521,10 +1521,10 @@ def enqueue_long_task():
         return render_template('index.html')
   
   # Enqueue the task
-  high_priority_queue.enqueue(get_data_private, args=(username_private, gametype))
+  high_priority_queue.enqueue(get_data_private, username_private, gametype)
   
   # Retrieve the job ID
-  job = high_priority_queue.enqueue(get_data_private, args=(username_private, gametype))
+  job = high_priority_queue.enqueue(get_data_private, username_private, gametype)
   session['job_id'] = job.id  # Store the job ID in the user's session
 
 
@@ -1544,8 +1544,8 @@ def task_is_completed(job_id):
 # CHECKING JOB STATUS
 @app.route("/check_task_status", methods=['GET'])
 def check_task_status():
-    # Get the job ID from the user session 
-    job_id = session.get('job_id')  
+    # Get the job ID from the user session
+    job_id = session.get('job_id')
 
     if job_id:
         try:
@@ -1555,10 +1555,12 @@ def check_task_status():
                 data = session.get('task_data')
                 if data:
                     return render_template('resultsPrivateAndPublic.html', **data)
-     
         except NoSuchJobError:
             pass  # Handle the case where the job is not found
+
+    # If the task is not completed, return a JSON response indicating in_progress
     return jsonify({"status": "in_progress"})
+
 
 
 ############################################################
@@ -1569,6 +1571,7 @@ def check_task_status():
 @app.route("/get_data_private", methods=['GET','POST'])
 @cache.cached(timeout=60)
 def get_data_private(username_private, gametype):
+      global driver
       ## paywall
       user_email=session['user_email']
       temp_user=get_user_by_email(user_email)
