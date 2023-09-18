@@ -3,7 +3,7 @@
 import rq
 import os
 from redis import Redis
-from rq import Worker, Queue
+from rq import Worker, Queue, Connection
 #from app import get_data_private # Import your long-running task function
 
 
@@ -20,7 +20,7 @@ redis_conn = Redis(host=redis_host, port=redis_port, password=redis_password, ss
 # Create a Redis connection 
 #redis_conn = Redis.from_url(redis_url, ssl=True)
 
-high_priority_queue = Queue("high_priority", connection=redis_url)
+high_priority_queue = Queue("high_priority", connection=redis_conn)
 
 # Create a list of queues to be processed by the worker
 queues = [high_priority_queue]
