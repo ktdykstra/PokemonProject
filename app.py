@@ -1503,6 +1503,16 @@ def enqueue_long_task():
   driver = webdriver.Chrome(options=chrome_options) #service=service, options=chrome_options
   driver.get("https://www.google.com/")
 
+  ## paywall
+  user_email=session['user_email']
+  temp_user=get_user_by_email(user_email)
+  if temp_user[2] > 4:
+      driver.quit()
+      return render_template("pricing.html")
+  
+   ## INCREMENT CLICK COUNT IN DB FOR USER
+  increment_click_count(user_email)
+
   if request.method == 'POST':
       username_private = request.form.get('usernamePrivate')
       password = request.form.get('showdown_pw')
@@ -1572,12 +1582,7 @@ def check_task_status():
 @cache.cached(timeout=60)
 def get_data_private(username_private, gametype):
       global driver
-      ## paywall
-      user_email=session['user_email']
-      temp_user=get_user_by_email(user_email)
-      if temp_user[2] > 4:
-        driver.quit()
-        return render_template("pricing.html")
+      
       
       if driver is not None:
           
@@ -1585,11 +1590,8 @@ def get_data_private(username_private, gametype):
           df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
           time.sleep(2)
 
-          ## INCREMENT CLICK COUNT IN DB FOR USER
-          increment_click_count(user_email)
-
           #update value of df1 in cache
-          set_user_df1(df1)
+          #set_user_df1(df1)
 
           #print(output)
           # hero individual plot
@@ -1720,7 +1722,8 @@ def get_data_private(username_private, gametype):
                       'num_games': num_games,
                       'win_rate': win_rate,
                       'num_wins': num_wins,
-                      'result': output_html  # You can include any additional data here
+                      'result': output_html,
+                      'df1': df1,
                   }
           session['task_data'] = data
           return data
