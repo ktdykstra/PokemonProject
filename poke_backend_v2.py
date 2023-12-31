@@ -108,21 +108,9 @@ def gather_matches(username, game_type, driver, all_matches):
     
     # ## Get first page
     match_type=[]
-    # match_page=1
-    # api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type 
-    # # s=session
-    # driver.get(api_url)
-    # json = driver.find_element(by="tag name", value='pre')
-    # print(json)
-    # json=json.text
-    # print(json)
-    # # json=s.get(api_url).json()
-    # base_db=pd.read_json(json)
-    # print(base_db)
-    # return base_db
     match_page = 1
     api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page)
-    # print(api_url)
+    print(api_url)
     driver.get(api_url)
     json_element = driver.find_element(by="tag name", value='pre')
     json_text = json_element.text
@@ -152,7 +140,7 @@ def gather_matches(username, game_type, driver, all_matches):
     if all_matches == True:
         match_page = 1
         api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page)
-        # print(api_url)
+        print(api_url)
         driver.get(api_url)
         json_element = driver.find_element(by="tag name", value='pre')
         json_text = json_element.text
@@ -208,25 +196,11 @@ def gather_matches(username, game_type, driver, all_matches):
 
     ## clean database columns and strip ! for private matches
     base_db.rename(columns={"id":"match_id"},inplace=True)
-    base_db=base_db.apply(remove_exclamation,axis=1)
-    
-    # Add logs and turns to metadata df
-
-    body_logs, head_logs, tail_logs, turns, turn_count, forfeit = get_logs(base_db, driver)
-    base_db["body_logs"]=body_logs
-    base_db["head_logs"]=head_logs
-    base_db["tail_logs"]=tail_logs
-    base_db["turn_logs"]=turns
-    base_db["turn_count"]=turn_count
-    base_db["forfeit"]=forfeit
-    
-    # Get a hero/villian designator
-
-    # MATCH_DB.loc[MATCH_DB['p1']==username, 'hero'] = 'p1'
-    base_db['hero'] = base_db['p1'].apply(lambda x: 'p1' if (x==username or x==("!"+username)) else 'p2')
-    base_db['villian'] = base_db['hero'].apply(lambda x: 'p2' if x=="p1" else 'p1')
-
+    # base_db=base_db.apply(remove_exclamation,axis=1) # add back in once fixed
     return base_db
+
+
+# return base_db
 
 
 ## getting logs for individual match ids
@@ -1072,6 +1046,25 @@ def get_metrics(sample_username, sample_game_type, driver, all_matches):
     ## Gather matches from Showdown
     
     MATCH_DB=gather_matches(sample_username, sample_game_type, driver, all_matches)
+
+    ## get logs
+
+    body_logs, head_logs, tail_logs, turns, turn_count, forfeit = get_logs(MATCH_DB, driver)
+    MATCH_DB["body_logs"]=body_logs
+    MATCH_DB["head_logs"]=head_logs
+    MATCH_DB["tail_logs"]=tail_logs
+    MATCH_DB["turn_logs"]=turns
+    MATCH_DB["turn_count"]=turn_count
+    MATCH_DB["forfeit"]=forfeit
+
+    ## assign p1 and p2
+    MATCH_DB['p1'] = MATCH_DB['players'].apply(lambda x: x[0])
+    MATCH_DB['p2'] = MATCH_DB['players'].apply(lambda x: x[1])
+    
+    # Get a hero/villian designator
+    # MATCH_DB.loc[MATCH_DB['p1']==username, 'hero'] = 'p1'
+    MATCH_DB['hero'] = MATCH_DB['p1'].apply(lambda x: 'p1' if (x==sample_username or x==("!"+sample_username)) else 'p2')
+    MATCH_DB['villian'] = MATCH_DB['hero'].apply(lambda x: 'p2' if x=="p1" else 'p1')
     
     ## Aggregate data from matches
     
@@ -1343,58 +1336,58 @@ def get_villain_comp_library(comp_identifier, MATCH_DB):
 
 # In[9]:
 
+#######################
+## Testing
+#######################
 
-# display(library, meta, hero_comps_db, hero_pairs_db, library.iloc[0].turn_logs.iloc[-1].turn_df, library.iloc[0].match_scorecards)
+# ## necessary imports for testing
+# import json
+# import os
+# import time
+# from flask_cors import CORS
+# import pandas as pd
+# import numpy as np
+# import importlib
+# # from flask_bootstrap import Bootstrap
+# from markupsafe import Markup
+# # importlib.reload(sdg)
+# # import poke_backend_v2 as sdg
+# import socket 
+# import pickle
+# import plotly.express as px
+# import plotly.graph_objects as go
+# import plotly.offline as pyo
+# import re
+# from selenium import webdriver
+# import base64
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.common.keys import Keys
+# from webdriver_manager.chrome import ChromeDriverManager
+# from selenium.webdriver.chrome.service import Service
 
+# ## setup a driver
+# global driver
+# #global df1
+# # set up webdriver in headless mode
+# # service = Service(ChromeDriverManager().install())
+# chrome_options = Options()
+# chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--disable-dev-shm-usage")
+# chrome_options.add_argument("--no-sandbox")
+# # download and use the latest ChromeDriver automatically using
+# # Set up ChromeOptions for headless mode
+# driver = webdriver.Chrome(options=chrome_options) #service=service, 
+# driver.get("https://www.google.com/")
 
-# In[7]:
+# ## run test
+# sample_username = "Broskander"
+# sample_gametype = "gen9vgc2024regf"
 
+# df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 =get_metrics(sample_username, sample_gametype, driver, False)
 
-# start = time.time()
-# temp=gather_matches(sample_username, sample_game_type)
-# end = time.time()
-# print(end - start)
-
-
-# In[8]:
-
-
-# start = time.time()
-# temp=gather_matches(sample_username, sample_game_type)
-# end = time.time()
-# print(end - start)
-
-
-# In[4]:
-
-
-# start = time.time()
-# get_logs(temp)
-# end = time.time()
-# print(end - start)
-
-
-# In[5]:
-
-
-# start = time.time()
-# get_all_data(temp)
-# end = time.time()
-# print(end - start)
-
-
-# In[6]:
-
-
-# # In[26]:
-
-
-# display(library, meta, hero_pairs_db,library.iloc[0].turn_logs.iloc[-1].turn_df, library.iloc[0].match_scorecards)
-# # display(library, meta, hero_pairs_db, villain_pairs_db, hero_comps_db, villain_comps_db)
-
-
-# In[ ]:
-
-
+# driver.quit()
 
 
