@@ -227,7 +227,7 @@ def get_logs(df, driver):
         
         match_id=df.iloc[i].match_id
         if df.iloc[i].match_type=="private":
-            match_url=base_url + "/" + match_id + "pw"+".json"
+            match_url=base_url + "/" + match_id +".json"
         else:
             match_url=base_url + "/" + match_id +".json"
         driver.get(match_url)
@@ -1368,7 +1368,7 @@ def get_villain_comp_library(comp_identifier, MATCH_DB):
 # from webdriver_manager.chrome import ChromeDriverManager
 # from selenium.webdriver.chrome.service import Service
 
-# ## setup a driver
+# ## setup a driver for public scrape
 # global driver
 # #global df1
 # # set up webdriver in headless mode
@@ -1382,12 +1382,47 @@ def get_villain_comp_library(comp_identifier, MATCH_DB):
 # driver = webdriver.Chrome(options=chrome_options) #service=service, 
 # driver.get("https://www.google.com/")
 
+# ## username pw etc info
+
+# sample_username = "DaFinisher"
+# sample_password="Serapisiscool2"
+# sample_gametype = "gen9vgc2023regulatione"
+
+# ## setup for a private scrape specific
+
+# def login_showdown(username, password, driver):
+#     # global driver
+#     # Navigate to the login page
+#     login_url = "https://play.pokemonshowdown.com/"
+#     driver.get(login_url)
+
+#     # Wait for the login page to load
+#     time.sleep(2)  # Adjust the wait time as needed
+
+#     # Submit the login form
+#     login_button = driver.find_element(By.NAME, "login")
+#     login_button.click()
+
+#     # Find the username and password input fields and fill them out
+#     username_field = driver.find_element(By.NAME, "username")
+#     username_field.send_keys(username)
+#     button = driver.find_element(By.XPATH, "//button[@type='submit']")
+#     button.click()
+#     time.sleep(2) 
+#     wait = WebDriverWait(driver, 10)
+#     pw_field = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "textbox")))
+#     pw_field.send_keys(password)
+#     button = driver.find_element(By.XPATH, "//button[@type='submit']")
+#     button.click()
+#     time.sleep(2)
+#     driver.teardown=False ## crucial for making sure the driver doesn't auto quit after function
+    
+#     return driver
+
 # ## run test
-# sample_username = "Broskander"
-# sample_gametype = "gen9vgc2024regf"
 
 # df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 =get_metrics(sample_username, sample_gametype, driver, False)
-
+# df1.tail()
 # driver.quit()
 
 
