@@ -29,6 +29,7 @@ import plotly.graph_objects as go
 from selenium import webdriver
 import user_agent
 import json
+from selenium.webdriver.common.by import By
 
 ## Logistics
 
