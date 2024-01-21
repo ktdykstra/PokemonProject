@@ -1403,88 +1403,88 @@ def get_villain_comp_library(comp_identifier, MATCH_DB):
 # from selenium.webdriver.chrome.service import Service
 
 ## setup a driver for public scrape
-global driver
-#global df1
-# set up webdriver in headless mode
-# service = Service(ChromeDriverManager().install())
-chrome_options = Options()
-# chrome_options.add_argument("--headless")
-chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument("--no-sandbox")
-# download and use the latest ChromeDriver automatically using
-# Set up ChromeOptions for headless mode
-driver = webdriver.Chrome(options=chrome_options) #service=service, 
-driver.get("https://www.google.com/")
+# global driver
+# #global df1
+# # set up webdriver in headless mode
+# # service = Service(ChromeDriverManager().install())
+# chrome_options = Options()
+# # chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--disable-dev-shm-usage")
+# chrome_options.add_argument("--no-sandbox")
+# # download and use the latest ChromeDriver automatically using
+# # Set up ChromeOptions for headless mode
+# driver = webdriver.Chrome(options=chrome_options) #service=service, 
+# driver.get("https://www.google.com/")
 
-# ## username pw etc info
+# # ## username pw etc info
 
-sample_username = "DaFinisher"
-sample_password="Serapisiscool2"
-sample_gametype = "gen9vgc2023regulatione"
+# sample_username = "DaFinisher"
+# sample_password="Serapisiscool2"
+# sample_gametype = "gen9vgc2023regulatione"
 
-## setup for a private scrape specific
+# ## setup for a private scrape specific
 
-def login_showdown(username, password, driver):
-    # global driver
-    # Navigate to the login page
-    login_url = "https://play.pokemonshowdown.com/"
-    driver.get(login_url)
-    # Wait for the login page to load
-    time.sleep(2)  # Adjust the wait time as needed
+# def login_showdown(username, password, driver):
+#     # global driver
+#     # Navigate to the login page
+#     login_url = "https://play.pokemonshowdown.com/"
+#     driver.get(login_url)
+#     # Wait for the login page to load
+#     time.sleep(2)  # Adjust the wait time as needed
 
-    # Submit the login form
-    login_button = driver.find_element(By.NAME, "login")
-    login_button.click()
+#     # Submit the login form
+#     login_button = driver.find_element(By.NAME, "login")
+#     login_button.click()
 
-    # Find the username and password input fields and fill them out
-    username_field = driver.find_element(By.NAME, "username")
-    username_field.send_keys(username)
-    button = driver.find_element(By.XPATH, "//button[@type='submit']")
-    button.click()
-    time.sleep(2) 
-    wait = WebDriverWait(driver, 10)
-    pw_field = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "textbox")))
-    pw_field.send_keys(password)
-    button = driver.find_element(By.XPATH, "//button[@type='submit']")
-    button.click()
-    time.sleep(2)
-    driver.teardown=False ## crucial for making sure the driver doesn't auto quit after function
+#     # Find the username and password input fields and fill them out
+#     username_field = driver.find_element(By.NAME, "username")
+#     username_field.send_keys(username)
+#     button = driver.find_element(By.XPATH, "//button[@type='submit']")
+#     button.click()
+#     time.sleep(2) 
+#     wait = WebDriverWait(driver, 10)
+#     pw_field = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "textbox")))
+#     pw_field.send_keys(password)
+#     button = driver.find_element(By.XPATH, "//button[@type='submit']")
+#     button.click()
+#     time.sleep(2)
+#     driver.teardown=False ## crucial for making sure the driver doesn't auto quit after function
     
-    return driver
-driver=login_showdown(sample_username,sample_password,driver)
-base_link="https://replay.pokemonshowdown.com/?user=" + sample_username + "&private=1"
-driver.get(base_link)
-all_links = driver.find_elements(By.TAG_NAME, 'a')
-href_links = [link.get_attribute('href') for link in all_links]
-href_links=href_links[6:]
-## sort out the ?p2 links
-pattern = r"\?p2$"
-test=[]
-for x in href_links:
-    match = re.search(pattern, x)
-    if match:
-        test.append(x[:-3])
-    else:
-        test.append(x)
-test
-## do first match to set up proper db format
-driver.get(test[0]+".json")
-json_element = driver.find_element(by="tag name", value='pre')
-json_text = json_element.text
-json_dict = json.loads(json_text)
-json_list = [json_dict]
-base_db2 = pd.DataFrame(json_list)
+#     return driver
+# driver=login_showdown(sample_username,sample_password,driver)
+# base_link="https://replay.pokemonshowdown.com/?user=" + sample_username + "&private=1"
+# driver.get(base_link)
+# all_links = driver.find_elements(By.TAG_NAME, 'a')
+# href_links = [link.get_attribute('href') for link in all_links]
+# href_links=href_links[6:]
+# ## sort out the ?p2 links
+# pattern = r"\?p2$"
+# test=[]
+# for x in href_links:
+#     match = re.search(pattern, x)
+#     if match:
+#         test.append(x[:-3])
+#     else:
+#         test.append(x)
+# test
+# ## do first match to set up proper db format
+# driver.get(test[0]+".json")
+# json_element = driver.find_element(by="tag name", value='pre')
+# json_text = json_element.text
+# json_dict = json.loads(json_text)
+# json_list = [json_dict]
+# base_db2 = pd.DataFrame(json_list)
 
-## get rest of matches
-for x in test[1:]:
-    driver.get(x+".json")
-    json_element = driver.find_element(by="tag name", value='pre')
-    json_text = json_element.text
-    json_dict = json.loads(json_text)
-    json_list = [json_dict]
-    new_db = pd.DataFrame(json_list)
-    base_db2=pd.concat([base_db2,new_db])
-base_db2
+# ## get rest of matches
+# for x in test[1:]:
+#     driver.get(x+".json")
+#     json_element = driver.find_element(by="tag name", value='pre')
+#     json_text = json_element.text
+#     json_dict = json.loads(json_text)
+#     json_list = [json_dict]
+#     new_db = pd.DataFrame(json_list)
+#     base_db2=pd.concat([base_db2,new_db])
+# base_db2
 # ## run test
 
 # df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 =get_metrics(sample_username, sample_gametype, driver, True)
