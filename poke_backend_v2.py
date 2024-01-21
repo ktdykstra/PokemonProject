@@ -30,6 +30,7 @@ from selenium import webdriver
 import user_agent
 import json
 from selenium.webdriver.common.by import By
+import time
 
 ## Logistics
 
@@ -142,7 +143,9 @@ def gather_matches(username, game_type, driver, all_matches):
     if all_matches == True:
         base_link="https://replay.pokemonshowdown.com/?user=" + username + "&private=1"
         driver.get(base_link)
+        time.sleep(1)
         all_links = driver.find_elements(By.TAG_NAME, 'a')
+        print(all_links)
         href_links = [link.get_attribute('href') for link in all_links]
         href_links=href_links[6:]
         print(href_links)
