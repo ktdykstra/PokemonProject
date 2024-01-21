@@ -1495,9 +1495,10 @@ def get_data_private():
   ## paywall
   user_email=session['user_email']
   temp_user=get_user_by_email(user_email)
-  if temp_user[2] > 4:
-     driver.quit()
-     return render_template("pricing.html")
+  ##### UNCOMMENT FOR PAYWALL!! ######
+  # if temp_user[2] > 4:
+  #    driver.quit()
+  #    return render_template("pricing.html")
 
   if request.method == 'POST':
       # # METERED PAYWALL LOGIC
