@@ -139,7 +139,7 @@ def gather_matches(username, game_type, driver, all_matches):
 
     ## check the private/public matches condition and gather private matches too
     if all_matches == True:
-        base_link="https://replay.pokemonshowdown.com/?user=" + sample_username + "&private=1"
+        base_link="https://replay.pokemonshowdown.com/?user=" + username + "&private=1"
         driver.get(base_link)
         all_links = driver.find_elements(By.TAG_NAME, 'a')
         href_links = [link.get_attribute('href') for link in all_links]
