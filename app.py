@@ -1279,12 +1279,13 @@ def get_data():
   driver = webdriver.Chrome(options=chrome_options) #service=service, 
   driver.get("https://www.google.com/")
 
-  ## paywall
+  ## paywall 
   user_email=session['user_email']
   temp_user=get_user_by_email(user_email)
-  if temp_user[2] > 4:
-     driver.quit()
-     return render_template("pricing.html")
+  ##### UNDO COMMENTS WHEN READY TO REINSTATE PAYWALL! ########
+  # if temp_user[2] > 4:
+  #    driver.quit()
+  #    return render_template("pricing.html")
 
   #print("DRIVER:", driver)
   if request.method == 'POST':
