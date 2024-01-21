@@ -101,11 +101,12 @@ def contains_chrome(input_string):
         return input_string
     
 ## splitting into
-# gather_private_matches(username, game_type, driver)
+# private_matches(username, game_type, driver)
 
 # ## Gather matches via the API. DOUBLE CHECK THAT NOT DOUBLE COUNTING MATCHES
 def gather_matches(username, game_type, driver, all_matches):
     
+    ## get the public matches
     # ## Get first page
     match_type=[]
     match_page = 1
@@ -136,35 +137,67 @@ def gather_matches(username, game_type, driver, all_matches):
             base_db=pd.concat([base_db,new_db])
             match_page+=1
 
-    ## check the private/public matches condition
+    ## check the private/public matches condition and gather private matches too
     if all_matches == True:
-        match_page = 1
-        api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page)
-        print(api_url)
-        driver.get(api_url)
+        base_link="https://replay.pokemonshowdown.com/?user=" + sample_username + "&private=1"
+        driver.get(base_link)
+        all_links = driver.find_elements(By.TAG_NAME, 'a')
+        href_links = [link.get_attribute('href') for link in all_links]
+        href_links=href_links[6:]
+        ## sort out the ?p2 links
+        pattern = r"\?p2$"
+        test=[]
+        for x in href_links:
+            match = re.search(pattern, x)
+            if match:
+                test.append(x[:-3])
+            else:
+                test.append(x)
+
+        ## do first match to set up proper db format
+        driver.get(test[0]+".json")
         json_element = driver.find_element(by="tag name", value='pre')
         json_text = json_element.text
-        base_db2 = pd.read_json(json_text)
-        base_db2["match_type"]="private"
+        json_dict = json.loads(json_text)
+        json_list = [json_dict]
+        base_db2 = pd.DataFrame(json_list)
 
-        ## scroll through pages
-        match_page+=1
-        pagination=False
-        while pagination == False:
-            api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page) #"&format=" + game_type +
-            # json=s.get(api_url).json()
-            driver.get(api_url)
+        ## get rest of matches
+        for x in test[1:]:
+            driver.get(x+".json")
             json_element = driver.find_element(by="tag name", value='pre')
             json_text = json_element.text
-            if json_text=='[]':
-                print("Finished searching for private matches.")
-                pagination=True
-            else:
-                print("Not done searching for private matches...")
-                new_db=pd.read_json(json_text).iloc[1:,] # this is where im worried about double counting
-                new_db["match_type"]="private"
-                base_db2=pd.concat([base_db2,new_db])
-                match_page+=1
+            json_dict = json.loads(json_text)
+            json_list = [json_dict]
+            new_db = pd.DataFrame(json_list)
+            base_db2=pd.concat([base_db2,new_db])
+        # match_page = 1
+        # api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page)
+        # print(api_url)
+        # driver.get(api_url)
+        # json_element = driver.find_element(by="tag name", value='pre')
+        # json_text = json_element.text
+        # base_db2 = pd.read_json(json_text)
+        # base_db2["match_type"]="private"
+
+        # ## scroll through pages
+        # match_page+=1
+        # pagination=False
+        # while pagination == False:
+        #     api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page) #"&format=" + game_type +
+        #     # json=s.get(api_url).json()
+        #     driver.get(api_url)
+        #     json_element = driver.find_element(by="tag name", value='pre')
+        #     json_text = json_element.text
+        #     if json_text=='[]':
+        #         print("Finished searching for private matches.")
+        #         pagination=True
+        #     else:
+        #         print("Not done searching for private matches...")
+        #         new_db=pd.read_json(json_text).iloc[1:,] # this is where im worried about double counting
+        #         new_db["match_type"]="private"
+        #         base_db2=pd.concat([base_db2,new_db])
+        #         match_page+=1
         base_db=pd.concat([base_db,base_db2])
 
     # if all_matches == True:
@@ -841,7 +874,6 @@ def publish_comps(MATCH_DB):
 
 # In[30]:
 
-
 ## publish losses
 
 def publish_losses(MATCH_DB):
@@ -1336,93 +1368,152 @@ def get_villain_comp_library(comp_identifier, MATCH_DB):
 
 # In[9]:
 
-#######################
-## Testing
-#######################
+######################
+# Testing
+######################
 
-# ## necessary imports for testing
-# import json
-# import os
-# import time
-# from flask_cors import CORS
-# import pandas as pd
-# import numpy as np
-# import importlib
-# # from flask_bootstrap import Bootstrap
-# from markupsafe import Markup
-# # importlib.reload(sdg)
-# # import poke_backend_v2 as sdg
-# import socket 
-# import pickle
-# import plotly.express as px
-# import plotly.graph_objects as go
-# import plotly.offline as pyo
-# import re
-# from selenium import webdriver
-# import base64
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.common.keys import Keys
-# from webdriver_manager.chrome import ChromeDriverManager
-# from selenium.webdriver.chrome.service import Service
+## necessary imports for testing
+import json
+import os
+import time
+from flask_cors import CORS
+import pandas as pd
+import numpy as np
+import importlib
+# from flask_bootstrap import Bootstrap
+from markupsafe import Markup
+# importlib.reload(sdg)
+# import poke_backend_v2 as sdg
+import socket 
+import pickle
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.offline as pyo
+import re
+from selenium import webdriver
+import base64
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
-# ## setup a driver for public scrape
-# global driver
-# #global df1
-# # set up webdriver in headless mode
-# # service = Service(ChromeDriverManager().install())
-# chrome_options = Options()
+## setup a driver for public scrape
+global driver
+#global df1
+# set up webdriver in headless mode
+# service = Service(ChromeDriverManager().install())
+chrome_options = Options()
 # chrome_options.add_argument("--headless")
-# chrome_options.add_argument("--disable-dev-shm-usage")
-# chrome_options.add_argument("--no-sandbox")
-# # download and use the latest ChromeDriver automatically using
-# # Set up ChromeOptions for headless mode
-# driver = webdriver.Chrome(options=chrome_options) #service=service, 
-# driver.get("https://www.google.com/")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--no-sandbox")
+# download and use the latest ChromeDriver automatically using
+# Set up ChromeOptions for headless mode
+driver = webdriver.Chrome(options=chrome_options) #service=service, 
+driver.get("https://www.google.com/")
 
-# ## username pw etc info
+## username pw etc info
 
-# sample_username = "DaFinisher"
-# sample_password="Serapisiscool2"
-# sample_gametype = "gen9vgc2023regulatione"
+sample_username = "DaFinisher"
+sample_password="Serapisiscool2"
+sample_gametype = "gen9vgc2023regulatione"
 
-# ## setup for a private scrape specific
+## setup for a private scrape specific
 
-# def login_showdown(username, password, driver):
-#     # global driver
-#     # Navigate to the login page
-#     login_url = "https://play.pokemonshowdown.com/"
-#     driver.get(login_url)
+def login_showdown(username, password, driver):
+    # global driver
+    # Navigate to the login page
+    login_url = "https://play.pokemonshowdown.com/"
+    driver.get(login_url)
+    # Wait for the login page to load
+    time.sleep(2)  # Adjust the wait time as needed
 
-#     # Wait for the login page to load
-#     time.sleep(2)  # Adjust the wait time as needed
+    # Submit the login form
+    login_button = driver.find_element(By.NAME, "login")
+    login_button.click()
 
-#     # Submit the login form
-#     login_button = driver.find_element(By.NAME, "login")
-#     login_button.click()
-
-#     # Find the username and password input fields and fill them out
-#     username_field = driver.find_element(By.NAME, "username")
-#     username_field.send_keys(username)
-#     button = driver.find_element(By.XPATH, "//button[@type='submit']")
-#     button.click()
-#     time.sleep(2) 
-#     wait = WebDriverWait(driver, 10)
-#     pw_field = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "textbox")))
-#     pw_field.send_keys(password)
-#     button = driver.find_element(By.XPATH, "//button[@type='submit']")
-#     button.click()
-#     time.sleep(2)
-#     driver.teardown=False ## crucial for making sure the driver doesn't auto quit after function
+    # Find the username and password input fields and fill them out
+    username_field = driver.find_element(By.NAME, "username")
+    username_field.send_keys(username)
+    button = driver.find_element(By.XPATH, "//button[@type='submit']")
+    button.click()
+    time.sleep(2) 
+    wait = WebDriverWait(driver, 10)
+    pw_field = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "textbox")))
+    pw_field.send_keys(password)
+    button = driver.find_element(By.XPATH, "//button[@type='submit']")
+    button.click()
+    time.sleep(2)
+    driver.teardown=False ## crucial for making sure the driver doesn't auto quit after function
     
-#     return driver
+    return driver
 
-# ## run test
+## run test
 
-# df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 =get_metrics(sample_username, sample_gametype, driver, False)
-# df1.tail()
-# driver.quit()
+df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 =get_metrics(sample_username, sample_gametype, driver, True)
+
+df1.private
+
+driver.quit()
+
+sample_df=gather_matches(sample_username, sample_gametype, driver, False)
+sample_df.columns
+['uploadtime', 'match_id', 'format', 'players', 'rating', 'private',
+       'password', 'match_type']
+
+## build the selenium workaround for gathering matches
+driver=login_showdown(sample_username,sample_password, driver)
+base_link="https://replay.pokemonshowdown.com/?user=" + sample_username + "&private=1"
+driver.get(base_link)
+all_links = driver.find_elements(By.TAG_NAME, 'a')
+href_links = [link.get_attribute('href') for link in all_links]
+href_links=href_links[6:]
+## sort out the ?p2 links
+pattern = r"\?p2$"
+test=[]
+for x in href_links:
+    match = re.search(pattern, x)
+    if match:
+        test.append(x[:-3])
+    else:
+        test.append(x)
+
+## do first match to set up proper db format
+driver.get(test[0]+".json")
+json_element = driver.find_element(by="tag name", value='pre')
+json_text = json_element.text
+json_dict = json.loads(json_text)
+json_list = [json_dict]
+base_db2 = pd.DataFrame(json_list)
+
+## get rest of matches
+for x in test[1:]:
+    driver.get(x+".json")
+    json_element = driver.find_element(by="tag name", value='pre')
+    json_text = json_element.text
+    json_dict = json.loads(json_text)
+    json_list = [json_dict]
+    new_db = pd.DataFrame(json_list)
+    base_db2=pd.concat([base_db2,new_db])
+
+driver.quit()
+
+base_db2
+
+driver.quit()
+
+test
+driver.get(href_links[6])
+
+from bs4 import BeautifulSoup
+base_link="https://replay.pokemonshowdown.com/?user=" + sample_username + "&private=1"
+print(base_link)
+response=requests.get(base_link)
+soup = BeautifulSoup(response.content, 'html.parser')
+soup.prettify()
+state_tags = soup.find_all('a')
+state_tags
 
 
