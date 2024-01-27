@@ -106,18 +106,19 @@ def contains_chrome(input_string):
 # private_matches(username, game_type, driver)
 
 # ## Gather matches via the API. DOUBLE CHECK THAT NOT DOUBLE COUNTING MATCHES
-def gather_matches(username, game_type, driver, all_matches):
+def gather_matches(username, game_type, driver, all_matches, session):
     
     ## get the public matches
     # ## Get first page
     match_type=[]
     match_page = 1
     api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page)
+    print("api url:")
     print(api_url)
-    driver.get(api_url)
-    json_element = driver.find_element(by="tag name", value='pre')
-    json_text = json_element.text
-    base_db = pd.read_json(json_text)
+    json_text = session.get(api_url).json()
+    # json_element = driver.find_element(by="tag name", value='pre')
+    # json_text = json_element.text
+    base_db = pd.DataFrame.from_records(json_text)
     base_db["match_type"]="public"
 
     # ## Scroll through pages of games
@@ -126,15 +127,16 @@ def gather_matches(username, game_type, driver, all_matches):
     while pagination == False:
         api_url="https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&page=" + str(match_page) #"&format=" + game_type +
         # json=s.get(api_url).json()
-        driver.get(api_url)
-        json_element = driver.find_element(by="tag name", value='pre')
-        json_text = json_element.text
-        if json_text=='[]':
+        json_text = session.get(api_url).json()
+        # driver.get(api_url)
+        # json_element = driver.find_element(by="tag name", value='pre')
+        # json_text = json_element.text
+        if json_text==[]:
             print("Finished searching for public matches.")
             pagination=True
         else:
             print("Not done searching for public matches...")
-            new_db=pd.read_json(json_text).iloc[1:,] # this is where im worried about double counting
+            new_db=pd.DataFrame.from_records(json_text).iloc[1:,] # this is where im worried about double counting
             new_db["match_type"]="public"
             base_db=pd.concat([base_db,new_db])
             match_page+=1
@@ -142,6 +144,8 @@ def gather_matches(username, game_type, driver, all_matches):
     ## check the private/public matches condition and gather private matches too
     if all_matches == True:
         base_link="https://replay.pokemonshowdown.com/?user=" + username + "&private=1"
+        print("base link:")
+        print(base_link)
         driver.get(base_link)
         time.sleep(1)
         all_links = driver.find_elements(By.TAG_NAME, 'a')
@@ -160,19 +164,13 @@ def gather_matches(username, game_type, driver, all_matches):
                 test.append(x)
 
         ## do first match to set up proper db format
-        driver.get(test[0]+".json")
-        json_element = driver.find_element(by="tag name", value='pre')
-        json_text = json_element.text
-        json_dict = json.loads(json_text)
+        json_dict = session.get(test[0]+".json").json()
         json_list = [json_dict]
         base_db2 = pd.DataFrame(json_list)
 
         ## get rest of matches
         for x in test[1:]:
-            driver.get(x+".json")
-            json_element = driver.find_element(by="tag name", value='pre')
-            json_text = json_element.text
-            json_dict = json.loads(json_text)
+            json_dict = session.get(x+".json").json()
             json_list = [json_dict]
             new_db = pd.DataFrame(json_list)
             base_db2=pd.concat([base_db2,new_db])
@@ -242,7 +240,7 @@ def gather_matches(username, game_type, driver, all_matches):
 
 
 ## getting logs for individual match ids
-def get_logs(df, driver):
+def get_logs(df, session):
     
     ## Storage lists
 
@@ -268,10 +266,8 @@ def get_logs(df, driver):
             match_url=base_url + "/" + match_id +".json"
         else:
             match_url=base_url + "/" + match_id +".json"
-        driver.get(match_url)
-        json_element = driver.find_element(by="tag name", value='pre')
-        json_text = json_element.text
-        json_file=json.loads(json_text)
+        
+        json_file = session.get(match_url).json()
         log=json_file["log"]
 
         ## Make LOG
@@ -1072,21 +1068,19 @@ def get_all_data(MATCH_DB):
 
 def get_metrics(sample_username, sample_game_type, driver, all_matches):
     
-    ## establish requests session with cookies from login for private matches
-    # session= requests.Session()
-    # if all_matches==True:
-    #     for cookie in cookies:
-    #         session.cookies.set(cookie["name"], cookie["value"])
-    # else:
-    #     pass
+    # establish requests session with cookies from login for private matches
+    cookie_dict = {c["name"]: c["value"] for c in driver.get_cookies()}
+    cookie_jar = requests.utils.cookiejar_from_dict(cookie_dict)
+    session = requests.Session()
+    session.cookies = cookie_jar
 
     ## Gather matches from Showdown
     
-    MATCH_DB=gather_matches(sample_username, sample_game_type, driver, all_matches)
+    MATCH_DB=gather_matches(sample_username, sample_game_type, driver, all_matches, session)
 
     ## get logs
 
-    body_logs, head_logs, tail_logs, turns, turn_count, forfeit = get_logs(MATCH_DB, driver)
+    body_logs, head_logs, tail_logs, turns, turn_count, forfeit = get_logs(MATCH_DB, session)
     MATCH_DB["body_logs"]=body_logs
     MATCH_DB["head_logs"]=head_logs
     MATCH_DB["tail_logs"]=tail_logs

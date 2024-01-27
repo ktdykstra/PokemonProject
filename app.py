@@ -1302,7 +1302,7 @@ def get_data():
     if driver is not None:
       ## run the data gathering. all_matches == False 
       df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username, gametype, driver, False)
-      time.sleep(2)
+      time.sleep(0.2)
 
       ## INCREMENT CLICK COUNT IN DB FOR USER
       increment_click_count(user_email)
@@ -1442,13 +1442,18 @@ def get_data():
 # LOGIN TO PS! WITH SELENIUM
 ############################################################
 def login_showdown(username, password, driver):
+    # If we don't delete all cookies, running this twice in a
+    # row will fail because it will already be logged in.
+    driver.delete_all_cookies()
+
     # global driver
     # Navigate to the login page
+
     login_url = "https://play.pokemonshowdown.com/"
     driver.get(login_url)
 
     # Wait for the login page to load
-    time.sleep(2)  # Adjust the wait time as needed
+    time.sleep(0.2)  # Adjust the wait time as needed
 
     # Submit the login form
     login_button = driver.find_element(By.NAME, "login")
@@ -1459,13 +1464,13 @@ def login_showdown(username, password, driver):
     username_field.send_keys(username)
     button = driver.find_element(By.XPATH, "//button[@type='submit']")
     button.click()
-    time.sleep(2) 
+    time.sleep(0.2) 
     wait = WebDriverWait(driver, 10)
     pw_field = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "textbox")))
     pw_field.send_keys(password)
     button = driver.find_element(By.XPATH, "//button[@type='submit']")
     button.click()
-    time.sleep(2)
+    time.sleep(0.2)
     driver.teardown=False ## crucial for making sure the driver doesn't auto quit after function
     
     return driver
@@ -1490,7 +1495,7 @@ def get_data_private():
 
   # download and use the latest ChromeDriver automatically using
   driver = webdriver.Chrome(options=chrome_options) #service=service, options=chrome_options
-  driver.get("https://www.google.com/")
+  # driver.get("https://www.google.com/")
 
   ## paywall
   user_email=session['user_email']
@@ -1509,8 +1514,8 @@ def get_data_private():
       username_private = request.form.get('usernamePrivate')
       password = request.form.get('showdown_pw')
       gametype = request.form.get('gametype')
-      driver=login_showdown(username_private, password, driver)            
-      time.sleep(2)
+      driver=login_showdown(username_private, password, driver)
+
       print("DRIVER:", driver)
       print("User:", username_private)
       print("pass:", password)
@@ -1521,7 +1526,6 @@ def get_data_private():
       if driver is not None:
           ## run the data gathering
           df1, df2, df_hero_indiv, df_villain_indiv, df3, df4, df5, df6 = sdg.get_metrics(username_private, gametype, driver, True)
-          time.sleep(2)
 
           ## INCREMENT CLICK COUNT IN DB FOR USER
           increment_click_count(user_email)
