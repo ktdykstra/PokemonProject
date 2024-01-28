@@ -8,3 +8,9 @@ Outputs from data analysis:
 5. Lose Rate against opposing combined lead - [#Villian_Lead_Pair∩Loss / Total Games]
 6. Lose Rate against full team selection - [#Villian_Comp_Six∩Loss / Total Games]
 
+## Setup
+
+1. Create a virtual environment with `python -m venv venv`
+2. Activate the virtual environment with `. venv/bin/activate`
+3. Install the requirements with `pip install -r requirements.txt`
+  - If you see an error with `psycopg2`, you need to install postgres locally. If you're on mac, try `brew install postgresql`.
