@@ -131,7 +131,7 @@ def gather_matches(username, game_type, driver, all_matches, session):
         # driver.get(api_url)
         # json_element = driver.find_element(by="tag name", value='pre')
         # json_text = json_element.text
-        if json_text==[]:
+        if json_text == []:
             print("Finished searching for public matches.")
             pagination=True
         else:
@@ -163,17 +163,17 @@ def gather_matches(username, game_type, driver, all_matches, session):
             else:
                 test.append(x)
 
-        ## do first match to set up proper db format
-        json_dict = session.get(test[0]+".json").json()
-        json_list = [json_dict]
-        base_db2 = pd.DataFrame(json_list)
+        base_db2 = pd.DataFrame()
 
-        ## get rest of matches
-        for x in test[1:]:
-            json_dict = session.get(x+".json").json()
-            json_list = [json_dict]
+        ## set up matches
+        for i, x in enumerate(test):
+            json_list = [session.get(x+".json").json()]
             new_db = pd.DataFrame(json_list)
-            base_db2=pd.concat([base_db2,new_db])
+            if i == 0:
+                ## do first match to set up proper db format
+                base_db = pd.DataFrame(new_db)
+            else:
+                base_db2 = pd.concat([base_db2, new_db])
         # match_page = 1
         # api_url = "https://replay.pokemonshowdown.com/search.json?user=" + username + "&format=" + game_type + "&private" + "&page=" + str(match_page)
         # print(api_url)
@@ -1013,8 +1013,10 @@ def get_metametrics(MATCH_DB):
     
     num_wins=MATCH_DB[MATCH_DB.win==1].shape[0]
     num_games=MATCH_DB.shape[0]
-    win_rate=(num_wins/num_games*100)
-    win_rate=format_percent(win_rate)
+    if num_games == 0:
+        win_rate=0
+    else:
+        win_rate=format_percent(num_wins/num_games*100)
     meta_df=pd.DataFrame({"num_wins":num_wins,"num_games":num_games,"win_rate":win_rate}, index=[0])
     return meta_df
 
@@ -1065,7 +1067,6 @@ def get_all_data(MATCH_DB):
 
 # In[36]:
 
-
 def get_metrics(sample_username, sample_game_type, driver, all_matches):
     
     # establish requests session with cookies from login for private matches
@@ -1087,6 +1088,12 @@ def get_metrics(sample_username, sample_game_type, driver, all_matches):
     MATCH_DB["turn_logs"]=turns
     MATCH_DB["turn_count"]=turn_count
     MATCH_DB["forfeit"]=forfeit
+
+    # If a player has no games of a type, the analysis will fail. Fill in the expected columns.
+    cols_to_exist = ["players", "match_id"]
+    for col in cols_to_exist:
+        if col not in MATCH_DB:
+            MATCH_DB[col] = ""
 
     ## assign p1 and p2
     MATCH_DB['p1'] = MATCH_DB['players'].apply(lambda x: x[0])
@@ -1174,10 +1181,12 @@ def get_individual_rates(library):
     result=library[["match_id","hero_comp_six","win","match_scorecards"]].explode("hero_comp_six")
     result["used_total"]=0
     holder=pd.DataFrame()
-    holder
     for x in library.match_scorecards:
         holder=pd.concat([holder,x.loc["hero_pokemon","begins_field"]])
-    holder.columns=["began"]
+    if holder.empty:
+        holder["began"] = 0
+    else:
+        holder.columns=["began"]
     holder["used"]=holder.began.apply(lambda x: 0 if x==0 else 1)
     result["used_total"]=holder["used"].values
     result["win_conditional"]=result.apply(check_conditional_win,axis=1)
@@ -1283,7 +1292,10 @@ def get_villain_indiv_rates(library):
     holder
     for x in library.match_scorecards:
         holder=pd.concat([holder,x.loc["villain_pokemon","begins_field"]])
-    holder.columns=["began"]
+    if holder.empty:
+        holder["began"] = 0
+    else:
+        holder.columns=["began"]
     holder["used"]=holder.began.apply(lambda x: 0 if x==0 else 1)
     result["used_total"]=holder["used"].values
     result["loss_conditional"]=result.apply(check_conditional_loss,axis=1)
