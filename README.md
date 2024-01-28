@@ -13,4 +13,4 @@ Outputs from data analysis:
 1. Create a virtual environment with `python -m venv venv`
 2. Activate the virtual environment with `. venv/bin/activate`
 3. Install the requirements with `pip install -r requirements.txt`
-  - If you see an error with `psycopg2`, you need to install postgres locally. If you're on mac, try `brew install postgresql`.
+    - If you see an error with `psycopg2`, you need to install postgres locally. If you're on mac, try `brew install postgresql`.

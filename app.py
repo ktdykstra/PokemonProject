@@ -606,6 +606,16 @@ app.config['CACHE_TYPE'] = 'redis'
 app.config['CACHE_REDIS_URL'] = os.environ.get('STACKHERO_REDIS_URL_CLEAR')
 cache = Cache(app)
 
+def cache_key():
+  # Cache carefully here. Without a cache key, concurrent users (or the same user
+  # requesting multiple game types) will be shown duplicate results.
+  endpoint = request.path
+  method = request.method
+  username = request.form.get('username')
+  game_type = request.form.get('gametype')
+  return f"{endpoint}_{method}_{username}_{game_type}"
+
+
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Set the REQUESTS_CA_BUNDLE environment variable to use certifi certificates
@@ -1262,7 +1272,7 @@ def ads():
 #
 ############################################################
 @app.route("/get_data", methods=['GET','POST'])
-@cache.cached(timeout=60)
+@cache.cached(timeout=60, make_cache_key=cache_key)
 def get_data():
   global driver
   #global df1
@@ -1481,7 +1491,7 @@ def login_showdown(username, password, driver):
 #
 ############################################################
 @app.route("/get_data_private", methods=['GET','POST'])
-@cache.cached(timeout=60)
+@cache.cached(timeout=60, make_cache_key=cache_key)
 def get_data_private():
   global driver
   #global df1
