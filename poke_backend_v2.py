@@ -1066,6 +1066,13 @@ def get_all_data(MATCH_DB):
 
 
 # In[36]:
+def ensure_cols(df, cols, default=""):
+    # The analysis expects certain columns to exist.
+    # Fill in those columns if they don't (which often happens when there are no results).
+    for col in cols:
+        if col not in df:
+            df[col] = default
+
 
 def get_metrics(sample_username, sample_game_type, driver, all_matches):
     
@@ -1078,6 +1085,8 @@ def get_metrics(sample_username, sample_game_type, driver, all_matches):
     ## Gather matches from Showdown
     
     MATCH_DB=gather_matches(sample_username, sample_game_type, driver, all_matches, session)
+    ensure_cols(MATCH_DB, ["match_type"])
+
 
     ## get logs
 
@@ -1088,12 +1097,7 @@ def get_metrics(sample_username, sample_game_type, driver, all_matches):
     MATCH_DB["turn_logs"]=turns
     MATCH_DB["turn_count"]=turn_count
     MATCH_DB["forfeit"]=forfeit
-
-    # If a player has no games of a type, the analysis will fail. Fill in the expected columns.
-    cols_to_exist = ["players", "match_id"]
-    for col in cols_to_exist:
-        if col not in MATCH_DB:
-            MATCH_DB[col] = ""
+    ensure_cols(MATCH_DB, ["players", "match_id"])
 
     ## assign p1 and p2
     MATCH_DB['p1'] = MATCH_DB['players'].apply(lambda x: x[0])
