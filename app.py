@@ -611,9 +611,9 @@ def cache_key():
   # requesting multiple game types) will be shown duplicate results.
   endpoint = request.path
   method = request.method
-  username = request.form.get('username')
-  game_type = request.form.get('gametype')
-  return f"{endpoint}_{method}_{username}_{game_type}"
+
+  key = f"{endpoint}_{method}__{json.dumps(request.form.to_dict())}"
+  return key
 
 
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -1463,7 +1463,7 @@ def login_showdown(username, password, driver):
     driver.get(login_url)
 
     # Wait for the login page to load
-    time.sleep(0.2)  # Adjust the wait time as needed
+    time.sleep(1)  # Adjust the wait time as needed
 
     # Submit the login form
     login_button = driver.find_element(By.NAME, "login")
