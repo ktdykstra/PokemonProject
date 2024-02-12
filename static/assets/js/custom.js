@@ -8,7 +8,7 @@
 
 	// Scroll animation init
 	window.sr = new scrollReveal();
-	
+	ƒ
 
 	// Menu Dropdown Toggle
 	if($('.menu-trigger').length){
