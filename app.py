@@ -71,7 +71,7 @@ app.config['SESSION_USE_SIGNER'] = True
 # The Redis connection details
 redis_host = 'qoxjxb.stackhero-network.com'
 redis_port = '6380'
-redis_password = '2SSlD7FN0buUpMoGeb4iR2eKf8vJ87GDm67hq6LEiQK6IloP3X01WFbCTfhiU0h8'
+redis_password = "redacted"
 
 # Create a Redis connection using redis.StrictRedis
 redis_connection = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, ssl=True)
@@ -84,10 +84,10 @@ app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL')
 
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 
-stripe.api_key = 'sk_test_51NchgQDypgtvgAYhWbgnSjTEd9fyiHx0gXeXRbwOLZwAWnm9Nqy1nV14lvaK2e3O46YSL1zeaQoh9lrSCmO9yP7J002sx3FOfN'
+stripe.api_key = "redacted"
 
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
-endpoint_secret = 'whsec_AZE85BOzWncPR6OB62f447ZUQuVwl3BX'
+endpoint_secret = "redacted"
 
 PREMIUM_PRICE_ID = 'price_1NchwKDypgtvgAYhILRJc3RP'
 STANDARD_PRICE_ID = 'price_1NkeMUDypgtvgAYhm4NEpXAI'
